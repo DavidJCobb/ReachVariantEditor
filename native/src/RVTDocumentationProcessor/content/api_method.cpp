@@ -96,7 +96,11 @@ namespace content {
                added.content = util::serialize_element(elem, {
                   .adapt_indented_pre_tags      = true,
                   .include_containing_element   = false,
-                  .pre_tag_content_tweak        = [](QString& out) { out = util::megalo_syntax_highlight(out); },
+                  .pre_tag_content_tweak        =
+                     [](QDomElement pre, QString& out) {
+                        if (!pre.hasAttribute("lang"))
+                           out = util::megalo_syntax_highlight(out);
+                     },
                   .url_tweak                    = [stem](QString& out) { util::link_fixup(stem, out);  },
                   .wrap_bare_text_in_paragraphs = true,
                });

@@ -15,6 +15,7 @@ namespace content {
       this->type         = root.attribute("type");
       this->is_indexed   = root.attribute("indexed") == "true";
       this->is_read_only = root.attribute("read-only") == "true";
+      this->is_transient = root.attribute("transient") == "true";
       this->is_none      = root.attribute("none") == "true";
       //
       {
@@ -65,7 +66,7 @@ namespace content {
             title += "[<var>n</var>]";
       }
       //
-      body = QString("<header><h1>%1</h1>%2</header>").arg(title);
+      body = QString("<header><h1>%1</h1>%3%2</header>").arg(title);
       if (!this->type.isEmpty()) {
          auto type = registry::get().get_type(this->type);
          //
@@ -77,6 +78,14 @@ namespace content {
       } else {
          body = body.arg("");
       }
+      if (!this->name2.isEmpty()) {
+         auto aka = QString("<span class=\"a-k-a\">a.k.a. %2%3</span>")
+            .arg(prefix)
+            .arg(this->name2);
+         body = body.arg(aka);
+      } else {
+         body = body.arg("");
+      }
       body += '\n';
       body += this->description_to_html();
       body += '\n';
@@ -84,11 +93,17 @@ namespace content {
          assert(!this->is_none && "how can a namespace member be none AND indexed?!");
          if (this->is_read_only)
             body += "<p>These values are read-only.</p>\n";
+         if (this->is_transient)
+            body += "<p>These values are transient: they will not function properly if used in persistent format strings.</p>\n";
       } else {
          if (this->is_none)
             body += "<p>This is a \"none\" value, so you cannot assign to it or access members on it.</p>\n";
-         else if (this->is_read_only)
-            body += "<p>This value is read-only.</p>\n";
+         else {
+            if (this->is_read_only)
+               body += "<p>This value is read-only.</p>\n";
+            if (this->is_transient)
+               body += "<p>This value is transient: it will not function properly if used in persistent format strings.</p>\n";
+         }
       }
       body += this->example_to_html();
       body += this->notes_to_html();

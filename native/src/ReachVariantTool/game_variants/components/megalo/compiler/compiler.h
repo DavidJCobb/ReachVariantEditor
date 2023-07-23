@@ -172,7 +172,7 @@ namespace Megalo {
             int32_t trigger_index = -1;
             Block*  content = nullptr;
             Block*  parent  = nullptr; // used so we can tell when the function goes out of scope
-            //
+            
             UserDefinedFunction() {}
             UserDefinedFunction(const QString& n, int32_t ti, Block& b) : name(n), trigger_index(ti), content(&b), parent(dynamic_cast<Block*>(b.parent)) {}
       };
@@ -265,7 +265,7 @@ namespace Megalo {
          bool     inline_next_block     = false;
          bool     negate_next_condition = false;
          c_joiner next_condition_joiner = c_joiner::none;
-         std::vector<Script::Alias*> aliases_in_scope;
+         std::vector<Script::Alias*> aliases_in_scope; // unowned pointers; the aliases are owned by their containing Blocks
          std::vector<Script::UserDefinedEnum> enums_in_scope;
          std::vector<Script::UserDefinedFunction> functions_in_scope;
          GameVariantDataMultiplayer& variant;
@@ -413,7 +413,7 @@ namespace Megalo {
          #pragma region Variable declaration helpers
             Script::Alias* _allocate_alias(QString name, QString member_type);
             Script::Alias* _allocate_alias(QString name, const OpcodeArgTypeinfo& temporary_type);
-            bool _alias_is_explicit_reference_to_allocated(const Script::Alias& new_alias);
+            const Script::Alias* _alias_is_explicit_reference_to_allocated(const Script::Alias& new_alias);
             void _declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified);
          #pragma endregion
          //

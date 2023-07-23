@@ -45,7 +45,7 @@ namespace util {
                if (options.adapt_indented_pre_tags)
                   text = minimize_indent(text);
                if (options.pre_tag_content_tweak)
-                  (options.pre_tag_content_tweak)(text);
+                  (options.pre_tag_content_tweak)(root, text);
             }
             if (!wrapping_in_paragraph) {
                wrapping_in_paragraph = options.wrap_bare_text_in_paragraphs && !options._is_recursing && !text.trimmed().isEmpty();

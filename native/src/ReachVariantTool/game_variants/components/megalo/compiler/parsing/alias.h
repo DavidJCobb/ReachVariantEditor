@@ -24,6 +24,8 @@ namespace Megalo {
             Alias(Compiler&, QString name, QString target);
             Alias(Compiler&, QString name, int32_t target);
             ~Alias();
+
+            QString pretty_printable_name() const;
             
             bool    is_enumeration() const noexcept;
             const Enum* get_enumeration() const noexcept;

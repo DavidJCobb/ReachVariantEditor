@@ -561,7 +561,6 @@
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.cpp.bak" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.h.bak" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.inl.bak" />
-    <None Include="game_variants\components\megalo\opcode_arg_types\references\README.md" />
     <None Include="Resources\gametype_files\blank_forge.bin" />
     <None Include="Resources\gametype_files\blank_mp.bin" />
     <None Include="Resources\gametype_files\blank_ff.bin" />

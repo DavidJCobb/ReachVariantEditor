@@ -42,5 +42,12 @@
          don't conflict with each other or contain redundant information (e.g. multiple initial 
          values), or a compiler error otherwise.
       </p>
+      
+      <h2>Temporary variables</h2>
+      <p>
+         Temporary variables do not need to be declared, and cannot be given an initial value or 
+         a networking priority. Attempting to declare them is a warning, unless you also specify 
+         an initial value or networking priority, in which case it's an error.
+      </p>
    </body>
 </article>

@@ -258,6 +258,18 @@ namespace Megalo::Script {
       }
    }
 
+   QString Alias::pretty_printable_name() const {
+      if (!this->target) {
+         return this->name;
+      }
+      auto* basis_type = this->target->resolved.alias_basis;
+      if (!basis_type)
+         return this->name;
+      return QString("%1.%2")
+         .arg(basis_type->internal_name.c_str())
+         .arg(this->name);
+   }
+
    bool Alias::is_enumeration() const noexcept {
       if (!this->target)
          return false;

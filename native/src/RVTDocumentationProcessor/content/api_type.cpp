@@ -69,7 +69,11 @@ namespace content {
             this->scope.extra = util::serialize_element(node, {
                .adapt_indented_pre_tags      = true,
                .include_containing_element   = false,
-               .pre_tag_content_tweak        = [](QString& out) { out = util::megalo_syntax_highlight(out); },
+               .pre_tag_content_tweak        =
+                  [](QDomElement pre, QString& out) {
+                     if (!pre.hasAttribute("lang"))
+                        out = util::megalo_syntax_highlight(out);
+                  },
                .url_tweak                    = [](QString& out) { util::link_fixup("script/api/", out);  },
                .wrap_bare_text_in_paragraphs = false,
             });

@@ -19,35 +19,6 @@
          end
       </pre>
       <p>
-         Aliases can be "absolute" or "relative." An absolute alias refers to an integer 
-         constant or to a global value, while a relative alias refers to a nested variable.
-      </p>
-      <p>
-         Absolute aliases with the same name will "shadow" each other: aliases defined 
-         later will prevent access to aliases defined earlier. Relative aliases with the 
-         same name will shadow each other if they belong to the same type. Aliases are 
-         block-scoped.
-      </p>
-      <pre>
-         -- Let's mark a variable for temporary use, with an alias.
-         alias temp_int_00 = global.number[0]
-         
-         for each player do
-            if current_player.killer_type_is(kill) then
-               alias death_type = temp_int_00
-               
-               death_type = current_player.get_death_damage_type()
-               if death_type == enums.damage_reporting_type.dmr then
-                  --
-                  -- (current_player) was killed with a DMR.
-                  --
-               end
-            end
-         end
-         
-         -- The "death_type" alias isn't available here, so it doesn't make a mess.
-      </pre>
-      <p>
          You can also alias certain values that are specific to argument types, such as 
          object types:
       </p>
@@ -65,6 +36,229 @@
                   created = 1
                end
             end
+         end
+      </pre>
+      
+      <h2>Features of aliases</h2>
+      
+      <h3>Absolute or relative</h3>
+      <p>
+         Aliases can be "absolute" or "relative." An absolute alias refers to an integer 
+         constant or to a global value, while a relative alias refers to a nested variable.
+      </p>
+      <pre>
+         alias absolute_constant = 5
+         
+         alias absolute_variable = global.number[0]
+         
+         if absolute_variable == 1 then
+            -- ...
+         end
+         
+         --
+         -- Relative alias:
+         --
+         
+         alias relative_variable = player.number[0]
+         
+         for each player do
+            if current_player.relative_variable == 1 then
+               -- ...
+            end
+         end
+      </pre>
+      <p>
+         In that code example, we define <var>relative_variable</var> as an alias that 
+         can be accessed on all player-type variables; the alias refers to any given 
+         player's nested <code>number[0]</code> variable.
+      </p>
+      
+      <h3>Scoping</h3>
+      <p>
+         Aliases are <dfn>block-scoped</dfn>. This means that they only exist inside of 
+         the block of code they were defined in; they <dfn>go out of scope</dfn> &mdash; 
+         they stop existing &mdash; past the end of that block.
+      </p>
+      <pre>
+         -- Let's mark a variable for temporary use, with an alias.
+         alias temporary_number_variable = global.number[0]
+         
+         for each player do
+            if current_player.killer_type_is(kill) then
+               alias death_type = temporary_number_variable
+               
+               death_type = current_player.get_death_damage_type()
+               if death_type == enums.damage_reporting_type.dmr then
+                  --
+                  -- (current_player) was killed with a DMR.
+                  --
+               end
+            end
+         end
+         
+         -- The "death_type" alias isn't available here, so it doesn't make a mess.
+      </pre>
+      <p>
+         Aliases that are defined outside of all blocks will never go out of scope; they 
+         are always <dfn>in-scope</dfn> &mdash; always available from the current scope.
+      </p>
+      
+      <h3>Shadowing</h3>
+      <p>
+         Aliases <dfn>shadow</dfn> each other. That is: if you define multiple aliases 
+         with the same name, the most recently defined one (i.e. the one furthest down 
+         in the code) will prevent access to the others.
+      </p>
+      <pre>
+         global.number[0] = 3
+         
+         alias example_alias = 1
+         alias example_alias = 2
+         alias example_alias = 3 -- This alias shadows the others...
+         
+         if global.number[0] == example_alias then
+            -- ...so code in this block will run.
+         end
+      </pre>
+      <p>
+         Shadowing is affected by scoping:
+      </p>
+      <pre>
+         alias example = 1
+         
+         for each player do
+            alias example = 5 -- Shadows the other alias.
+            
+            current_player.number[0] = example
+         end
+         -- The "shadowing" alias isn't in-scope anymore. The alias that was once shadowed 
+         -- is now available: `example` is now `1`.
+      </pre>
+      
+      <h2>Allocation to aliases</h2>
+      <p>
+         Variables can be <dfn>allocated</dfn> to aliases dynamically. That is: you can 
+         ask for a variable of a given type, without having to manually specify the 
+         variable's index.
+      </p>
+      <pre>
+         alias absolute_alias = allocate global.number
+         
+         alias relative_alias = allocate player.number
+      </pre>
+      <p>
+         For these alias declarations, ReachVariantTool will look for any variable of 
+         the requested type that is not already pointed to by an alias that is in-scope, 
+         and use the first such variable that it finds. If no such variables remain (i.e. 
+         every variable of the type you've asked for is already aliased), then a compiler 
+         error will occur.
+      </p>
+      <pre>
+         alias some_alias = global.number[0]
+         
+         -- The `global.number[0]` variable is referred to by another alias, so while 
+         -- there's no guarantee that `example` will refer to any specific global.number 
+         -- variable, there *is* a guarantee that it *won't* refer to `global.number[0]`.
+         alias example  = allocate global.number
+      </pre>
+      <p>
+         You can also allocate <a href="script/api/ns_temporaries.html">temporary variables</a> using 
+         a special syntax:
+      </p>
+      <pre>
+         alias my_temporary_variable = allocate temporary number
+      </pre>
+      
+      <h3>Collision warnings</h3>
+      <p>
+         If you accidentally point an alias at a variable that was allocated to another 
+         alias, the compiler will warn you.
+      </p>
+      <pre>
+         -- Assume this is the only code in the entire script.
+         
+         alias example_allocated = allocate global.number
+         -- Because no other global.number variables have been aliased, this will be 
+         -- the global.number[0] variable.
+         
+         alias example_explicit = global.number[0]
+         -- This will generate a warning. The compiler will tell you that the other 
+         -- alias, `example_allocated`, just happened to end up using the variable 
+         -- that you're now also assigning to this alias.
+         
+         alias example_borrowed = example_allocated
+         -- This does not generate a warning. You clearly intend for both of these 
+         -- aliases to point to the same variable, because you're making the one 
+         -- alias point to the other alias.
+      </pre>
+      <p>
+         The reason this warning exists is because if you run into this situation, it 
+         likely won't be on purpose. While it <em>is</em> possible to predict which 
+         variable will be allocated to any given alias, the whole point of allocating 
+         variables to aliases (as opposed to choosing variables manually) is that you 
+         shouldn't actually have to care what variable ends up in that alias.
+      </p>
+      <p>
+         If you get this warning, you would generally want to either allocate variables 
+         to aliases after all manually-set aliases, or change the manually-set alias to 
+         one that allocates a variable.
+      </p>
+      
+      <h3>Technical limitation: user-defined functions</h3>
+      <p>
+         Due to technical limitations, you are not allowed to allocate variables to aliases 
+         while inside of a user-defined function. Trying to do so will trigger a compiler 
+         error.
+      </p>
+      <pre>
+         function my_function()
+            
+            -- This is an error:
+            alias temporary_variable = allocate temporary number
+            
+         end
+      </pre>
+      <p>
+         The reason for this is that ReachVariantTool handles variables as it reads your 
+         code; it never backtracks, so it can't fix them up based on anything it sees 
+         later in your script. This means that in situations like the following, there's 
+         no way to prevent a function definition's allocated variables from <dfn>clobbering</dfn> 
+         the variables of its caller:
+      </p>
+      <pre>
+         function my_function()
+            -- Let's pretend, for a second, that ReachVariantTool allows this:
+            alias temporary_variable = allocate temporary number
+            
+            temporary_variable = 5
+         end
+         
+         -- The `temporary_variable` alias in `my_function()` is now out of scope. The 
+         -- compiler doesn't know it exists anymore. This means that the compiler thinks 
+         -- that variable is safe to use...
+         
+         -- ... so that variable gets allocated to this alias here.
+         alias important_variable = allocate temporary number
+         
+         important_variable = 5
+         
+         -- So code that comes later in the file will try to use a variable that's already 
+         -- taken by code that comes earlier in the file yet executes later during play. 
+         -- Since the compiler always handles variables and aliases going downward, it 
+         -- can't backtrack and fix this.
+         my_function()
+         
+         if important_variable != 5 then
+            crash_the_game()
+         end
+      </pre>
+      <p>
+         The workaround is to pre-allocate your aliases just outside of the function:
+      </p>
+      <pre>
+         alias function_local_variable = allocate temporary number
+         function my_function()
+            function_local_variable = 5
          end
       </pre>
    </body>

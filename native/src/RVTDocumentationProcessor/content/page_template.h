@@ -21,6 +21,8 @@ namespace content {
          QString properties;
          QString member_of_link;
       } nav;
+      //
+      QString meta_extra;
    };
 
    class page_template {
@@ -30,6 +32,7 @@ namespace content {
          enum class token_type {
             base_href,
             body,
+            meta_extra,
             nav_accessors,
             nav_actions,
             nav_conditions,
@@ -50,6 +53,7 @@ namespace content {
             token base_href      = { token_type::base_href };
             token body           = { token_type::body };
             token title          = { token_type::title };
+            token meta_extra     = { token_type::meta_extra };
             token nav_accessors  = { token_type::nav_accessors };
             token nav_actions    = { token_type::nav_actions };
             token nav_conditions = { token_type::nav_conditions };
@@ -64,8 +68,5 @@ namespace content {
          void setContent(const QString&);
 
          QString create_page(page_creation_options) const noexcept;
-
-         QString createPage(const QString& title, const QString& body, const QString& base_href = QString()) const noexcept;
-         QString createPage(const QString& title, const QString& body, int base_depth = 0) const noexcept;
    };
 }

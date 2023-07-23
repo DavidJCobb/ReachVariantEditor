@@ -23,13 +23,13 @@
          <category id="const-none" />
          <category id="unscoped-widget" />
       </member>
-      <member name="current_object" type="object" read-only="true">
+      <member name="current_object" type="object" read-only="true" transient="true">
          <blurb>The current object in a <code>for each object</code> or <code>for 
          each object with label</code> loop.</blurb>
          <category id="unscoped-current" />
          <category id="unscoped-object" />
       </member>
-      <member name="current_player" type="player" read-only="true">
+      <member name="current_player" type="player" read-only="true" transient="true">
          <blurb>The current player in a <code>for each player</code> or <code>for 
          each player randomly</code> loop.</blurb>
          <category id="unscoped-current" />
@@ -48,7 +48,7 @@
             </p>
          </description>
       </member>
-      <member name="current_team" type="team" read-only="true">
+      <member name="current_team" type="team" read-only="true" transient="true">
          <blurb>The current team in a <code>for each team</code> loop.</blurb>
          <category id="unscoped-current" />
          <category id="unscoped-team" />
@@ -142,7 +142,7 @@
             -- Allow each player to see how fast they're moving.
             --
             for each player do
-               script_widget[0].set_text("%n KPH", hud_player.speed_kph)
+               script_widget[0].set_text("%n KPH", local_player.speed_kph)
             end
             on local: for each player do
                current_player.speed_raw = current_player.biped.get_speed()
@@ -155,66 +155,32 @@
          <category id="unscoped-player" />
       </member>
       <member name="local_team" name2="hud_player_team" type="team" read-only="true">
-         <blurb>This value's precise meaning is unknown, but it can presumably be used 
-         with HUD widgets and object waypoints to display different information for each 
-         player.</blurb>
-         <description>
-            <p>
-               Community reverse-engineering indicates that this value is one of several 
-               that can be used with HUD widgets and object waypoints to display different 
-               information to each player. When setting a widget or waypoint's text, you 
-               would pass this value (or a member variable on it) as a 
-               <a href="script/api/format-string.html">format string</a> parameter. However, 
-               while community reverse-engineering indicates that this would refer to the 
-               team that <a href="hud_player.html">hud_player</a> belongs to, testing has 
-               failed to verify this.
-            </p>
-         </description>
+         <blurb>
+            This is the team to which the <a href="local_player.html">local player</a> belongs. 
+            This value can be passed to HUD widgets as part of a 
+            <a href="script/api/format-string.html">format string</a> to display information 
+            about the team.
+         </blurb>
+         <example>
+            alias owned_vehicle_count = team.number[0]
+            
+            for each player do
+               script_widget[0].set_text("Your team has %n vehicles.", local_team.owned_vehicle_count)
+            end
+         </example>
          <category id="unscoped-hud" />
          <category id="unscoped-team" />
       </member>
-      <member name="hud_target_player_team" type="team" read-only="true">
-         <blurb>This value's precise meaning is unknown, but it can presumably be used 
-         with HUD widgets and object waypoints to display different information for each 
-         player.</blurb>
-         <description>
-            <p>
-               Community reverse-engineering indicates that this value is one of several 
-               that can be used with HUD widgets and object waypoints to display different 
-               information to each player. When setting a widget or waypoint's text, you 
-               would pass this value (or a member variable on it) as a 
-               <a href="script/api/format-string.html">format string</a> parameter. However, 
-               while community reverse-engineering indicates that this would refer to the 
-               team that <a href="hud_taret_player.html">hud_target_player</a> belongs to, 
-               testing has failed to verify this.
-            </p>
-         </description>
+      <member name="target_team" name2="hud_target_team" type="team" read-only="true">
+         <blurb>
+            If there is a <a href="hud_target_player.html">hud_target_player</a>, then 
+            this is the team that that player is on. Otherwise, it's the team of the 
+            target object. This value can be passed to HUD widgets as part of a 
+            <a href="script/api/format-string.html">format string</a> to display information 
+            about the team.
+         </blurb>
          <category id="unscoped-hud" />
          <category id="unscoped-team" />
-      </member>
-      <member name="hud_target_object_team" type="team">
-         <blurb>This value is believed to refer to the owner team for <code>hud_target_object</code>.</blurb>
-         <description>
-            <p>
-               Community testing indicates that this value is one of several that can be used 
-               with HUD widgets and object waypoints to display different information to each 
-               player. When setting a widget or waypoint's text, you  would pass this value 
-               (or a member variable on it) as a <a href="script/api/format-string.html">format string</a> 
-               parameter. Testing suggests that this refers to the owner team for <a href="hud_target_object.html">hud_target_object</a>'s owner team.
-            </p>
-            <p>
-               These values would be useful for UI code. Consider, for example, a situation 
-               where you want to put a waypoint on an object, and have that object display the value of <code>&lt;self&gt;.team.number[0]</code> 
-               as the waypoint's text. There wouldn't be any way to pass that unless you could 
-               write something like <code>hud_target_object_team.number[0]</code> into the 
-               format string. 
-            </p>
-         </description>
-         <category id="unscoped-hud" />
-         <category id="unscoped-team" />
-      </member>
-      <member name="unk_15_team" type="team">
-         <blurb>Unknown, and potentially unused.</blurb>
       </member>
       <member name="script_option" type="number" indexed="true" read-only="true">
          <blurb>Allows scripts to access the value of scripted Custom Game options.</blurb>
@@ -241,7 +207,7 @@
          </description>
          <category id="traits" />
       </member>
-      <member name="killed_object" type="object" read-only="true">
+      <member name="killed_object" type="object" read-only="true" transient="true">
          <blurb>During an <a href="script/events">object death event</a>, this is the 
          killed object.</blurb>
          <related name="killer_object" />
@@ -249,18 +215,18 @@
          <related name="death_event_damage_type" />
          <category id="death-event-params" />
       </member>
-      <member name="killer_object" type="object" read-only="true">
+      <member name="killer_object" type="object" read-only="true" transient="true">
          <blurb>During an <a href="/script/events">object death event</a>, this is the 
          killer object.</blurb>
          <category id="death-event-params" />
       </member>
-      <member name="killer_player" type="player" read-only="true">
+      <member name="killer_player" type="player" read-only="true" transient="true">
          <blurb>During an <a href="/script/events">object death event</a>, this is the 
          killer player.</blurb>
          <category id="unscoped-player" />
          <category id="death-event-params" />
       </member>
-      <member name="death_event_damage_type" type="number" read-only="true">
+      <member name="death_event_damage_type" type="number" read-only="true" transient="true">
          <blurb>During an <a href="script/events">object death event</a>, this is the 
          damage type that killed the object. It is presumed to be a 
          <a href="/script/api/ns_enums/damage_reporting_type">damage reporting type</a>; testing is pending.</blurb>

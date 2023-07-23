@@ -55,7 +55,7 @@ namespace Megalo {
             NamespaceMember::make_which_member("hud_target_player", OpcodeArgValuePlayer::typeinfo, variable_which_values::player::hud_target),
             NamespaceMember::make_which_member("hud_player",        OpcodeArgValuePlayer::typeinfo, variable_which_values::player::hud), // old/incorrect name, retained for backward-compatibility
             NamespaceMember::make_which_member("hud_player_team",   OpcodeArgValueTeam::typeinfo,   variable_which_values::team::hud_player_owner_team), // old/incorrect name, retained for backward-compatibility
-            NamespaceMember::make_which_member("hud_target_player_team", OpcodeArgValueTeam::typeinfo, variable_which_values::team::hud_target_player_owner_team),
+            NamespaceMember::make_which_member("hud_target_team",   OpcodeArgValueTeam::typeinfo, variable_which_values::team::hud_target_player_owner_team),
             NamespaceMember::make_which_member("killed_object",     OpcodeArgValueObject::typeinfo, variable_which_values::object::killed),
             NamespaceMember::make_which_member("killer_object",     OpcodeArgValueObject::typeinfo, variable_which_values::object::killer),
             NamespaceMember::make_which_member("killer_player",     OpcodeArgValuePlayer::typeinfo, variable_which_values::player::killer),

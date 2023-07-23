@@ -23,6 +23,13 @@ namespace content {
          }
       }
       {
+         auto file = QFile("_redirect.html");
+         file.open(QIODevice::ReadOnly);
+         if (file.isOpen()) {
+            this->page_templates.redirect.setContent(QString::fromUtf8(file.readAll()));
+         }
+      }
+      {
          auto file = QFile("_type.html");
          file.open(QIODevice::ReadOnly);
          if (file.isOpen()) {

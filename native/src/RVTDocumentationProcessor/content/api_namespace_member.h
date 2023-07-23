@@ -11,6 +11,7 @@ namespace content {
 
          QString type;
          bool is_read_only = false;
+         bool is_transient = false;
          bool is_indexed   = false;
          bool is_none      = false;
 

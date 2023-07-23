@@ -37,6 +37,7 @@ namespace content {
          struct {
             page_template article;
             page_template ns_member; // for namespace members
+            page_template redirect;
             page_template type;      // for type members. NOT for the types themselves
          } page_templates;
          

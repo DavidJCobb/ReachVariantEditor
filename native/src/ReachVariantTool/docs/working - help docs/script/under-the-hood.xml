@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<article>
+   <title>Under the hood</title>
+   <body>
+      <p>
+         This article describes the basics of how Megalo code is compiled and stored in a saved 
+         gametype. You don't need to know any of this in order to write Megalo scripts; this 
+         should be considered advanced knowledge.
+      </p>
+      
+      <section>
+         <h2>Basic structure of a script</h2>
+         <p>
+            Megalo scripts are organized into <dfn>triggers</dfn>, which map roughly to blocks of 
+            code in a script. The code itself consists of <dfn>conditions</dfn> and <dfn>actions</dfn> 
+            which are executed in sequence when the game engine executes the trigger as a whole. 
+            Triggers have additional data allowing them to specify their overall type (e.g. what 
+            kind of <a href="for">for</a>-loop, if any, they are, and what Forge label they act 
+            on) and what <a href="events">event</a> they handle.
+         </p>
+         <p>
+            In order to nest a block of code, the game compiles the inner block as its own trigger 
+            separate from the outer block; the inner block is marked as a "subroutine" block, which 
+            distinguishes it from a top-level trigger so that the game won't blindly execute it 
+            when scanning through the trigger list. Then, the outer block has a "call" action 
+            compiled in: this action refers to another trigger by index and directs the game to 
+            execute that trigger's contents.
+         </p>
+         <p>
+            ReachVariantTool abuses this implementation of nesting in order to offer <a href="function">user-defined functions</a>: 
+            we compile the function's body as an independent trigger that has been marked as an 
+            inner trigger, and we use the "call" action to... well, call it. You could think of 
+            a user-defined function as an inner block that's nested under multiple outer blocks, 
+            existing in multiple places at once.
+         </p>
+      
+         <h3>Storage</h3>
+         <p>
+             Gametype script code uses a struct-of-arrays approach for storage. Rather than 
+             physically locating conditions and actions inside of the data for their containing 
+             trigger, Halo: Reach instead stores a list of every condition in the script, a list 
+             of every action in the script, and a list of every trigger in the script.
+         </p>
+         <p>
+            Triggers contain a data structure that is, internally, called an "action scope." 
+            This data structure contains the indices of the trigger's first condition and first 
+            action, as well as the number of conditions and actions inside of the trigger: the 
+            trigger defines its contents as slices of the condition and action arrays. This 
+            approach on its own would not allow conditions and actions to be interleaved; 
+            Bungie accomplished that by having each condition specify the index (within the 
+            containing trigger, not the overall list) of the action it precedes.
+         </p>
+         <p>
+            (This is all part of the overall design for game variant data: nothing inside of a 
+            game varant is heap-allocated, and there don't appear to be any internal pointers. 
+            All lists are stored in fixed-size memory regions. This extends even to the string 
+            table: the max uncompressed size is 0x4C00 bytes, and so there's a region that 
+            large within the in-memory game variant struct.)
+         </p>
+         <p>
+            It would hypothetically be possible to "overlap" triggers: if two triggers start 
+            with identical opcodes, then they could share those opcodes. This is not an easy 
+            optimization to implement, however, and because of the way opcode interleaving 
+            works, I don't expect that there would even be many opportunities to use it. An 
+            even more challenging optimization would be to overlap triggers whenver it is 
+            possible to do so, such as by having one trigger share the <em>middle</em> of 
+            some other trigger, or having a trigger share identical conditions and actions 
+            with different other triggers. (There are other data values on conditions that 
+            would need to be dealt with as well; see the next section.)
+         </p>
+         
+         <h3>Execution</h3>
+         <p>
+            In order to execute a trigger, the game loops over every action inside the trigger. 
+            For each action, we loop over all conditions that we haven't looped over before, and 
+            that come before the current action. If those conditions, in sum, fail, then we stop 
+            trigger execution; otherwise, we execute the current action. Conditions, then, act 
+            as early-returns from the current block. There are no "if" blocks in Megalo; rather, 
+            there are bare blocks which contain conditions.
+         </p>
+         <p>
+            The qualifier "in sum" here refers to the fact that conditions can be linked with 
+            "and" relationships or, alternatively, with "or" relationships. Conditions each have 
+            an "or group" value, an arbitrary integer; consecutive conditions with the same "or 
+            group" value are considered "or"-linked. Conditions fail in sum if any "and"-linked 
+            condition fails, or if all of a set of "or"-linked conditions fail.
+         </p>
+         <pre lang="c++">
+            MegaloActionScope::Execute(const MegaloScriptCode&amp; script) const {
+               size_t ci = 0; // condition index
+               for(size_t ai = 0; ai &lt; this->action_count; ++ai) {
+
+                  int32_t current_or_group = -1;
+
+                  // True if all conditions in the current "or group" have matched. 
+                  // An "or group" is a group of conditions that have been OR'd 
+                  // together.
+                  bool group_still_valid = true;
+
+                  for(; ci &lt; this->condition_count; ++ci) {
+                     const auto&amp; condition = script.conditions[this->condition_start + ci];
+
+                     if (condition.exec_before > i)
+                        //
+                        // This condition applies to actions later in the trigger.
+                        //
+                        break;
+
+                     if (condition.or_group != current_or_group) {
+                        if (!group_still_valid)
+                           //
+                           // If we reach the end of an "or group" and none of the 
+                           // conditions have matched, then stop the trigger.
+                           //
+                           return;
+                        current_or_group  = condition.or_group;
+                        group_still_valid = false;
+                     }
+                     group_still_valid |= condition.Execute();
+                  }
+                  if (!group_still_valid)
+                     return;
+
+                  const auto&amp; action = script.actions[this->action_start + ai];
+                  action.Execute();
+               }
+            }
+         </pre>
+         <p>
+            Because conditions act as an early-return mechanism for their containing block, they 
+            don't always require a separate block of their own; a condition's influence runs to 
+            the end of its containing block. If you wish to have some sequence of actions where 
+            only the middle few actions are conditional, however, then you must split that sequence 
+            of actions into a nested trigger, which will limit those conditions' influence.
+         </p>
+      
+         <h3>Inlined triggers</h3>
+         <p>
+            The mid-July 2023 update to Halo: The Master Chief Collection backported a number of 
+            scripting features from Halo 4 to Halo: Reach. One of these is the <code>begin</code> 
+            action, which allows one to nest a block of script code without having to create an 
+            entire new trigger for it (thereby avoiding the limit on how many ordinary triggers 
+            a game variant can contain).
+         </p>
+         <p>
+            The implementation is simple. The action's sole parameter is an action scope &mdash; 
+            the data structure that triggers use to identify what conditions and actions they 
+            contain. In other words, the action scope for the nested block is inlined directly 
+            into the action used to execute that block.
+         </p>
+      </section>
+      
+      <section>
+         <h2>References</h2>
+         <p>
+            There are five kinds of values to which one can define a reference: integers, objects, 
+            players, teams, and timers. These can be split into two categories: numeric references 
+            (though MegaloEdit uses the term "custom") and handle references, the latter so named 
+            because Halo: Reach's engine generally uses handles rather than pointers for working 
+            with objects, players, and teams.
+         </p>
+         <p>
+            <dfn>Explicit handle references</dfn> are single values &mdash; enums, which specify 
+            specific, globally-accessible handles; for example, <code>current_object</code>, 
+            <code>local_player</code>, and all global and temporary handle variables in Megalo.
+         </p>
+         <pre lang="c++">
+            enum class explicit_object_handle : int8_t;
+            enum class explicit_player_handle : int8_t;
+            enum class explicit_team_handle   : int8_t;
+         
+            union explicit_handle_union {
+               int8_t untyped = -1; // "none"
+            
+               explicit_object_handle object;
+               explicit_player_handle player;
+               explicit_team_handle   team;
+            };
+         </pre>
+         <p>
+            Handle reference operands in Megalo, then, resemble the following, using object 
+            handles as an example:
+         </p>
+         <pre lang="c++">
+            enum class object_reference_kind : uint8_t;
+         
+            class object_reference {
+               public:
+                  object_reference_kind  kind; // like a tagged union's tag
+                  explicit_handle_union  top_level;
+                  std::optional&lt;uint8_t&gt; member_index;
+            };
+         </pre>
+         <p>
+            If the operand refers directly to an explicit object handle, then the <var>kind</var> enum 
+            will indicate this, and the <var>top_level</var> field will specify which handle is being 
+            referred to, and the <var>member_index</var> field will be absent. If the operand refers to 
+            an object that is the member of some other handle, then the <var>kind</var> enum will indicate 
+            that; the <var>top_level</var> field will specify the handle, and the <var>member_index</var> 
+            field will specify which object handle member is being referred to.
+         </p>
+         <p>
+            Complicating matters slightly is the fact that properties are also represented in this 
+            system. If the operand is a reference to a player's biped, then this is indicated via 
+            the <var>kind</var>; the <var>member_of</var> and <var>target_index</var> fields hold 
+            the same values that they would for a <code>player_reference</code> referring to that 
+            same player.
+         </p>
+         <figure>
+            <table>
+               <thead>
+                  <tr>
+                     <th>RVT-syntax reference</th>
+                     <th><var>top_level</var></th>
+                     <th><var>member_index</var></th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr>
+                     <td><code>no_object</code></td>
+                     <td>-1</td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td><code>global.object[<var>T</var>]</code></td>
+                     <td><var>T</var></td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td><code>global.object[<var>T</var>].object[<var>M</var>]</code></td>
+                     <td><var>T</var></td>
+                     <td><var>M</var></td>
+                  </tr>
+                  <tr>
+                     <td><code>current_player.object[<var>M</var>]</code></td>
+                     <td>24<sup>[note 1]</sup></td>
+                     <td><var>M</var></td>
+                  </tr>
+                  <tr>
+                     <td><code>temporaries.object[<var>T</var>]</code></td>
+                     <td>21 + <var>T</var></td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td><code>current_player.biped</code></td>
+                     <td>24<sup>[note 1]</sup></td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td><code>current_player.player[<var>M</var>].biped</code></td>
+                     <td>24<sup>[note 1]</sup></td>
+                     <td><var>M</var></td>
+                  </tr>
+               </tbody>
+            </table>
+            <figcaption>
+               <sup>[note 1:]</sup>  In this case, 24 is a value in the <code>explicit_player_handle</code> 
+               enum, which corresponds to <code>current_player</code>.
+            </figcaption>
+         </figure>
+         <p>
+            Numeric references are slightly different. First, I'll illustrate this with timers:
+         </p>
+         <pre lang="c++">
+            enum class timer_reference_kind : uint8_t;
+         
+            class timer_reference {
+               public:
+                  timer_reference_kind  kind; // like a tagged union's tag
+                  explicit_handle_union member_of;
+                  uint8_t               target_index;
+            };
+         </pre>
+         <p>
+            If the operand is a reference to a built-in timer, like the game's round timer, then 
+            this is indicated via the <var>kind</var>; neither of the other fields are present 
+            in the serialized data. If the operand is a reference to a globally-scoped timer, then 
+            this is indicated via the <var>kind</var>, the <var>member_of</var> is absent from the 
+            serialized data, and the <var>target_index</var> specifies which timer is being used. 
+            If the timer is a member of some other object, then all three fields are used.
+         </p>
+         <figure>
+            <table>
+               <thead>
+                  <tr>
+                     <th>RVT-syntax reference</th>
+                     <th><var>member_of</var></th>
+                     <th><var>target_index</var></th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr>
+                     <td><code>game.round_timer</code></td>
+                     <td></td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td><code>global.timer[<var>T</var>]</code></td>
+                     <td></td>
+                     <td><var>T</var></td>
+                  </tr>
+                  <tr>
+                     <td><code>global.object[<var>M</var>].object[<var>T</var>]</code></td>
+                     <td><var>M</var></td>
+                     <td><var>T</var></td>
+                  </tr>
+                  <tr>
+                     <td><code>current_player.timer[<var>T</var>]</code></td>
+                     <td>24<sup>[note 1]</sup> </td>
+                     <td><var>T</var></td>
+                  </tr>
+               </tbody>
+            </table>
+            <figcaption>
+               <sup>[note 1:]</sup>  In this case, 24 is a value in the <code>explicit_player_handle</code> 
+               enum, which corresponds to <code>current_player</code>.
+            </figcaption>
+         </figure>
+         <p>
+            Integer references are essentially the same, except that they can also refer to an 
+            integer constant &mdash; a signed 16-bit value:
+         </p>
+         <pre lang="c++">
+            enum class integer_reference_kind : uint8_t;
+         
+            class integer_reference {
+               public:
+                  integer_reference_kind kind; // like a tagged union's tag
+                  union {
+                     int16_t constant;
+                     struct {
+                        explicit_handle_union member_of;
+                        uint8_t               target_index;
+                     } variable;
+                  };
+            };
+         </pre>
+         <p>
+            As with handles, integer property references on handle references (e.g. read-access 
+            to a player or team's score) are indicated by the <var>kind</var> enum; <var>member_of</var> 
+            and <var>target_index</var> hold the same values that their corresponding fields on 
+            handle references, <var>top_level</var> and <var>member_index</var>, would use to refer 
+            to the handle on which the property is being accessed. (Perhaps, then, it might even 
+            be a good idea to separate out the latter two fields into a struct, and add that as a 
+            union member in <code>integer_reference</code>?)
+         </p>
+         
+         <h3>Temporary variables</h3>
+         <p>
+            The mid-July 2023 update to Halo: The Master Chief Collection backported a number of 
+            scripting features from Halo 4 to Halo: Reach. One of these is <dfn>temporary variables</dfn>. 
+            Their implementation differs between numeric and handle references, naturally. Temporary 
+            integer variables are identified by a <var>kind</var> value and a <var>target_index</var>. 
+            Temporary handle variables are identified as new explicit handle references &mdash; that 
+            is, new values in the <code>explicit_object_handle</code>, <code>explicit_player_handle</code>, 
+            and <code>explicit_team_handle</code> enumerations shown above.
+         </p>
+         <p>
+            Temporary variables don't need to be declared within the gametype metadata; the game 
+            always has room for them; they always exist. When you declare a temporary variable 
+            in MegaloEdit, the official editor for Halo: Reach gametypes, it handles this by 
+            just compiling in an assignment to zero-or-none. It automatically allocates temporary 
+            variables based on block scoping, similarly to <a href="alias">allocation to aliases</a> 
+            in ReachVariantTool. One important difference between the editors is that MegaloEdit 
+            is capable of "spilling over" into unused global variables if a script runs out of 
+            temporary variables. MegaloEdit can do this because all non-temporary variables must 
+            be declared before all script code, so even with a single-pass parser, it always knows 
+            which variables are used and which are not. ReachVariantTool, by contrast, also uses 
+            a single-pass parser but allows variable declarations (and implicit instantiation: 
+            using an undeclared variable automatically declares it) anywhere in the script, and 
+            so when ReachVariantTool encounters an allocation-to-alias, it can't know for sure 
+            that any given global variable will <em>stay</em> unused through the rest of the 
+            script, and so can't safely spill extra temporaries to globals.
+         </p>
+         <p>
+            (And in case it needs to be said: when MegaloEdit spills to globals, it still uses 
+            block-scoping. Once a spilled temporary variable goes out of scope, the global used 
+            to back it is considered free for use by any temporaries that spill later on.)
+         </p>
+      
+         <h3>ReachVariantTool implementation</h3>
+         <p>
+            ReachVariantTool does not make any distinction between numeric and handle references, 
+            because at the time I didn't realize there was any such distinction to make. All five 
+            reference types are handled uniformly. The components of a reference operand (called 
+            a "variable" operand in RVT) are classified based solely on their types, and not on 
+            their meanings. This is an unfortunate design flaw arising from an incomplete understanding 
+            of Megalo, and it makes ReachVariantTool's code for references harder to follow and 
+            reason about.
+         </p>
+         <p>
+            The <var>kind</var> field is in ReachVariantTool called the operand's "scope" value. 
+            The <var>top_level</var> field on handle references and the <var>member_of</var> 
+            field on numeric references are treated uniformly and called the "which" value. The 
+            <var>member_index</var> field on handle references and the <var>target_index</var> 
+            field on target references are treated uniformly and called the "index."
+         </p>
+         <p>
+            Scope-values are implemented as <code>VariableScopeIndicatorValue</code> instances 
+            stored in arrays (one for each reference type); instances effectively serve as 
+            annotations for the values of the <var>..._reference_kind</var> enums. The enum 
+            values are annotated with:
+         </p>
+         <table>
+            <thead>
+               <tr>
+                  <th>Field name</th>
+                  <th>Purpose</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td>flags</td>
+                  <td>Flags, to track whether this "scope" represents read-only values like 
+                  player bipeds or the values of Custom Game options, and whether the 
+                  "scope" is used for references to a variable. (The latter flag is used by 
+                  the compiler for things like not allowing you to write a <a href="declare">variable declaration</a>
+                  wherein the declared variable's initial value is another variable.)</td>
+               </tr>
+               <tr>
+                  <td>base</td>
+                  <td>The explicit handle reference's type, if any.</td>
+               </tr>
+               <tr>
+                  <td>index_type</td>
+                  <td>The index's type, if any; or an indicator that this is the "scope" value 
+                  for an integer constant (represented as <code>enum index_type::generic</code>).</td>
+               </tr>
+               <tr>
+                  <td>index_bitcount</td>
+                  <td>The bitcount for the index. The index's bitcount can be inferred when the 
+                  reference is to a Megalo number variable; however, when the reference is to 
+                  some indexed data object, such as a Megalo-defined scoreboard stat or Custom 
+                  Game option, we use this field to indicate the bitcount needed for the index. 
+                  We also use this field to indicate the bitcount of integer constants.</td>
+               </tr>
+               <tr>
+                  <td>indexed_list_accessor</td>
+                  <td>
+                     <p>
+                        For references to indexed data objects, like Megalo-defined scoreboard 
+                        stats or Custom Game options, this is a functor that can be used to get 
+                        a type-erased pointer to the data object in memory, i.e. a pointer to 
+                        the scoreboard stat definition or Custom Game option definition.
+                     </p>
+                     <p>
+                        ReachVariantTool allows users to reorder most indexed data options: 
+                        Custom Game options, scoreboard stats, and similar are defined and 
+                        edited through the GUI and can be rearranged. The naive approach to 
+                        this would be to have all script operands store raw indices, and 
+                        iterate through the entire script to update every operand whenever 
+                        the user reorders something. The approach ReachVariantTool takes is 
+                        to have these indexed data objects all inherit from a common base 
+                        class that tracks its own index within its containing list (i.e. 
+                        the <var>n</var>-th scoreboard stat <em>knows</em> that it is the 
+                        <var>n</var>-th scoreboard stat), and have script operands store 
+                        pointers (typed to the base class) to the indexed data objects. When 
+                        we go to save the gametype to a file, the operand can simply ask the 
+                        indexed data object for its index and then serialize that index.
+                     </p>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+         <p>
+            Which-values are implemented as <code>VariableScopeWhichValue</code> instances stored 
+            in arrays, with the instances having names and flags. 
+         </p>
+         <p>
+            Indexes are implemented as simple integers. When the reference is to an indexed data 
+            object, they are paired with smart pointers that manage refcounts on the indexed data 
+            objects (another feature of the base class described above, used to allow end users to 
+            delete indexed data objects if they aren't in use by the script).
+         </p>
+      </section>
+   </body>
+</article>

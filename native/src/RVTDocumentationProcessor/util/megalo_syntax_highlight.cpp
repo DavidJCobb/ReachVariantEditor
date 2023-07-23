@@ -42,13 +42,18 @@ namespace util::impl {
 
 namespace {
    std::array keywords = {
-      util::impl::megalo_keyword{ "alias" },
+      util::impl::megalo_keyword{ "alias", },
       util::impl::megalo_keyword{ "alt" },
       util::impl::megalo_keyword{ "altif" },
+      util::impl::megalo_keyword{ // HACK HACK HACK
+         "allocate",
+         {
+            { "temporary" },
+         }
+      },
       util::impl::megalo_keyword{ "and" },
       util::impl::megalo_keyword{ "declare",
          {
-            { "*", "with", "network", "priority", "default" },
             { "*", "with", "network", "priority", "low" },
             { "*", "with", "network", "priority", "high" },
             { "*", "with", "network", "priority", "local" },
@@ -68,6 +73,7 @@ namespace {
       },
       util::impl::megalo_keyword{ "function" },
       util::impl::megalo_keyword{ "if" },
+      util::impl::megalo_keyword{ "inline" },
       util::impl::megalo_keyword{ "not" },
       util::impl::megalo_keyword{ "on" },
       util::impl::megalo_keyword{ "or" },

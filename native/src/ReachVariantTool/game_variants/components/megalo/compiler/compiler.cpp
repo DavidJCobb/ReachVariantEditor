@@ -32,7 +32,7 @@ namespace {
    // variables of its caller (particularly when that caller is another function), so 
    // we do not allow this syntax in there.
    //
-   constexpr const bool allow_allocate_temporary_inside_of_functions = false;
+   constexpr const bool allow_allocate_inside_of_functions = false;
 }
 
 namespace {
@@ -3044,28 +3044,28 @@ namespace Megalo {
       );
       return nullptr;
    }
-   bool Compiler::_alias_is_explicit_reference_to_allocated(const Script::Alias& new_alias) {
+   const Script::Alias* Compiler::_alias_is_explicit_reference_to_allocated(const Script::Alias& new_alias) {
       if (!new_alias.target)
-         return false;
+         return nullptr;
       if (new_alias.via_allocate)
          //
          // You should never pass `allocate` aliases to this, but I've added this as a precaution 
          // against maintenance mistakes (see below comment).
          //
-         return false;
+         return nullptr;
       auto& nt = *new_alias.target;
       if (nt.is_invalid)
-         return false;
+         return nullptr;
       if (nt.resolved.top_level.is_constant)
-         return false;
+         return nullptr;
       if (nt.resolved.top_level.is_static)
-         return false;
+         return nullptr;
       if (nt.resolved.top_level.enumeration)
-         return false;
+         return nullptr;
       if (nt.resolved.top_level.namespace_member.scope || nt.resolved.top_level.namespace_member.which)
-         return false;
+         return nullptr;
       if (nt.resolution_involved_aliases.top_level)
-         return false;
+         return nullptr;
 
       for (const auto* existing : this->aliases_in_scope) {
          if (existing == &new_alias)
@@ -3099,9 +3099,9 @@ namespace Megalo {
                continue;
             }
          }
-         return true;
+         return existing;
       }
-      return false;
+      return nullptr;
    }
    void Compiler::_handleKeyword_Alias(const pos start) {
       auto name = this->extract_word();
@@ -3152,9 +3152,9 @@ namespace Megalo {
             item->set_start(start);
             item->set_end(this->state);
             this->block->insert_item(item);
-            if constexpr (allow_allocate_temporary_inside_of_functions == false) {
+            if constexpr (allow_allocate_inside_of_functions == false) {
                if (this->block->get_nearest_function()) {
-                  this->raise_error(start, "Due to technical limitations in how ReachVariantTool's compiler works, temporary variables cannot be safely allocated while inside of a user-defined function. Temporary variables allocated outside of a function (i.e. by a function's containing block) can still be used from inside of the function, however.");
+                  this->raise_error(start, "Due to technical limitations in how ReachVariantTool's compiler works, variables cannot be safely allocated to aliases while inside of a user-defined function. Variables allocated outside of a function (i.e. by a function's containing block) can still be used from inside of the function, however.");
                   item->invalid = true;
                }
             }
@@ -3209,11 +3209,20 @@ namespace Megalo {
          //
          this->aliases_in_scope.push_back(item);
 
-         if (this->_alias_is_explicit_reference_to_allocated(*item)) {
-            //
-            // TODO: Can we improve the error messaging on this, e.g. show the names of the colliding aliases?
-            //
-            this->raise_warning(start, "You've pointed this alias at a specific variable, but that variable has already been assigned to another (still in-scope) alias using the `alias <name> = allocate ...` syntax. Did you intend for both of these aliases to refer to the same variable?");
+         if (auto* colliding_with = this->_alias_is_explicit_reference_to_allocated(*item)) {
+            this->raise_warning(
+               start,
+               QString(
+                  "You've pointed this alias, %1, at a specific variable, but that variable was "
+                  "automatically allocated to another alias, %2, which is still in-scope. If you "
+                  "intended for these aliases to refer to the same variable, then it's recommended "
+                  "that you write this as `alias %1 = %2` or something similar. If these aliases "
+                  "should not refer to the same variable, then either move the definition for %1 "
+                  "before the definition for %2, or have %1 also use allocation."
+               )
+                  .arg(item->pretty_printable_name())
+                  .arg(colliding_with->pretty_printable_name())
+            );
          }
       }
    }

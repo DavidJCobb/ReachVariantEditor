@@ -63,7 +63,11 @@ void handle_article(QDomElement& root, QDir base_save_folder, QString relative_p
    body = QString("<h1>%1</h1>").arg(title) + util::serialize_element(node, {
       .adapt_indented_pre_tags    = true,
       .include_containing_element = false,
-      .pre_tag_content_tweak      = [](QString& out) { out = util::megalo_syntax_highlight(out); },
+      .pre_tag_content_tweak      = 
+         [](QDomElement pre, QString& out) {
+            if (!pre.hasAttribute("lang"))
+               out = util::megalo_syntax_highlight(out);
+         },
       .url_tweak                  = [relative_folder](QString& out) { util::link_fixup(relative_folder, out);  },
    });
    //
@@ -71,6 +75,60 @@ void handle_article(QDomElement& root, QDir base_save_folder, QString relative_p
       .body  = body,
       .relative_folder_path = relative_folder,
       .title = title,
+   });
+   cobb::qt::save_file_to(write_to, body);
+}
+
+void handle_redirect(QDomElement& root, QDir base_save_folder, QString relative_path, QString relative_folder) {
+   auto& registry = content::registry::get();
+   
+   QString destination;
+   if (root.hasAttribute("href")) {
+      destination = root.attribute("href");
+   }
+   if (destination.isEmpty()) {
+      qDebug() << "Failed to parse a \"redirect\" file.";
+      return;
+   }
+   //
+   // BASE HREF doesn't affect META REFRESH addresses, so fixup is different here:
+   //
+   if (!destination.startsWith("./") && !destination.startsWith("/"))
+      destination = destination + "./";
+   else if (destination.startsWith("/")) {
+      destination = relative_folder + destination;
+   }
+
+   QString write_to = QDir::cleanPath(base_save_folder.absoluteFilePath(relative_path));
+   QString write_folder;
+   {
+      int i = write_to.lastIndexOf('.');
+      if (i > 0) {
+         write_to.truncate(i + 1);
+         write_to += "html";
+      }
+      //
+      write_folder = write_to;
+      i = write_folder.lastIndexOf('/');
+      int j = write_folder.lastIndexOf('\\');
+      i = std::max(i, j);
+      if (i >= 0)
+         write_folder.truncate(i);
+      else
+         write_folder.clear();
+   }
+   //
+   const auto& tmp = registry.page_templates.article;
+   QString body = QString(
+      "<h1>Redirect</h1>\n"
+      "If you are not redirected, please <a href=\"%1\">click here</a>."
+   ).arg(destination);
+   //
+   body = registry.page_templates.redirect.create_page({
+      .body       = body,
+      .relative_folder_path = relative_folder,
+      .title      = "Redirect",
+      .meta_extra = QString("<meta http-equiv=\"refresh\" content=\"0; url=%1\">").arg(destination)
    });
    cobb::qt::save_file_to(write_to, body);
 }
@@ -157,6 +215,8 @@ void process_xml_file(content::registry& registry, const QString& path, const QS
       }
       qDebug() << "Failed to parse a \"reuse\" file.\n   Source path: " << path << "\n   Target path: " << target_path << '\n';
       return;
+   } else if (type == "redirect") {
+      handle_redirect(root, base_save_folder, relative_path, relative_folder);
    }
 }
 

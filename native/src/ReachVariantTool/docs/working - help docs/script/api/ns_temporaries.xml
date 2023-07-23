@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<script-namespace name="temporaries">
+   <blurb>Contains temporary variables.</blurb>
+   <description>
+      <p>
+         The <var>temporaries</var> namespace contains temporary variables, a feature 
+         backported from Halo 4 to the Halo: The Master Chief Collection version of 
+         Halo: Reach. Gametypes that use these variables are incompatible with the 
+         original Xbox 360 version of Halo: Reach, and with MCC versions that predate 
+         the mid-July 2023 update.
+      </p>
+      <p>
+         You should not refer to temporary variables directly (e.g. <code>temporaries.number[<var>n</var>]</code>); 
+         this namespace is provided for use by ReachVariantTool's decompiler. You are 
+         encouraged to instead use <a href="script/alias.html">allocation to aliases</a>.
+      </p>
+      
+      <h2>Notes</h2>
+      <p>
+         Temporary variables do not need to be <a href="script/declare.html">declared</a>, and 
+         cannot be given an initial value or a networking priority. Declaring a temporary 
+         variable is a warning (and the declaration is ignored) unless you specify an 
+         initial value or networking priority, in which case it's an error.
+      </p>
+      <p>
+         Temporary timers don't exist. (How would they? Temporaries aren't meant to 
+         last for longer than some individual task during a single frame; they can't 
+         be used to track things across time.)
+      </p>
+      <p>
+         When you write scripts using MegaloEdit, the official Megalo editor by Bungie 
+         and 343 Industries, you can use a larger number of temporary variables 
+         than in ReachVariantTool. Both tools face the same limit on how many 
+         temporary variables can exist, but if you hit that limit in MegaloEdit, 
+         its compiler will "spill over" into any <a href="ns_global.html">global variables</a> 
+         that you haven't already used, repurposing them as temporary variables. 
+         ReachVariantTool is unable to do this due to technical limitations in its 
+         design.
+      </p>
+   </description>
+   <members>
+      <member name="number" type="number" indexed="true" transient="true">
+         <blurb>Temporary numbers. Ten are available, numbered from 0 to 9.</blurb>
+      </member>
+      <member name="object" type="object" indexed="true" transient="true">
+         <blurb>Temporary objects. Eight are available, numbered from 0 to 7.</blurb>
+      </member>
+      <member name="player" type="player" indexed="true" transient="true">
+         <blurb>Temporary players. Three are available, numbered from 0 to 2.</blurb>
+      </member>
+      <member name="team" type="team" indexed="true" transient="true">
+         <blurb>Temporary teams. Six are available, numbered from 0 to 5.</blurb>
+      </member>
+   </members>
+</script-namespace>

@@ -109,6 +109,9 @@
          a = b + c
          
          -- The above is interpreted as two statements: "a = b" and "+ c".
+         -- The supported syntax is:
+         -- a = b
+         -- a += c
       </pre>
       
       <h3>Blocks</h3>
@@ -122,7 +125,7 @@
             <dd>An <a href="enum">user-defined enum definition</a>.</dd>
          <dt>for ... do ... end</dt>
             <dd>A piece of code which should be executed multiple times in a row, 
-            with specific information made available each time.</dd>
+            with specific information made available each time. <a href="for">More details here.</a></dd>
          <dt>function ... end</dt>
             <dd>A user-defined function which can be "called," or triggered to run, 
             from different parts of the script. <a href="function">More details here.</a></dd>
@@ -132,7 +135,7 @@
       </dl>
       <p>
          Top-level blocks (that is, blocks not nested inside of other blocks) can be prefixed 
-         with <a href="events">event name</a>.
+         with an <a href="events">event name</a>.
       </p>
       
       <h3>Actions</h3>

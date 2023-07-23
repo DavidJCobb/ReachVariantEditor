@@ -88,8 +88,8 @@
                -- start of a round, by "sending an incident" a few seconds after 
                -- script processing begins.
                --
-               alias announced_start = player.number[0]
-               alias announced_timer = player.timer[0]
+               alias announced_start = allocate player.number
+               alias announced_timer = allocate player.timer
                declare player.announced_timer = 5
                --
                for each player do

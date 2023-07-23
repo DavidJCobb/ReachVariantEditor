@@ -37,8 +37,8 @@
             base gametype has its own incident.
          </p>
          <pre>
-            alias announced_game_start = player.number[0]
-            alias announce_start_timer = player.timer[0]
+            alias announced_game_start = allocate player.number
+            alias announce_start_timer = allocate player.timer
          
             declare player.announced_game_start with network priority low = 0
             declare player.announce_start_timer = 5
@@ -59,8 +59,8 @@
             using <a href="/script/api/format-string.html">format strings</a>.
          </p>
          <pre>
-            alias announced_game_start = player.number[0]
-            alias announce_start_timer = player.timer[0]
+            alias announced_game_start = allocate player.number
+            alias announce_start_timer = allocate player.timer
          
             declare player.announced_game_start with network priority low = 0
             declare player.announce_start_timer = 5
@@ -110,16 +110,16 @@
             with unnamed Forge labels, as 343i does).
          </p>
          <pre>
-            alias ach_top_shot_count        = player.number[0]
-            alias ach_license_to_kill_count = player.number[1]
-            alias ach_paper_beats_rock_vuln_timer = player.timer[0]
+            alias ach_top_shot_count              = allocate player.number
+            alias ach_license_to_kill_count       = allocate player.number
+            alias ach_paper_beats_rock_vuln_timer = allocate player.timer
             declare player.ach_top_shot_count        with network priority low
             declare player.ach_license_to_kill_count with network priority low
          
             for each player do -- award Dive Bomber achievement as appropriate
-               alias killer    = global.player[0]
-               alias killer_aa = global.object[0]
-               alias death_mod = global.number[0]
+               alias killer    = allocate temporary player
+               alias killer_aa = allocate temporary object
+               alias death_mod = allocate temporary number
                if current_player.killer_type_is(kill) then 
                   killer    = current_player.get_killer()
                   death_mod = current_player.get_death_damage_mod()
@@ -133,8 +133,8 @@
             end
 
             for each player do -- award From Hell's Heart achievement as appropriate
-               alias death_mod = global.number[0]
-               alias killer    = global.player[0]
+               alias death_mod = allocate temporary number
+               alias killer    = allocate temporary player
                if current_player.killer_type_is(kill) then
                   death_mod = current_player.get_death_damage_mod()
                   if death_mod == enums.damage_reporting_modifier.sticky then
@@ -147,8 +147,8 @@
             end
 
             for each player do -- manage and award Top Shot achievement as appropriate
-               alias killer    = global.player[0]
-               alias death_mod = global.number[0]
+               alias killer    = allocate temporary player
+               alias death_mod = allocate temporary number
                if current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) then 
                   current_player.ach_top_shot_count = 0
                   if current_player.killer_type_is(kill) then 
@@ -168,8 +168,8 @@
             end
 
             for each player do -- manage and award License To Kill achievement as appropriate
-               alias killer    = global.player[0]
-               alias death_mod = global.number[0]
+               alias killer    = allocate temporary player
+               alias death_mod = allocate temporary number
                if current_player.killer_type_is(kill) then 
                   killer    = current_player.get_killer()
                   death_mod = current_player.get_death_damage_mod()
@@ -183,7 +183,7 @@
             end
 
             for each player do -- manage timing for the Paper Beats Rock achievement
-               alias current_ability = global.object[0]
+               alias current_ability = allocate temporary object
                --
                current_ability = current_player.get_armor_ability()
                if current_ability.is_of_type(armor_lock) and current_ability.is_in_use() then 
@@ -192,8 +192,8 @@
                end
             end
             for each player do -- award Paper Beats Rock achievement as appropriate
-               alias killer    = global.player[0]
-               alias death_mod = global.number[0]
+               alias killer    = allocate temporary player
+               alias death_mod = allocate temporary number
                if current_player.killer_type_is(kill) and not current_player.ach_paper_beats_rock_vuln_timer.is_zero() then 
                   death_mod = current_player.get_death_damage_mod()
                   if death_mod == enums.damage_reporting_modifier.assassination then
@@ -242,25 +242,27 @@
             to know a player's team color, so that it can apply the right set of traits.
          </p>
          <pre>
-            alias red_team  = global.team[0]
-            alias blue_team = global.team[1]
+            alias red_team  = allocate global.team
+            alias blue_team = allocate global.team
             declare red_team  with network priority high = team[0]
             declare blue_team with network priority high = team[1]
             
             on init: do
+               alias is_odd = allocate temporary number
+            
                --
                -- We need to know which team is red and which team is blue, so we can apply the 
                -- appropriate visuals to players that are frozen. However, that's trickier than 
                -- you might expect: teams alternate each round, but their indices are remapped. 
                -- On round 1, Red Team is team[0], but on round 2, it's team[1].
                --
-               global.number[2] = game.current_round
-               global.number[2] %= 2
-               if global.number[2] == 0 then -- even-numbered round
+               is_odd = game.current_round
+               is_odd %= 2
+               if is_odd == 0 then -- even-numbered round
                   red_team  = team[0]
                   blue_team = team[1]
                end
-               if global.number[2] != 0 then -- odd-numbered round
+               if is_odd != 0 then -- odd-numbered round
                   red_team  = team[1]
                   blue_team = team[0]
                end
@@ -356,8 +358,8 @@
             Period does.
          </p>
          <pre>
-            alias sudden_death_enabled   = global.number[0] -- set this to 1 when you want Sudden Death to be active, or 0 otherwise
-            alias announced_sudden_death = global.number[1] -- only announce the start of Sudden Death once
+            alias sudden_death_enabled   = allocate global.number -- set this to 1 when you want Sudden Death to be active, or 0 otherwise
+            alias announced_sudden_death = allocate global.number -- only announce the start of Sudden Death once
 
             if not game.round_timer.is_zero() then 
                game.grace_period_timer = 0
@@ -403,7 +405,7 @@
          </p>
          <pre>
             alias opt_super_shields = script_option[12]
-            alias lifespan = object.timer[0]
+            alias lifespan = allocate object.timer
          
             -- This should be the index of a nameless Forge label whose object type 
             -- is the fire particle emitter:
@@ -413,8 +415,8 @@
          
             for each player do -- handle super shields VFX
                if opt_super_shields == 1 then 
-                  alias current_shields = global.number[0]
-                  alias outcome = global.number[1]
+                  alias current_shields = allocate temporary number
+                  alias outcome         = allocate temporary number
                   --
                   current_shields = 0
                   current_shields = current_player.biped.shields

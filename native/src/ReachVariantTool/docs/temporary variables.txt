@@ -1,0 +1,16 @@
+
+In mid-July 2023, MCC updated Halo: Reach's engine to backport "temporary variables," 
+a feature from Halo 4's Megalo engine. These are, in concept, just global variables 
+that don't need to be declared (i.e. they always exist) and that the compiler tracks 
+differently.
+
+When you "declare" a temporary variable in MegaloEdit, it just finds an available 
+temporary variable, maps that to the identifier you specify, and compiles in an 
+assignment to zero-or-none. The variable is then marked as used, and will remain so 
+until that identifier goes out of scope.
+
+If MegaloEdit runs out of temporary variables of the requested type, it will "spill 
+over" into any unused global variables. This is easier to implement for them because 
+they require that all globals be defined in advance of script code. For RVT, we'd 
+need to implement a multi-pass parser (source -> compilable AST -> compiled) in 
+order to achieve this.

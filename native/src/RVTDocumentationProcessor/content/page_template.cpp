@@ -35,6 +35,13 @@ namespace content {
             this->tokens.base_href.length = needle.size();
       }
       {
+         auto&   token  = this->tokens.meta_extra;
+         QString needle = "<content-placeholder id=\"meta-extra\" />";
+         token.at = source.indexOf(needle);
+         if (token.at >= 0)
+            token.length = needle.size();
+      }
+      {
          auto&   token  = this->tokens.nav_accessors;
          QString needle = "<content-placeholder id=\"nav-accessors\" />";
          token.at = source.indexOf(needle);
@@ -78,54 +85,6 @@ namespace content {
       }
    }
 
-   QString page_template::createPage(const QString& raw_title, const QString& body, const QString& base_href) const noexcept {
-      assert(this->tokens.body.at >= 0);
-      //
-      QString title = util::strip_html(raw_title);
-      QString out;
-      {
-         int size = this->html.size();
-         size += title.size();
-         size += body.size()      - this->tokens.body.length;
-         size += base_href.size() - this->tokens.base_href.length + base_tag.size() - 2;
-         size += 4096; // blind estimate for the navigation sidebar edits
-         //
-         out.reserve(size);
-      }
-      std::array list = { this->tokens.base_href, this->tokens.body, this->tokens.title };
-      std::sort(list.begin(), list.end());
-      //
-      int from = 0;
-      for (auto& token : list) {
-         out += QStringRef(&this->html, from, token.at - from);
-         from = token.at + token.length;
-         //
-         switch (token.type) {
-            case token_type::base_href:
-               out += base_tag.arg(base_href);
-               break;
-            case token_type::body:
-               out += body;
-               break;
-            case token_type::title:
-               out += title;
-               break;
-         }
-      }
-      auto size = this->html.size();
-      if (from < size)
-         out += QStringRef(&this->html, from, size - from);
-      //
-      return out;
-   }
-   QString page_template::createPage(const QString& title, const QString& body, int base_depth) const noexcept {
-      QString base_href;
-      while (base_depth-- > 0) {
-         base_href += "../";
-      }
-      return this->createPage(title, body, base_href);
-   }
-
    QString page_template::create_page(page_creation_options options) const noexcept {
       assert(this->tokens.body.at >= 0);
       if (options.base_href.isEmpty()) {
@@ -152,12 +111,13 @@ namespace content {
          size += options.base_href.size() - this->tokens.base_href.length + base_tag.size() - 2;
          size += 4096; // blind estimate for the navigation sidebar edits
          //
-         out.reserve(size);
+         out.reserve(size); // pre-allocate to reduce unnecessary reallocs
       }
       std::array list = {
          this->tokens.base_href,
          this->tokens.body,
          this->tokens.title,
+         this->tokens.meta_extra,
          this->tokens.nav_accessors,
          this->tokens.nav_actions,
          this->tokens.nav_conditions,
@@ -186,6 +146,9 @@ namespace content {
                break;
             case token_type::title:
                out += options.title;
+               break;
+            case token_type::meta_extra:
+               out += options.meta_extra;
                break;
             case token_type::nav_accessors:
                out += options.nav.accessors;

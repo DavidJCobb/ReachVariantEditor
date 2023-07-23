@@ -7,7 +7,7 @@ namespace util {
    struct html_serialize_options {
       bool adapt_indented_pre_tags      = false;
       bool include_containing_element   = false;
-      std::function<void(QString&)> pre_tag_content_tweak;
+      std::function<void(QDomElement, QString&)> pre_tag_content_tweak;
       std::function<void(QString&)> url_tweak;
       bool wrap_bare_text_in_paragraphs = false;
 

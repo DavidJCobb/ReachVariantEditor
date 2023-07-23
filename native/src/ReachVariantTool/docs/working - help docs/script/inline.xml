@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<article>
+   <title>Inline blocks</title>
+   <body>
+      <p>
+         In mid-July 2023, the Master Chief Collection was updated to backport some Halo 4 
+         scripting features to Halo: Reach. One of these is the <code>begin</code> action. 
+         This is a low-level optimization that allows triggers to be compiled slightly more 
+         efficiently.
+      </p>
+      <pre lang="MegaloEdit">
+         trigger general
+            action for_each player
+               temporary number is_survivor false
+               temporary number is_zombie   false
+         
+               action begin
+                  condition if current_player.is_zombie == 1
+                  action set is_zombie = true
+               end
+               action begin
+                  condition if current_player.is_zombie == 0
+                  action set is_survivor = true
+               end
+            end
+         end
+      </pre>
+      <p>
+         ReachVariantTool uses the term <dfn>inlined triggers</dfn> for this feature, in 
+         reference to how it works under the hood.
+      </p>
+      <p>
+         Ordinarily, blocks of code are compiled into "trigger" data structures in the Megalo 
+         data format, and an "action" is compiled into the script code to "call" these triggers 
+         and execute their contents. (In fact, ReachVariantTool implements <a href="function.html">user-defined functions</a> 
+         by abusing this system and compiling a trigger that gets called from multiple places.) 
+         However, there's a limit on how many triggers a gametype can contain.
+      </p>
+      <p>
+         What this new feature does is take some of the data that triggers normally contain 
+         (specifically, the data that says, "this part of the code belongs to me; it is inside 
+         me"), and it writes that data directly into the action itself. This means that the 
+         block of code doesn't become a "real" trigger that contributes to a gametype's overall 
+         trigger limit; the block of code is <dfn>inlined</dfn> directly into the very same 
+         action that executes it.
+      </p>
+      <p>
+         In order to inline a block in ReachVariantTool, prefix it with an <dfn>inline specifier</dfn>:
+      </p>
+      <pre>
+         inline: do
+            -- ...
+         end
+      </pre>
+      <p>
+         You can only inline <code>do</code>, <code>if</code>, <code>altif</code>, and <code>alt</code> 
+         blocks, and you cannot inline a block that is an <a href="events">event handler</a>. This is 
+         because <code>for</code> blocks and event handler blocks require extra information that's only 
+         stored in real triggers, not inlined ones.
+      </p>
+      <p>
+         Functions cannot be marked as inline at this time. It would theoretically be possible to 
+         compile function calls as inline triggers, without creating a full trigger for the function's 
+         body, provided the function doesn't need any functionality that requires full trigger behavior 
+         (i.e. the function doesn't have a for-loop as its entire body); however, this is not implemented.
+      </p>
+   </body>
+</article>
