@@ -2113,35 +2113,47 @@ namespace Megalo {
       var->resolve(*this, is_alias_definition, is_write_access);
       if (
          !var->is_invalid &&
-         !var->resolved.top_level.is_temporary &&
-         !var->is_none() &&
-         !var->is_statically_indexable_value()
+         !var->is_none()
       ) {
-         //
-         // Implicitly declare the variable:
-         //
-         auto type  = var->get_type();
-         auto basis = var->get_alias_basis_type();
-         //
-         if (type->is_variable()) { // VariableReference can also refer to things like script widgets
-            if (!basis && var->resolved.nested.type)
-               basis = var->resolved.top_level.type;
+         const auto* type  = var->get_type();
+         const auto* basis = var->get_alias_basis_type();
+
+         if (!var->get_alias_basis_type()) {
+            auto& top_level = var->resolved.top_level;
+            if (!top_level.is_constant && !top_level.is_temporary && !top_level.is_static && !top_level.namespace_member.scope) {
+               //
+               // Implicitly declare the top-level variable.
+               //
+               variable_type type_v = getVariableTypeForTypeinfo(top_level.type);
+               if (type_v == variable_type::not_a_variable) {
+                  this->raise_error(QString("Unable to generate an implicit top-level variable declaration for \"%1\".").arg(var->to_string()));
+               } else {
+                  variable_scope scope_v = variable_scope::global;
+                  if (top_level.is_temporary)
+                     scope_v = variable_scope::temporary;
+
+                  auto* set = this->_get_variable_declaration_set(scope_v);
+                  set->get_or_create_declaration(type_v, top_level.index);
+               }
+            }
+         }
+
+         if (var->resolved.nested.type) {
             //
+            // Implicitly declare the nested variable.
+            //
+            if (!basis)
+               basis = var->resolved.top_level.type;
+
             variable_scope scope_v = getVariableScopeForTypeinfo(basis);
-            variable_type  type_v  = getVariableTypeForTypeinfo(type);
+            variable_type  type_v = getVariableTypeForTypeinfo(type);
             if (scope_v == variable_scope::not_a_scope || type_v == variable_type::not_a_variable) {
                this->raise_error(QString("Unable to generate an implicit variable declaration for \"%1\".").arg(var->to_string()));
                return var;
             }
-            //
-            int32_t index = 0;
-            if (scope_v == variable_scope::global) {
-               index = var->resolved.top_level.index;
-            } else {
-               index = var->resolved.nested.index;
-            }
-            auto set  = this->_get_variable_declaration_set(scope_v);
-            auto decl = set->get_or_create_declaration(type_v, index);
+            
+            auto set = this->_get_variable_declaration_set(scope_v);
+            auto decl = set->get_or_create_declaration(type_v, var->resolved.nested.index);
          }
       }
       return var;
@@ -3004,7 +3016,7 @@ namespace Megalo {
             continue;
 
          auto& existing_info = existing->target->resolved;
-         if (existing_info.nested.type != &temporary_type) // ignore aliases of a different type
+         if (existing_info.top_level.type != &temporary_type) // ignore aliases of a different type
             continue;
 
          if (existing_info.top_level.is_constant)

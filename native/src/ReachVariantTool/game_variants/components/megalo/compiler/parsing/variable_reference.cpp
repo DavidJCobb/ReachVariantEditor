@@ -487,8 +487,12 @@ namespace Megalo::Script {
             name = top_level.namespace_member.which->name.c_str();
          } else {
             has_index = true;
-            if (!top_level.is_static)
-               replacements.emplace_back("global");
+            if (!top_level.is_static) {
+               if (top_level.is_temporary)
+                  replacements.emplace_back("temporaries");
+               else
+                  replacements.emplace_back("global");
+            }
             name = top_level.type->internal_name.c_str();
          }
          //

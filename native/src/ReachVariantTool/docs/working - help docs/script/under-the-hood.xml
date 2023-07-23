@@ -485,7 +485,7 @@
             how the parser is implemented.</p>
          <p>
             (This is not a terribly good way to design or implement a scripting language, but 
-            in my defense, I had never in my life come across Robert Nystrom's excellent book 
+            in my defense, I had never come across Robert Nystrom's excellent book 
             <a href="https://craftinginterpreters.com/contents.html" target="_blank"><i>Crafting Interpreters</i></a> 
             before.)
          </p>
@@ -507,14 +507,7 @@
             handle if-blocks.
          </p>
          
-         <h3>The limitations of not using an AST</h3>
-         <p>
-            A more robust compiler would first convert the script to an 
-            <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree" target="_blank">abstract syntax tree</a> 
-            &mdash; a collection of objects representing raw syntax elements &mdash; and then, in a 
-            second pass, attempt to compile that data into a valid Megalo representation. References 
-            (i.e. to numbers and handles) are an informative way to demonstrate the difference.
-         </p>
+         <h3>An example of a compiler flaw</h3>
          <p>
             Consider the following code:
          </p>
@@ -524,6 +517,12 @@
             end
          </pre>
          <p>
+            A more robust compiler would first convert the script to an 
+            <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree" target="_blank">abstract syntax tree</a> 
+            &mdash; a collection of objects representing raw syntax elements &mdash; and then, in a 
+            second pass, attempt to compile that data into a valid Megalo representation.
+         </p>
+         <p>
             With an AST, the left-side comparand would be parsed into a data structure representing 
             member access. No attempt would be made to validate variable access or typing; we would 
             simply represent <code>global</code>, <code>object</code>, <code>player</code>, and 
@@ -532,20 +531,19 @@
             this comparand actually maps to. A benefit of this is that even though the lefthand 
             comparand shown above can't actually compile (because the variable is nested too 
             deeply), we would still be able to identify its type, so we could, for example, emit 
-            additional errors if you try to compare an inaccessible number variable to an object.
+            additional errors if you try to compare this inaccessible number variable to an object.
          </p>
          <p>
             ReachVariantTool, by contrast, parses and compiles in a single step, and so attempts to 
             interpret only those variable references that are actually valid. When it reads the 
             first part of the variable (<code>global</code>), it checks whether that refers to a 
             namespace, a typename, an enumeration, or some other construct, and what it finds will 
-            influence how the next parts of the variable are handled. In this case, upon encountering 
-            <code>player[1]</code>, it will immediately abort variable parsing, as this variable is 
+            influence how the next parts of the variable are read. In this case, upon encountering 
+            <code>player[1]</code>, we will immediately abort variable parsing, as this variable is 
             nested too deeply. ReachVariantTool isn't even able to store invalid variables; the data 
             structure used to store variable references only has the exact fields needed to store 
             valid references (i.e. fields for a top-level variable, a nested variable, a property, 
-            and an accessor). This in turn means that we can't enforce static typing for invalid 
-            variable references.
+            and an accessor).
          </p>
          
          <h3>Limited backtracking</h3>
