@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      
+      <title>player.get_button_press_duration | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+      <script src="resources/head.js"></script>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/player.html">Player</a>
+               <ul>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Properties</a>
+                     <ul>
+                        <li><a href="script/api/player/properties/biped.html">biped</a></li>
+<li><a href="script/api/player/properties/money.html">money</a></li>
+<li><a href="script/api/player/properties/rating.html">rating</a></li>
+<li><a href="script/api/player/properties/score.html">score</a></li>
+<li><a href="script/api/player/properties/script_stat.html">script_stat[<var>n</var>]</a></li>
+<li><a href="script/api/player/properties/team.html">team</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Accessors</a>
+                     <ul>
+                        <li><a href="script/api/player/accessors/frag_grenades.html">frag_grenades</a></li>
+<li><a href="script/api/player/accessors/plasma_grenades.html">plasma_grenades</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/player/conditions/assisted_kill_of.html">assisted_kill_of</a></li>
+<li><a href="script/api/player/conditions/is_elite.html">is_elite</a></li>
+<li><a href="script/api/player/conditions/is_fireteam_leader.html">is_fireteam_leader</a></li>
+<li><a href="script/api/player/conditions/is_monitor.html">is_monitor</a></li>
+<li><a href="script/api/player/conditions/is_not_respawning.html">is_not_respawning</a></li>
+<li><a href="script/api/player/conditions/is_spartan.html">is_spartan</a></li>
+<li><a href="script/api/player/conditions/killer_type_is.html">killer_type_is</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
+<li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
+<li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_armor_ability.html">get_armor_ability</a></li>
+<li><a href="script/api/player/actions/get_button_press_duration.html">get_button_press_duration</a></li>
+<li><a href="script/api/player/actions/get_button_press_duration.html">get_button_time</a></li>
+<li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_mod.html">get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_type.html">get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></li>
+<li><a href="script/api/player/actions/try_get_killer.html">get_killer</a></li>
+<li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
+<li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
+<li><a href="script/api/player/actions/try_get_vehicle.html">get_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_weapon.html">get_weapon</a></li>
+<li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
+<li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
+<li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
+<li><a href="script/api/player/actions/set_co_op_spawning.html">set_co_op_spawning</a></li>
+<li><a href="script/api/player/actions/set_fireteam.html">set_fireteam</a></li>
+<li><a href="script/api/player/actions/set_loadout_palette.html">set_loadout_palette</a></li>
+<li><a href="script/api/player/actions/set_objective_allegiance_icon.html">set_objective_allegiance_icon</a></li>
+<li><a href="script/api/player/actions/set_objective_allegiance_name.html">set_objective_allegiance_name</a></li>
+<li><a href="script/api/player/actions/set_objective_text.html">set_objective_text</a></li>
+<li><a href="script/api/player/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></li>
+<li><a href="script/api/player/actions/set_req_purchase_modes.html">set_req_purchase_modes</a></li>
+<li><a href="script/api/player/actions/set_requisition_palette.html">set_requisition_palette</a></li>
+<li><a href="script/api/player/actions/set_respawn_vehicle.html">set_respawn_vehicle</a></li>
+<li><a href="script/api/player/actions/set_objective_allegiance_icon.html">set_round_card_icon</a></li>
+<li><a href="script/api/player/actions/set_objective_allegiance_name.html">set_round_card_text</a></li>
+<li><a href="script/api/player/actions/set_objective_text.html">set_round_card_title</a></li>
+<li><a href="script/api/player/actions/set_vehicle_spawning_enabled.html">set_vehicle_spawning_enabled</a></li>
+<li><a href="script/api/player/actions/try_get_armor_ability.html">try_get_armor_ability</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_mod.html">try_get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_type.html">try_get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/try_get_killer.html">try_get_killer</a></li>
+<li><a href="script/api/player/actions/try_get_vehicle.html">try_get_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_weapon.html">try_get_weapon</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <header><h1>player.get_button_press_duration</h1><span class="a-k-a">a.k.a. player.get_button_time</span></header>
+
+               <p>
+                  This function was added to the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i> 
+                  in mid-July 2023, being backported from <i>Halo 4</i>'s Megalo engine. Gametypes that 
+                  use this function will likely fail to load on Xbox 360 builds of <i>Halo: Reach</i> 
+                  (even when played via Xbox One backward compatibility).
+               </p>
+               <p>
+                  This function checks whether a specified gameplay-related button is being held down on 
+                  the gamepad; if so, it returns the number of script ticks for which the button has been 
+                  held down. This function does not react to the keyboard, only works on host, and per 
+                  statements by 343i developers is intended for debugging purposes only.
+               </p>
+               <p>
+                  When multiple functions are mapped to the same button, they do not block each other; 
+                  this function will return the same time in script ticks for both of them. Although 
+                  buttons are identified by their mapped function (i.e. "the Jump button" instead of "A"), 
+                  this function will return the correct duration even if the player is unable to trigger 
+                  the mapped function. Players that are on the respawn screen, or out of grenades, for 
+                  example, can still be detected as pressing the "throw grenades" button.
+               </p>
+               <p>
+                  Per a 343i employee, this function is not "deterministic." It doesn't synch across the 
+                  network or in Theater. If a gametype ever actually reacts to this function in any way 
+                  that affects game or map state, then a Theater film of that play session will immediately 
+                  desynch at that point in the match, rendering playback past that point impossible (Theater 
+                  will show an error message and then forcibly return you to the lobby). To paraphrase the 
+                  employee: "You should only use it for debugging, as a last resort."
+               </p>
+            
+<p>This function returns <a href="script/api/number.html">number</a>. Calling this function without storing its return value in a variable is an error.</p><h2>Arguments</h2>
+<dl>
+   <dt>button</dt>
+      <dd>
+                  <p>
+                     The name of a gameplay function to which a button can be mapped. In the following 
+                     list, title-cased names (e.g. "Gameplay Function Name") refer to options in the 
+                     MCC's gamepad control scheme editor.
+                  </p>
+                  <dl>
+                     <dt>jump</dt>
+                        <dd>The button that's currently mapped to Jump.</dd>
+                     <dt>switch_grenade</dt>
+                        <dd>The button that's mapped to cycling through your grenades. This matches MCC's 
+                        "Switch Grenades" function, but <em>not</em> "Select Next Grenade" or "Select 
+                        Previous Grenade."</dd>
+                     <dt>context_primary</dt>
+                        <dd>The button that's currently mapped to Action.</dd>
+                     <dt>melee_attack</dt>
+                        <dd>The button that's currently mapped to meleeing.</dd>
+                     <dt>equipment</dt>
+                        <dd>The button that's currently mapped to Use Armor Ability.</dd>
+                     <dt>throw_grenade</dt>
+                        <dd>The button that's currently mapped to throwing a grenade.</dd>
+                     <dt>fire_primary</dt>
+                        <dd>The button that's currently mapped to Fire.</dd>
+                     <dt>crouch</dt>
+                        <dd>The button that's currently mapped to crouching.</dd>
+                     <dt>scope_zoom</dt>
+                        <dd>The button that's currently mapped to toggling your scope/zoom.</dd>
+                     <dt>night_vision</dt>
+                        <dd>The button that's currently mapped to Toggle Night Vision.</dd>
+                     <dt>fire_secondary</dt>
+                        <dd>The button that's currently mapped to Vehicle Function 1.</dd>
+                     <dt>fire_tertiary</dt>
+                        <dd>Unknown. This appears to always react to the B button; it doesn't correspond 
+                        to any of the controls that MCC allows players to rebind in custom control schemes, 
+                        and it doesn't differ between any of the built-in control schemes.</dd>
+                     <dt>vehicle_trick</dt>
+                        <dd>Either of the buttons mapped to Vehicle Function 2 and Vehicle Function 3.</dd>
+                  </dl>
+               </dd>
+</dl>
+<h2>Example</h2>
+<pre>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
+   global.number[0] = current_player.get_button_press_duration(jump)
+<span class="keyword">end</span></pre>
+<h2>Notes</h2>
+<ul>
+   <li><p>
+               This function will never return a value higher than 255 (equivalent to 4.25 seconds).
+            </p></li>
+</ul>
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

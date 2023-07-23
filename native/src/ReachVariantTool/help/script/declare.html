@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>Variable declarations | ReachVariantTool Documentation</title>
       <base href="../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -118,6 +119,13 @@
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
                   <li><a href="script/best-practices.html">Best practices</a></li>
+                  <li data-dont-default-collapse>
+                     <a>Advanced</a>
+                     <ul>
+                        <li><a href="script/inline.html">Inlined triggers</a></li>
+                        <li><a href="script/under-the-hood.html">Under the hood</a></li>
+                     </ul>
+                  </li>
                </ul>
             </li>
             <li>
@@ -130,6 +138,7 @@
                         <li><a href="script/api/ns_enums.html">enums</a></li>
                         <li><a href="script/api/ns_game.html">game</a></li>
                         <li><a href="script/api/ns_global.html">global</a></li>
+                        <li><a href="script/api/ns_temporaries.html">temporaries</a></li>
                      </ul>
                   </li>
                   <li data-dont-default-collapse>
@@ -155,7 +164,7 @@
                               <li><a href="script/api/incident.html">Incident</a></li>
                               <li><a href="script/api/object-type.html">Object Type</a></li>
                               <li><a href="script/api/player-set.html">Player Set</a></li>
-                              <li><a href="script/api/player-traits.html">Player Traits</a></li>
+                              <li><a href="script/api/traits.html">Player Traits</a></li>
                               <li><a href="script/api/sound.html">Sound</a></li>
                               <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
                               <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
@@ -180,12 +189,7 @@
          <h1>Variable declarations</h1>
       <p>
          Variable declarations allow you to specify a variable's networking priority and its 
-         initial value. They aren't required — you can use a variable straightaway, 
-         without declaring it — but because Megalo's default variable networking priority 
-         can't survive host migrations, you'll probably want to use them.
-      </p>
-      <p>
-         Variable declarations look like this:
+         initial value. They look like this:
       </p>
       <pre>
 <span class="keyword">declare</span> SOME_VARIABLE
@@ -205,21 +209,29 @@
          priority values are:
       </p>
       <dl>
-         <dt>default</dt>
-            <dd>The meaning of this value is unclear. Testing has established that a variable's 
-            value will be lost after a host migration if its network priority was the default.</dd>
          <dt>low</dt>
-            <dd>Testing has established that low-priority variables can survive a host migration.</dd>
+            <dd>Testing has established that low-priority variables can survive a host migration. 
+            If you don't specify a networking priority for a variable, this is used as the 
+            default.</dd>
          <dt>high</dt>
             <dd>Testing has established that high-priority variables can survive a host migration. 
             If you wish to display a player variable in the UI, it must be high-priority.</dd>
          <dt>local</dt>
-            <dd>Variables with this network priority aren't sent over the network at all.</dd>
+            <dd>Variables with this network priority aren't sent over the network at all. This 
+            is a good thing to use for temporary variables that are just used to do quick tasks, 
+            like computing a number to be stored elsewhere.</dd>
       </dl>
       <p>
          Declaring a variable multiple times generates a compiler warning if the declarations 
          don't conflict with each other or contain redundant information (e.g. multiple initial 
          values), or a compiler error otherwise.
+      </p>
+      
+      <h2>Temporary variables</h2>
+      <p>
+         Temporary variables do not need to be declared, and cannot be given an initial value or 
+         a networking priority. Attempting to declare them is a warning, unless you also specify 
+         an initial value or networking priority, in which case it's an error.
       </p>
    
       </main>

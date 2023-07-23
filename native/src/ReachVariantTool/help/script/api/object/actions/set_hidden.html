@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      
+      <title>object.set_hidden | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+      <script src="resources/head.js"></script>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/object.html">Object</a>
+               <ul>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Properties</a>
+                     <ul>
+                        <li><a href="script/api/object/properties/spawn_sequence.html">spawn_sequence</a></li>
+<li><a href="script/api/object/properties/team.html">team</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Accessors</a>
+                     <ul>
+                        <li><a href="script/api/object/accessors/health.html">health</a></li>
+<li><a href="script/api/object/accessors/max_health.html">max_health</a></li>
+<li><a href="script/api/object/accessors/max_shields.html">max_shields</a></li>
+<li><a href="script/api/object/accessors/shields.html">shields</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/object/conditions/has_forge_label.html">has_forge_label</a></li>
+<li><a href="script/api/object/conditions/is_in_use.html">is_in_use</a></li>
+<li><a href="script/api/object/conditions/is_of_type.html">is_of_type</a></li>
+<li><a href="script/api/object/conditions/is_out_of_bounds.html">is_out_of_bounds</a></li>
+<li><a href="script/api/object/conditions/shape_contains.html">shape_contains</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
+<li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
+<li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
+<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
+<li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
+<li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
+<li><a href="script/api/object/actions/place_at_me.html">create_object</a></li>
+<li><a href="script/api/object/actions/delete.html">delete</a></li>
+<li><a href="script/api/object/actions/detach.html">detach</a></li>
+<li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
+<li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
+<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
+<li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
+<li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
+<li><a href="script/api/object/actions/get_orientation.html">get_orientation</a></li>
+<li><a href="script/api/object/actions/get_speed.html">get_speed</a></li>
+<li><a href="script/api/object/actions/kill.html">kill</a></li>
+<li><a href="script/api/object/actions/place_at_me.html">place_at_me</a></li>
+<li><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></li>
+<li><a href="script/api/object/actions/push_upward.html">push_upward</a></li>
+<li><a href="script/api/object/actions/remove_weapon.html">remove_weapon</a></li>
+<li><a href="script/api/object/actions/set_shape.html">set_boundary</a></li>
+<li><a href="script/api/object/actions/set_device_actual_position.html">set_device_actual_position</a></li>
+<li><a href="script/api/object/actions/set_device_animation_position.html">set_device_animation_position</a></li>
+<li><a href="script/api/object/actions/set_device_position.html">set_device_position</a></li>
+<li><a href="script/api/object/actions/set_device_power.html">set_device_power</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_fireteam_respawn_filter</a></li>
+<li><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></li>
+<li><a href="script/api/object/actions/set_hidden.html">set_hidden</a></li>
+<li><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></li>
+<li><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></li>
+<li><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_permissions.html">set_respawn_filter</a></li>
+<li><a href="script/api/object/actions/set_scale.html">set_scale</a></li>
+<li><a href="script/api/object/actions/set_shape.html">set_shape</a></li>
+<li><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_spawn_location_fireteams</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_permissions.html">set_spawn_location_permissions</a></li>
+<li><a href="script/api/object/actions/set_waypoint_icon.html">set_waypoint_icon</a></li>
+<li><a href="script/api/object/actions/set_waypoint_priority.html">set_waypoint_priority</a></li>
+<li><a href="script/api/object/actions/set_waypoint_range.html">set_waypoint_range</a></li>
+<li><a href="script/api/object/actions/set_waypoint_text.html">set_waypoint_text</a></li>
+<li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
+<li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
+<li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
+<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <header><h1>object.set_hidden</h1></header>
+
+               <p>
+                  This function was added to the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i> 
+                  in mid-July 2023, being backported from <i>Halo 4</i>'s Megalo engine. Gametypes that 
+                  use this function will likely fail to load on Xbox 360 builds of <i>Halo: Reach</i> 
+                  (even when played via Xbox One backward compatibility).
+               </p>
+               <p>
+                  This function makes objects invisible.
+               </p>
+               <p>
+                  As of this writing (July 16, 2023), this function only works on host, and has the following side 
+                  effects:
+               </p>
+               <ul>
+                  <li>Hiding an object will also hide any other objects attached to it. This extends to weapon 
+                  pickup and vehicle occupancy (i.e. players are hidden while riding in a hidden vehicle).</li>
+                  <li>Attaching a hidden object to a non-hidden object may, in some cases, cease hiding the 
+                  object even after the former is detached. For example, if a player's biped is hidden and they 
+                  hop onto a turret, the player will cease to be hidden even after they hop off the turret.</li>
+                  <li>Player bipeds can be hidden, but their first-person geometry is not affected; players can 
+                  always see themselves in first-person.</li>
+                  <li>Hidden weapons, including weapons carried by hidden bipeds, don't make any sound when firing.</li>
+                  <li>Certain visual effects attached to a hidden object remain visible; this includes a Warthog's 
+                  headlights and rear antenna.</li>
+                  <li>Grenades, bullets, and melee attacks may stop colliding with hidden objects. Hidden objects — 
+                  and the players riding in them — may also cease to be affected by environmental hazards like
+                  explosive splash damage and Kill Balls. Kill boundaries can still destroy these objects.</li>
+               </ul>
+            
+<p>This function returns <a href="script/api/number.html">number</a>. Calling this function without storing its return value in a variable is an error.</p><h2>Arguments</h2>
+<dl>
+   <dt><a href="script/api/bool.html">should_hide</a></dt>
+      <dd>
+                  <p>
+                     Indicates whether the object should be hidden (true) or visible (false).
+                  </p>
+               </dd>
+</dl>
+<h2>Example</h2>
+<pre>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"hide</span>" <span class="keyword">do</span>
+   current_object.set_hidden(true)
+<span class="keyword">end</span></pre>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

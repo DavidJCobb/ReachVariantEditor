@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>team.score | ReachVariantTool Documentation</title>
       <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -47,6 +48,8 @@
                         <li><a href="script/api/team/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
 <li><a href="script/api/team/actions/set_co_op_spawning.html">set_co_op_spawning</a></li>
 <li><a href="script/api/team/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></li>
+<li><a href="script/api/team/actions/set_respawn_vehicle.html">set_respawn_vehicle</a></li>
+<li><a href="script/api/team/actions/set_vehicle_spawning_enabled.html">set_vehicle_spawning_enabled</a></li>
 
                      </ul>
                   </li>
@@ -66,6 +69,9 @@
                Suppose a match has two teams, Red and Blue, and no one (players or teams) 
                has any points. If you set each team's score to 1, and then set a Red Team 
                player's score to 1, then Red Team will be in the lead.
+            </p>
+            <p>
+               Team scores cannot hold values outside the range [-32,768, 32,767].
             </p>
          
 <h2>Example</h2>

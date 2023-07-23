@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>timer.set_rate | ReachVariantTool Documentation</title>
       <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -87,8 +88,8 @@
 <span class="comment">-- start of a round, by "sending an incident" a few seconds after </span>
 <span class="comment">-- script processing begins.</span>
 <span class="comment">--</span>
-<span class="keyword">alias</span> announced_start = player.number[0]
-<span class="keyword">alias</span> announced_timer = player.timer[0]
+<span class="keyword">alias</span> announced_start = <span class="keyword">allocate</span> player.number
+<span class="keyword">alias</span> announced_timer = <span class="keyword">allocate</span> player.timer
 <span class="keyword">declare</span> player.announced_timer = 5
 <span class="comment">--</span>
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>

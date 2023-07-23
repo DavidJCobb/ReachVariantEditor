@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>Variant ID | ReachVariantTool Documentation</title>
       <base href="../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -118,6 +119,13 @@
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
                   <li><a href="script/best-practices.html">Best practices</a></li>
+                  <li data-dont-default-collapse>
+                     <a>Advanced</a>
+                     <ul>
+                        <li><a href="script/inline.html">Inlined triggers</a></li>
+                        <li><a href="script/under-the-hood.html">Under the hood</a></li>
+                     </ul>
+                  </li>
                </ul>
             </li>
             <li>
@@ -130,6 +138,7 @@
                         <li><a href="script/api/ns_enums.html">enums</a></li>
                         <li><a href="script/api/ns_game.html">game</a></li>
                         <li><a href="script/api/ns_global.html">global</a></li>
+                        <li><a href="script/api/ns_temporaries.html">temporaries</a></li>
                      </ul>
                   </li>
                   <li data-dont-default-collapse>
@@ -155,7 +164,7 @@
                               <li><a href="script/api/incident.html">Incident</a></li>
                               <li><a href="script/api/object-type.html">Object Type</a></li>
                               <li><a href="script/api/player-set.html">Player Set</a></li>
-                              <li><a href="script/api/player-traits.html">Player Traits</a></li>
+                              <li><a href="script/api/traits.html">Player Traits</a></li>
                               <li><a href="script/api/sound.html">Sound</a></li>
                               <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
                               <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
@@ -266,6 +275,44 @@
             <dd>A variant name for standard Warthogs only. When applied to a standard Warthog, produces a Troop Transport Warthog instead.</dd>
          <dt>rocket</dt>
             <dd>A variant name for standard Warthogs only. When applied to a standard Warthog, produces a Rocket Warthog instead.</dd>
+         <dt>none_variant</dt>
+            <dd>A variant name for standard Warthogs only. When applied to a standard Warthog, produces a Warthog with no turret.</dd>
+         <dt>destroyed</dt>
+            <dd>Produces a destroyed vehicle. Support varies across vehicle types, and in some cases, the "destroyed" effect may only be cosmetic (i.e. the vehicle may be fully operational, and it may be possible to "destroy" it for real).</dd>
+         <dt>damaged</dt>
+            <dd>Produces a damaged vehicle. Support varies across vehicle types.</dd>
+         <dt>no_sideguns</dt>
+            <dd>A variant name for Falcons; produces a Falcon with no side chainguns.</dd>
+         <dt>grenade</dt>
+            <dd>A variant name for Falcons; produces a Falcon with grenade launchers instead of side chainguns.</dd>
+         <dt>multiplayer</dt>
+            <dd>A variant name for Falcons; produces a Falcon with no main turret, and no extra seats besides the side chainguns.</dd>
+         <dt>no_side_turrets</dt>
+            <dd>A variant name for Phantoms; produces a Phantom with no door guns.</dd>
+         <dt>no_turrets</dt>
+            <dd>A variant name for Phantoms; produces a Phantom with no door guns or main turret.</dd>
+         <dt>no_chin_gun</dt>
+            <dd>A variant name for Phantoms; produces a Phantom with no main turret.</dd>
+         <dt>bed_long</dt>
+            <dd>A variant name for civilian semi trucks. When applied to one, produces a semi truck with a long truck bed.</dd>
+         <dt>bed_long_container</dt>
+            <dd>A variant name for civilian semi trucks. When applied to one, produces a semi truck with a long trailer.</dd>
+         <dt>bed_long_tanker</dt>
+            <dd>A variant name for civilian semi trucks. When applied to one, produces a semi truck with a long tanker.</dd>
+         <dt>bed_small</dt>
+            <dd>A variant name for civilian semi trucks. When applied to one, produces a semi truck with a small truck bed.</dd>
+         <dt>bed_small_container</dt>
+            <dd>A variant name for civilian semi trucks. When applied to one, produces a semi truck with a small trailer.</dd>
+         <dt>bed_small_tanker</dt>
+            <dd>A variant name for civilian semi trucks. When applied to one, produces a semi truck with a small tanker.</dd>
+         <dt>plasma_cannon</dt>
+            <dd>A variant name for Shade turrets; produces a turret that fires plasma rounds (the default).</dd>
+         <dt>flak_cannon</dt>
+            <dd>A variant name for Shade turrets; produces a turret that fires fuel rods.</dd>
+         <dt>auto</dt>
+            <dd>A variant name for Shade turrets; produces a turret with the seat enclosed in a shielded barrier.</dd>
+         <dt>noblade</dt>
+            <dd>A variant name for Energy Swords; produces a sword with no visible blade. The sword otherwise functions as normal.</dd>
       </dl>
       
       <h2>Unknown values</h2>

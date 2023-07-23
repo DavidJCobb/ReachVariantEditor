@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>Player | ReachVariantTool Documentation</title>
       <base href="../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -118,6 +119,13 @@
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
                   <li><a href="script/best-practices.html">Best practices</a></li>
+                  <li data-dont-default-collapse>
+                     <a>Advanced</a>
+                     <ul>
+                        <li><a href="script/inline.html">Inlined triggers</a></li>
+                        <li><a href="script/under-the-hood.html">Under the hood</a></li>
+                     </ul>
+                  </li>
                </ul>
             </li>
             <li>
@@ -130,6 +138,7 @@
                         <li><a href="script/api/ns_enums.html">enums</a></li>
                         <li><a href="script/api/ns_game.html">game</a></li>
                         <li><a href="script/api/ns_global.html">global</a></li>
+                        <li><a href="script/api/ns_temporaries.html">temporaries</a></li>
                      </ul>
                   </li>
                   <li data-dont-default-collapse>
@@ -155,7 +164,7 @@
                               <li><a href="script/api/incident.html">Incident</a></li>
                               <li><a href="script/api/object-type.html">Object Type</a></li>
                               <li><a href="script/api/player-set.html">Player Set</a></li>
-                              <li><a href="script/api/player-traits.html">Player Traits</a></li>
+                              <li><a href="script/api/traits.html">Player Traits</a></li>
                               <li><a href="script/api/sound.html">Sound</a></li>
                               <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
                               <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
@@ -194,6 +203,8 @@
 <h2>Properties</h2>
 <dl><dt><a href="script/api/player/properties/biped.html">biped</a></dt>
    <dd><p>The player's current biped.</p></dd>
+<dt><a href="script/api/player/properties/money.html">money</a></dt>
+   <dd><p>The player's money, to spend on requisitings as part of an unimplemented gameplay system.</p></dd>
 <dt><a href="script/api/player/properties/rating.html">rating</a></dt>
    <dd><p>The player's Arena rating.</p></dd>
 <dt><a href="script/api/player/properties/score.html">score</a></dt>
@@ -202,8 +213,6 @@
    <dd><p>The value of a scripted Post-Game Carnage Report stat for this player.</p></dd>
 <dt><a href="script/api/player/properties/team.html">team</a></dt>
    <dd><p>The player's owner team.</p></dd>
-<dt><a href="script/api/player/properties/unknown_09.html">unknown_09</a></dt>
-   <dd><p>Unknown. Possibly the player's requisition money.</p></dd>
 </dl>
 
 <h2>Accessors</h2>
@@ -237,6 +246,9 @@
    <dd><p>Apply a set of player traits to a player for the current tick.</p></dd>
 <dt><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></dt>
    <dd><p>Force a player into a vehicle if any seat is available.</p></dd>
+<dt><a href="script/api/player/actions/get_button_press_duration.html">get_button_press_duration <span class="a-k-a">a.k.a.</span> get_button_time</a></dt>
+   <dd><p>MCC-exclusive: Detect whether a player is holding a given button down. Intended for 
+            debugging purposes only.</p></dd>
 <dt><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></dt>
    <dd><p>Identify the object that the player is aiming at, if that object 
             is changing the player's reticle color.</p></dd>
@@ -259,6 +271,12 @@
    <dd><p>Sets a player's current fireteam index.</p></dd>
 <dt><a href="script/api/player/actions/set_loadout_palette.html">set_loadout_palette</a></dt>
    <dd><p>Sets which loadout palette a player can select loadouts from.</p></dd>
+<dt><a href="script/api/player/actions/set_objective_allegiance_icon.html">set_objective_allegiance_icon <span class="a-k-a">a.k.a.</span> set_round_card_icon</a></dt>
+   <dd><p>Change the round card's icon.</p></dd>
+<dt><a href="script/api/player/actions/set_objective_allegiance_name.html">set_objective_allegiance_name <span class="a-k-a">a.k.a.</span> set_round_card_text</a></dt>
+   <dd><p>Change the round card's icon caption.</p></dd>
+<dt><a href="script/api/player/actions/set_objective_text.html">set_objective_text <span class="a-k-a">a.k.a.</span> set_round_card_title</a></dt>
+   <dd><p>Change the round card's description text.</p></dd>
 <dt><a href="script/api/player/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></dt>
    <dd><p>This function appears to set a player's default respawn object, when 
             co-op spawning is enabled.</p></dd>
@@ -266,12 +284,12 @@
    <dd><p>A development leftover related to a scrapped Requisition system.</p></dd>
 <dt><a href="script/api/player/actions/set_requisition_palette.html">set_requisition_palette</a></dt>
    <dd><p>A development leftover related to a scrapped Requisition system.</p></dd>
-<dt><a href="script/api/player/actions/set_round_card_icon.html">set_round_card_icon</a></dt>
-   <dd><p>Change the round card's icon.</p></dd>
-<dt><a href="script/api/player/actions/set_round_card_text.html">set_round_card_text</a></dt>
-   <dd><p>Change the round card's icon caption.</p></dd>
-<dt><a href="script/api/player/actions/set_round_card_title.html">set_round_card_title</a></dt>
-   <dd><p>Change the round card's description text.</p></dd>
+<dt><a href="script/api/player/actions/set_respawn_vehicle.html">set_respawn_vehicle</a></dt>
+   <dd><p>MCC-exclusive: Automatically spawn players inside of vehicles, without having to manually 
+            create vehicles and force players into them.</p></dd>
+<dt><a href="script/api/player/actions/set_vehicle_spawning_enabled.html">set_vehicle_spawning_enabled</a></dt>
+   <dd><p>MCC-exclusive: Although intended to let you control whether players spawn in vehicles 
+            or not, this function doesn't appear to actually do anything.</p></dd>
 <dt><a href="script/api/player/actions/try_get_armor_ability.html">try_get_armor_ability <span class="a-k-a">a.k.a.</span> get_armor_ability</a></dt>
    <dd><p>Identify the player's current Armor Ability.</p></dd>
 <dt><a href="script/api/player/actions/try_get_death_damage_mod.html">try_get_death_damage_mod <span class="a-k-a">a.k.a.</span> get_death_damage_mod</a></dt>

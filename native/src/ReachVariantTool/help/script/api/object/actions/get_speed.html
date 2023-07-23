@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>object.get_speed | ReachVariantTool Documentation</title>
       <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -57,6 +58,7 @@
 <li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
+<li><a href="script/api/object/actions/place_at_me.html">create_object</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
@@ -72,14 +74,18 @@
 <li><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></li>
 <li><a href="script/api/object/actions/push_upward.html">push_upward</a></li>
 <li><a href="script/api/object/actions/remove_weapon.html">remove_weapon</a></li>
+<li><a href="script/api/object/actions/set_shape.html">set_boundary</a></li>
 <li><a href="script/api/object/actions/set_device_actual_position.html">set_device_actual_position</a></li>
 <li><a href="script/api/object/actions/set_device_animation_position.html">set_device_animation_position</a></li>
 <li><a href="script/api/object/actions/set_device_position.html">set_device_position</a></li>
 <li><a href="script/api/object/actions/set_device_power.html">set_device_power</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_fireteam_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></li>
+<li><a href="script/api/object/actions/set_hidden.html">set_hidden</a></li>
 <li><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></li>
 <li><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></li>
 <li><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_permissions.html">set_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_scale.html">set_scale</a></li>
 <li><a href="script/api/object/actions/set_shape.html">set_shape</a></li>
 <li><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></li>
@@ -104,8 +110,8 @@
          <header><h1>object.get_speed</h1></header>
 
                <p>
-                  This function returns an object's speed, apparently measured in feet 
-                  per second. Race multiplies the value by 109 and then divides by 100 
+                  This function returns an object's speed, apparently measured in feet
+                  per second. Race multiplies the value by 109 and then divides by 100
                   to convert it to kilometers per hour.
                </p>
             

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      
+      <title>team.set_vehicle_spawning_enabled | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+      <script src="resources/head.js"></script>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/team.html">Team</a>
+               <ul>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Properties</a>
+                     <ul>
+                        <li><a href="script/api/team/properties/score.html">score</a></li>
+<li><a href="script/api/team/properties/script_stat.html">script_stat[<var>n</var>]</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Accessors</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/team/conditions/has_alliance_status.html">has_alliance_status</a></li>
+<li><a href="script/api/team/conditions/has_any_players.html">has_any_players</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/team/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
+<li><a href="script/api/team/actions/set_co_op_spawning.html">set_co_op_spawning</a></li>
+<li><a href="script/api/team/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></li>
+<li><a href="script/api/team/actions/set_respawn_vehicle.html">set_respawn_vehicle</a></li>
+<li><a href="script/api/team/actions/set_vehicle_spawning_enabled.html">set_vehicle_spawning_enabled</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <header><h1>team.set_vehicle_spawning_enabled</h1></header>
+
+               <p>
+                  This function was added to the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i> 
+                  in mid-July 2023, being backported from <i>Halo 4</i>'s Megalo engine. Gametypes that 
+                  use this function will likely fail to load on Xbox 360 builds of <i>Halo: Reach</i> 
+                  (even when played via Xbox One backward compatibility).
+               </p>
+               <p>
+                  This function was intended to let you control whether players on a given team spawn in a 
+                  vehicle or not; it would allow you to set a spawn vehicle via 
+                  <a href="script/api/player/actions/set_respawn_vehicle.html">set_respawn_vehicle</a>, 
+                  without having to set the spawn vehicle type to none in order to disable vehicle spawning.
+               </p>
+               <p>
+                  In tests, this function doesn't actually do anything. Disassembly of haloreach.dll 
+                  shows that it is, as of this writing, a no-op: it contains no code and has no effect.
+               </p>
+            
+<h2>Arguments</h2>
+<dl>
+   <dt><a href="script/api/bool.html">enable</a></dt>
+      <dd>
+                  <p>
+                     Control whether players on this team respawn in a vehicle (true) or not (false).
+                  </p>
+               </dd>
+</dl>
+<h2>Example</h2>
+<pre>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">team</span> <span class="keyword">do</span>
+   current_team.set_respawn_vehicle(warthog)
+   current_team.set_vehicle_spawning_enabled(false)
+<span class="keyword">end</span></pre>
+<h2>See also</h2>
+<ul>
+   <li><a href="script/api/player/actions/set_respawn_vehicle.html">player.set_respawn_vehicle</a></li>
+   <li><a href="script/api/player/actions/set_vehicle_spawning_enabled.html">player.set_vehicle_spawning_enabled</a></li>
+   <li><a href="script/api/team/actions/set_respawn_vehicle.html">team.set_respawn_vehicle</a></li>
+</ul>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

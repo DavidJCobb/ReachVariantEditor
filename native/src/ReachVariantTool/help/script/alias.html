@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>Aliases | ReachVariantTool Documentation</title>
       <base href="../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -118,6 +119,13 @@
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
                   <li><a href="script/best-practices.html">Best practices</a></li>
+                  <li data-dont-default-collapse>
+                     <a>Advanced</a>
+                     <ul>
+                        <li><a href="script/inline.html">Inlined triggers</a></li>
+                        <li><a href="script/under-the-hood.html">Under the hood</a></li>
+                     </ul>
+                  </li>
                </ul>
             </li>
             <li>
@@ -130,6 +138,7 @@
                         <li><a href="script/api/ns_enums.html">enums</a></li>
                         <li><a href="script/api/ns_game.html">game</a></li>
                         <li><a href="script/api/ns_global.html">global</a></li>
+                        <li><a href="script/api/ns_temporaries.html">temporaries</a></li>
                      </ul>
                   </li>
                   <li data-dont-default-collapse>
@@ -155,7 +164,7 @@
                               <li><a href="script/api/incident.html">Incident</a></li>
                               <li><a href="script/api/object-type.html">Object Type</a></li>
                               <li><a href="script/api/player-set.html">Player Set</a></li>
-                              <li><a href="script/api/player-traits.html">Player Traits</a></li>
+                              <li><a href="script/api/traits.html">Player Traits</a></li>
                               <li><a href="script/api/sound.html">Sound</a></li>
                               <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
                               <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
@@ -194,34 +203,6 @@
    <span class="keyword">end</span>
 <span class="keyword">end</span></pre>
       <p>
-         Aliases can be "absolute" or "relative." An absolute alias refers to an integer 
-         constant or to a global value, while a relative alias refers to a nested variable.
-      </p>
-      <p>
-         Absolute aliases with the same name will "shadow" each other: aliases defined 
-         later will prevent access to aliases defined earlier. Relative aliases with the 
-         same name will shadow each other if they belong to the same type. Aliases are 
-         block-scoped.
-      </p>
-      <pre>
-<span class="comment">-- Let's mark a variable for temporary use, with an alias.</span>
-<span class="keyword">alias</span> temp_int_00 = global.number[0]
-
-<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
-   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span>
-      <span class="keyword">alias</span> death_type = temp_int_00
-      
-      death_type = current_player.get_death_damage_type()
-      <span class="keyword">if</span> death_type == enums.damage_reporting_type.dmr <span class="keyword">then</span>
-         <span class="comment">--</span>
-         <span class="comment">-- (current_player) was killed with a DMR.</span>
-         <span class="comment">--</span>
-      <span class="keyword">end</span>
-   <span class="keyword">end</span>
-<span class="keyword">end</span>
-
-<span class="comment">-- The "death_type" alias isn't available here, so it doesn't make a mess.</span></pre>
-      <p>
          You can also alias certain values that are specific to argument types, such as 
          object types:
       </p>
@@ -239,6 +220,218 @@
          created = 1
       <span class="keyword">end</span>
    <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+      
+      <h2>Features of aliases</h2>
+      
+      <h3>Absolute or relative</h3>
+      <p>
+         Aliases can be "absolute" or "relative." An absolute alias refers to an integer 
+         constant or to a global value, while a relative alias refers to a nested variable.
+      </p>
+      <pre>
+<span class="keyword">alias</span> absolute_constant = 5
+
+<span class="keyword">alias</span> absolute_variable = global.number[0]
+
+<span class="keyword">if</span> absolute_variable == 1 <span class="keyword">then</span>
+   <span class="comment">-- ...</span>
+<span class="keyword">end</span>
+
+<span class="comment">--</span>
+<span class="comment">-- Relative alias:</span>
+<span class="comment">--</span>
+
+<span class="keyword">alias</span> relative_variable = player.number[0]
+
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.relative_variable == 1 <span class="keyword">then</span>
+      <span class="comment">-- ...</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+      <p>
+         In that code example, we define <var>relative_variable</var> as an alias that 
+         can be accessed on all player-type variables; the alias refers to any given 
+         player's nested <code>number[0]</code> variable.
+      </p>
+      
+      <h3>Scoping</h3>
+      <p>
+         Aliases are <dfn>block-scoped</dfn>. This means that they only exist inside of 
+         the block of code they were defined in; they <dfn>go out of scope</dfn> — 
+         they stop existing — past the end of that block.
+      </p>
+      <pre>
+<span class="comment">-- Let's mark a variable for temporary use, with an alias.</span>
+<span class="keyword">alias</span> temporary_number_variable = global.number[0]
+
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span>
+      <span class="keyword">alias</span> death_type = temporary_number_variable
+      
+      death_type = current_player.get_death_damage_type()
+      <span class="keyword">if</span> death_type == enums.damage_reporting_type.dmr <span class="keyword">then</span>
+         <span class="comment">--</span>
+         <span class="comment">-- (current_player) was killed with a DMR.</span>
+         <span class="comment">--</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- The "death_type" alias isn't available here, so it doesn't make a mess.</span></pre>
+      <p>
+         Aliases that are defined outside of all blocks will never go out of scope; they 
+         are always <dfn>in-scope</dfn> — always available from the current scope.
+      </p>
+      
+      <h3>Shadowing</h3>
+      <p>
+         Aliases <dfn>shadow</dfn> each other. That is: if you define multiple aliases 
+         with the same name, the most recently defined one (i.e. the one furthest down 
+         in the code) will prevent access to the others.
+      </p>
+      <pre>
+global.number[0] = 3
+
+<span class="keyword">alias</span> example_alias = 1
+<span class="keyword">alias</span> example_alias = 2
+<span class="keyword">alias</span> example_alias = 3 <span class="comment">-- This alias shadows the others...</span>
+
+<span class="keyword">if</span> global.number[0] == example_alias <span class="keyword">then</span>
+   <span class="comment">-- ...so code in this block will run.</span>
+<span class="keyword">end</span></pre>
+      <p>
+         Shadowing is affected by scoping:
+      </p>
+      <pre>
+<span class="keyword">alias</span> example = 1
+
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
+   <span class="keyword">alias</span> example = 5 <span class="comment">-- Shadows the other alias.</span>
+   
+   current_player.number[0] = example
+<span class="keyword">end</span>
+<span class="comment">-- The "shadowing" alias isn't in-scope anymore. The alias that was once shadowed </span>
+<span class="comment">-- is now available: `example` is now `1`.</span></pre>
+      
+      <h2>Allocation to aliases</h2>
+      <p>
+         Variables can be <dfn>allocated</dfn> to aliases dynamically. That is: you can 
+         ask for a variable of a given type, without having to manually specify the 
+         variable's index.
+      </p>
+      <pre>
+<span class="keyword">alias</span> absolute_alias = <span class="keyword">allocate</span> global.number
+
+<span class="keyword">alias</span> relative_alias = <span class="keyword">allocate</span> player.number</pre>
+      <p>
+         For these alias declarations, ReachVariantTool will look for any variable of 
+         the requested type that is not already pointed to by an alias that is in-scope, 
+         and use the first such variable that it finds. If no such variables remain (i.e. 
+         every variable of the type you've asked for is already aliased), then a compiler 
+         error will occur.
+      </p>
+      <pre>
+<span class="keyword">alias</span> some_alias = global.number[0]
+
+<span class="comment">-- The `global.number[0]` variable is referred to by another alias, so while </span>
+<span class="comment">-- there's no guarantee that `example` will refer to any specific global.number </span>
+<span class="comment">-- variable, there *is* a guarantee that it *won't* refer to `global.number[0]`.</span>
+<span class="keyword">alias</span> example  = <span class="keyword">allocate</span> global.number</pre>
+      <p>
+         You can also allocate <a href="script/api/ns_temporaries.html">temporary variables</a> using 
+         a special syntax:
+      </p>
+      <pre>
+<span class="keyword">alias</span> my_temporary_variable = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number</pre>
+      
+      <h3>Collision warnings</h3>
+      <p>
+         If you accidentally point an alias at a variable that was allocated to another 
+         alias, the compiler will warn you.
+      </p>
+      <pre>
+<span class="comment">-- Assume this is the only code in the entire script.</span>
+
+<span class="keyword">alias</span> example_allocated = <span class="keyword">allocate</span> global.number
+<span class="comment">-- Because no other global.number variables have been aliased, this will be </span>
+<span class="comment">-- the global.number[0] variable.</span>
+
+<span class="keyword">alias</span> example_explicit = global.number[0]
+<span class="comment">-- This will generate a warning. The compiler will tell you that the other </span>
+<span class="comment">-- alias, `example_allocated`, just happened to end up using the variable </span>
+<span class="comment">-- that you're now also assigning to this alias.</span>
+
+<span class="keyword">alias</span> example_borrowed = example_allocated
+<span class="comment">-- This does not generate a warning. You clearly intend for both of these </span>
+<span class="comment">-- aliases to point to the same variable, because you're making the one </span>
+<span class="comment">-- alias point to the other alias.</span></pre>
+      <p>
+         The reason this warning exists is because if you run into this situation, it 
+         likely won't be on purpose. While it <em>is</em> possible to predict which 
+         variable will be allocated to any given alias, the whole point of allocating 
+         variables to aliases (as opposed to choosing variables manually) is that you 
+         shouldn't actually have to care what variable ends up in that alias.
+      </p>
+      <p>
+         If you get this warning, you would generally want to either allocate variables 
+         to aliases after all manually-set aliases, or change the manually-set alias to 
+         one that allocates a variable.
+      </p>
+      
+      <h3>Technical limitation: user-defined functions</h3>
+      <p>
+         Due to technical limitations, you are not allowed to allocate variables to aliases 
+         while inside of a user-defined function. Trying to do so will trigger a compiler 
+         error.
+      </p>
+      <pre>
+<span class="keyword">function</span> my_function()
+   
+   <span class="comment">-- This is an error:</span>
+   <span class="keyword">alias</span> temporary_variable = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
+   
+<span class="keyword">end</span></pre>
+      <p>
+         The reason for this is that ReachVariantTool handles variables as it reads your 
+         code; it never backtracks, so it can't fix them up based on anything it sees 
+         later in your script. This means that in situations like the following, there's 
+         no way to prevent a function definition's allocated variables from <dfn>clobbering</dfn> 
+         the variables of its caller:
+      </p>
+      <pre>
+<span class="keyword">function</span> my_function()
+   <span class="comment">-- Let's pretend, for a second, that ReachVariantTool allows this:</span>
+   <span class="keyword">alias</span> temporary_variable = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
+   
+   temporary_variable = 5
+<span class="keyword">end</span>
+
+<span class="comment">-- The `temporary_variable` alias in `my_function()` is now out of scope. The </span>
+<span class="comment">-- compiler doesn't know it exists anymore. This means that the compiler thinks </span>
+<span class="comment">-- that variable is safe to use...</span>
+
+<span class="comment">-- ... so that variable gets allocated to this alias here.</span>
+<span class="keyword">alias</span> important_variable = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
+
+important_variable = 5
+
+<span class="comment">-- So code that comes later in the file will try to use a variable that's already </span>
+<span class="comment">-- taken by code that comes earlier in the file yet executes later during play. </span>
+<span class="comment">-- Since the compiler always handles variables and aliases going downward, it </span>
+<span class="comment">-- can't backtrack and fix this.</span>
+my_function()
+
+<span class="keyword">if</span> important_variable != 5 <span class="keyword">then</span>
+   crash_the_game()
+<span class="keyword">end</span></pre>
+      <p>
+         The workaround is to pre-allocate your aliases just outside of the function:
+      </p>
+      <pre>
+<span class="keyword">alias</span> function_local_variable = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
+<span class="keyword">function</span> my_function()
+   function_local_variable = 5
 <span class="keyword">end</span></pre>
    
       </main>
