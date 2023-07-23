@@ -178,15 +178,15 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_progress_bar", "", {2, 1}, 0) // TODO: should we make this an intrinsic instead? i.e. object_var.timer_var.set_progress_bar_visibility(who) ?
       ),
       ActionFunction( // 16
-         "CHUD Message",
+         "Kill Feed Message",
          "",
-         "For %1, play sound %2 and display message: %3.",
+         "For %1, play sound %2 and print a message to the kill feed: %3.",
          {
             OpcodeArgBase("who",   OpcodeArgValuePlayerOrGroup::typeinfo),
             OpcodeArgBase("sound", OpcodeArgValueSound::typeinfo),
-            OpcodeArgBase("text",  OpcodeArgValueStringTokens2::typeinfo),
+            OpcodeArgBase("text",  OpcodeArgValueFormatString::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("show_message_to", "", {0, 1, 2}, OpcodeFuncToScriptMapping::game_namespace)
+         OpcodeFuncToScriptMapping::make_function("show_message_to", "hud_post_message", {0, 1, 2}, OpcodeFuncToScriptMapping::game_namespace)
       ),
       ActionFunction( // 17
          "Set Timer Rate",
@@ -203,7 +203,7 @@ namespace Megalo {
          "Presumably, if this were run in a debug build of Halo: Reach, it'd write a message to some readout or log file.",
          "Log a message if run in a debug build of Halo: Reach: %1.",
          {
-            OpcodeArgBase("text", OpcodeArgValueStringTokens2::typeinfo),
+            OpcodeArgBase("text", OpcodeArgValueFormatString::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("debug_print", "", {0})
       ),
@@ -475,7 +475,7 @@ namespace Megalo {
          "Set text for %1 to: %2.",
          {
             OpcodeArgBase("widget", OpcodeArgValueWidget::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
+            OpcodeArgBase("text",   OpcodeArgValueFormatStringPersistent::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_text", "", {1}, 0)
       ),
@@ -485,7 +485,7 @@ namespace Megalo {
          "Set text for %1 to: %2.",
          {
             OpcodeArgBase("widget", OpcodeArgValueWidget::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
+            OpcodeArgBase("text",   OpcodeArgValueFormatStringPersistent::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_value_text", "", {1}, 0)
       ),
@@ -547,7 +547,7 @@ namespace Megalo {
          "Set %1's waypoint text to message: %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
+            OpcodeArgBase("text",   OpcodeArgValueFormatStringPersistent::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_waypoint_text", "", {1}, 0)
       ),
@@ -577,7 +577,7 @@ namespace Megalo {
          "Set the objective title for %1 to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
+            OpcodeArgBase("text",   OpcodeArgValueFormatStringPersistent::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_objective_text", "set_round_card_title", {1}, 0)
       ),
@@ -587,7 +587,7 @@ namespace Megalo {
          "Set the objective description for %1 to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
+            OpcodeArgBase("text",   OpcodeArgValueFormatStringPersistent::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_objective_allegiance_name", "set_round_card_text", {1}, 0)
       ),
@@ -841,7 +841,7 @@ namespace Megalo {
          "Insert a marker into the saved Film of this match, with offset %1 and label: %2.",
          {
             OpcodeArgBase("offset", OpcodeArgValueScalar::typeinfo),
-            OpcodeArgBase("label",  OpcodeArgValueStringTokens2::typeinfo),
+            OpcodeArgBase("label",  OpcodeArgValueFormatString::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("insert_theater_film_marker", "saved_film_insert_marker", {0, 1})
       ),
@@ -1041,9 +1041,9 @@ namespace Megalo {
          "[MCC-only; backported from Halo 4.] Calls a HaloScript function that the map has made available for use by Megalo. This appears to be intended mainly for *.MAP mod authors who are creating map-and-Megalo combo mods.",
          "Invoke a HaloScript function: %1.",
          {
-            OpcodeArgBase("function_id", OpcodeArgValueHaloscriptFunctionID::typeinfo),
+            OpcodeArgBase("function_id", OpcodeArgValueVariantStringID::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("call_haloscript_function", "", {0}, OpcodeFuncToScriptMapping::game_namespace)
+         OpcodeFuncToScriptMapping::make_function("hs_function_call", "", {0}, OpcodeFuncToScriptMapping::game_namespace)
       ),
       ActionFunction( // 101
          "Get Button Press Duration",

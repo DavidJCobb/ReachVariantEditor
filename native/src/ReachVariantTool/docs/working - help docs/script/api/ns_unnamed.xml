@@ -237,7 +237,7 @@
       <actions>
          <method name="debug_print" id="18">
             <args>
-               <arg name="text"  type="format-string">The text to print.</arg>
+               <arg name="text" type="format-string">The text to print. This is a <a href="script/api/format-string.html#persistent">non-persistent</a> format string.</arg>
             </args>
             <blurb>A non-functional debugging tool. In Halo: Reach's debug builds, 
             this probably writes a message to some log file.</blurb>
@@ -375,7 +375,9 @@
          <method name="insert_theater_film_marker" name2="saved_film_insert_marker" id="81">
             <args>
                <arg name="offset" type="number">Unknown.</arg>
-               <arg name="label" type="format-string">Unknown.</arg>
+               <arg name="label" type="format-string">
+                  The exact purpose of this argument is unknown. It is a <a href="script/api/format-string.html#persistent">non-persistent</a> format string.
+               </arg>
             </args>
             <blurb>Unknown.</blurb>
          </method>

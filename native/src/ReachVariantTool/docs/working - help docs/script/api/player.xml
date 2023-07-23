@@ -628,7 +628,9 @@
          </method>
          <method name="set_objective_text" name2="set_round_card_title" id="56">
             <args>
-               <arg name="text" type="format-string" />
+               <arg name="text" type="format-string">
+                  The description text to display. This is a <a href="script/api/format-string.html#persistent">persistent</a> format string.
+               </arg>
             </args>
             <blurb>Change the round card's description text.</blurb>
             <description>
@@ -680,7 +682,9 @@
          </method>
          <method name="set_objective_allegiance_name" name2="set_round_card_text" id="57">
             <args>
-               <arg name="text" type="format-string" />
+               <arg name="text" type="format-string">
+                  The icon caption text to display. This is a <a href="script/api/format-string.html#persistent">persistent</a> format string.
+               </arg>
             </args>
             <blurb>Change the round card's icon caption.</blurb>
             <description>

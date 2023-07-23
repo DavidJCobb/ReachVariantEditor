@@ -37,7 +37,7 @@ namespace Megalo {
          void clear();
    };
 
-   class OpcodeArgValueStringTokens2 : public OpcodeArgValue {
+   class OpcodeArgValueFormatString : public OpcodeArgValue {
       megalo_opcode_arg_value_make_create_override;
       //
       // An opcode argument which consists of a format string and zero or more tokens to 
@@ -48,13 +48,18 @@ namespace Megalo {
       //
       public:
          static OpcodeArgTypeinfo typeinfo;
-         static constexpr int max_token_count = 2;
-         //
+         static constexpr const size_t max_token_count = 2;
+         
+      protected:
+         OpcodeArgValueFormatString(bool p) : persistent(p) {}
       public:
+         OpcodeArgValueFormatString() : persistent(false) {}
+
+         const bool persistent;
          MegaloStringRef string;
          cobb::bitnumber<cobb::bitcount(max_token_count), uint8_t> tokenCount = 0;
          OpcodeStringToken tokens[max_token_count];
-         //
+         
          virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
@@ -62,5 +67,13 @@ namespace Megalo {
          virtual arg_compile_result compile(Compiler&, cobb::string_scanner&,    uint8_t part) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
          virtual void copy(const OpcodeArgValue*) noexcept override;
+   };
+
+   class OpcodeArgValueFormatStringPersistent : public OpcodeArgValueFormatString {
+      megalo_opcode_arg_value_make_create_override;
+      public:
+         static OpcodeArgTypeinfo typeinfo;
+
+         OpcodeArgValueFormatStringPersistent() : OpcodeArgValueFormatString(true) {}
    };
 }

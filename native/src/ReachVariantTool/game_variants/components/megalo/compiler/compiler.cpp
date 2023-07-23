@@ -3131,11 +3131,23 @@ namespace Megalo {
                //
                // TODO: Should we add invalid aliases to `aliases_in_scope` so that references to them don't throw 
                // spurious errors? If so, we should create a dummy alias here with the correct type, and then fall 
-               // through to the branches below that'd add it. For now, we early-return.
+               // through to the branches below that'd add it. For now, we early-return. (Would require an alternate 
+               // handling for variables that allows us to ID the type even if the reference is invalid.)
                //
                return;
-            } else {
+            }
                item = this->_allocate_alias(name, *type_info);
+
+            if (this->block == this->root) {
+               this->raise_warning(
+                  start,
+                  QString(
+                     "Alias %1 is a temporary variable, allocated outside of any block; this variable will remain "
+                     "reserved for the rest of the script and can't be repurposed by code further down. Is this "
+                     "intentional? A global variable may work better here."
+                  )
+                     .arg(item->pretty_printable_name())
+               );
             }
          } else {
             auto prior       = this->backup_stream_state();
@@ -3161,7 +3173,7 @@ namespace Megalo {
             if (!item->invalid) {
                //
                // TODO: Should we add invalid aliases to `aliases_in_scope` so that references to them don't throw 
-               // spurious errors? (Be sure to update the non-`allocate` code, too.)
+               // spurious errors? (Be sure to update the non-`allocate` code, too.) (See notes there, too.)
                //
                this->aliases_in_scope.push_back(item);
             }
@@ -3205,7 +3217,7 @@ namespace Megalo {
       if (!item->invalid) { // aliases can also run into non-fatal errors
          //
          // TODO: Should we add invalid aliases to `aliases_in_scope` so that references to them don't throw 
-         // spurious errors? (Be sure to update the `allocate` code, too.)
+         // spurious errors? (Be sure to update the `allocate` code, too.) (See notes there, too.)
          //
          this->aliases_in_scope.push_back(item);
 

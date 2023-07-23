@@ -8,9 +8,9 @@
       <p>
          Halo: Reach's scripting engine supports the display of "format strings." A 
          format string can be a simple piece of text, but it can also include little 
-         placeholders that can be replaced with other values when the string is 
-         displayed. Up to two additional values can be provided after the format 
-         string itself.
+         placeholders that will automatically be replaced with other values (the 
+         format string "parameters") when the string is displayed. Up to two 
+         additional parameters can be provided after the format string itself.
       </p>
       <p>
          A percentage sign (<code>%</code>) marks the start of a placeholder; the 
@@ -20,6 +20,85 @@
          placeholder symbol incorrectly (including by writing just one <code>%</code> 
          symbol) will cause Halo: Reach to refuse to display your string.
       </p>
+      
+      <h2>Examples</h2>
+      <p>
+         Here's an example of how to use format strings: this code, taken from Slayer, 
+         displays the number of points needed to win if the game variant has a score 
+         limit.
+      </p>
+      <pre>
+         for each player do
+            if game.score_to_win != 0 and game.teams_enabled == 1 then 
+               current_player.set_objective_text("Kill players on the enemy team.\r\n%n points to win.", game.score_to_win)
+            end
+            if game.score_to_win != 0 and game.teams_enabled == 0 then 
+               current_player.set_objective_text("Score points by killing other players.\r\n%n points to win.", game.score_to_win)
+            end
+            if game.score_to_win == 0 and game.teams_enabled == 1 then 
+               current_player.set_objective_text("Kill players on the enemy team.")
+            end
+            if game.score_to_win == 0 and game.teams_enabled == 0 then 
+               current_player.set_objective_text("Score points by killing other players.")
+            end
+         end
+      </pre>
+      
+      <h2><a name="persistent">Persistent strings</a></h2>
+      <p>
+         Some functions treat format strings as <dfn>persistent</dfn>. This means that 
+         those particular strings can't be used to display "transient" variables &mdash; 
+         that is, any variable whose value will likely be reset before the frame is over, 
+         like the <a href="ns_unnamed/current_player"><var>current_player</var></a> or 
+         <a href="ns_unnamed/killer_player"><var>killer_player</var></a> variables.
+      </p>
+      <p>
+         The <a href="ns_game/show_message_to">game.show_message_to</a> function is an 
+         example of a non-persistent string:
+      </p>
+      <pre>
+         for each player do
+            if current_player.number[0] == 1 then
+               game.show_message_to(all_players, "%s won the game!", current_player)
+               current_player.number[0] = 0
+            end
+         end
+      </pre>
+      <p>
+         When that function runs, it will immediately substitute your format string 
+         parameters into the format string, and it will pass the resulting text to 
+         the kill feed, which remembers that text. This means that for the case above, 
+         your kill feed message will always display whatever player was 
+         <var>current_player</var> at the time the function was called.
+      </p>
+      <p>
+         The <a href="widget/set_text">widget.set_text</a> function is an example of 
+         a persistent string:
+      </p>
+      <pre>
+         script_widget[0].set_text("%s won the game!", global.player[0])
+      </pre>
+      <p>
+         When that function runs, it doesn't <em>immediately</em> substitute out your 
+         placeholders. Instead, it remembers the format string, and it remembers which 
+         variables you passed as format string parameters &mdash; not the variables' 
+         <em>values</em>, but the variables themselves. Every frame, the HUD widget 
+         will take the format string and substitute out <code>%s</code> for the name 
+         of <em>whatever player</em> happens to be the one referred to by <var>global.player[0]</var> 
+         on that frame. If that variable's value is changed, the HUD widget will update 
+         in real time.
+      </p>
+      <p>
+         This is why transient variables can't be used with persistent strings: their 
+         values don't last through a whole frame, so when the HUD widget (or object 
+         waypoint or similar UI) redoes the format string substitution, the variables 
+         won't have the values you intended.
+      </p>
+      <p>
+         If you want players to see their own names (or variables) in a persistent 
+         string, then use variables like <a href="ns_unnamed/local_player"><var>local_player</var></a>.
+      </p>
+      
       
       <h2>Placeholder codes by type</h2>
       <style>
@@ -162,33 +241,5 @@
                </div>
             </dd>
       </dl>
-      
-      <h2>Examples</h2>
-      <p>
-         Here's an example of how to use format strings: this code, taken from Slayer, 
-         displays the number of points needed to win if the game variant has a score 
-         limit.
-      </p>
-      <pre>
-         for each player do -- round card
-            if game.score_to_win != 0 and game.teams_enabled == 1 then 
-               current_player.set_round_card_title("Kill players on the enemy team.\r\n%n points to win.", game.score_to_win)
-            end
-            if game.score_to_win != 0 and game.teams_enabled == 0 then 
-               current_player.set_round_card_title("Score points by killing other players.\r\n%n points to win.", game.score_to_win)
-            end
-            if game.score_to_win == 0 and game.teams_enabled == 1 then 
-               current_player.set_round_card_title("Kill players on the enemy team.")
-            end
-            if game.score_to_win == 0 and game.teams_enabled == 0 then 
-               current_player.set_round_card_title("Score points by killing other players.")
-            end
-         end
-      </pre>
-      <p>
-         Note that the game appears to handle strings with improper format codes 
-         by simply refusing to display the string at all.
-      </p>
-      <!-- supplying a string with codes, but not enough values to fill those codes, substitutes in blank -->
    </description>
 </script-type>

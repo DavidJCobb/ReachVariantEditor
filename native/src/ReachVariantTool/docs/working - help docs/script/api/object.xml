@@ -999,7 +999,7 @@
          </method>
          <method name="set_waypoint_text" id="53">
             <args>
-               <arg name="text" type="format-string">The text to use.</arg>
+               <arg name="text" type="format-string">The text to use. This is a <a href="script/api/format-string.html#persistent">persistent</a> format string.</arg>
             </args>
             <blurb>Set the text of an object's waypoint.</blurb>
             <description>

@@ -53,7 +53,7 @@
          <p>
             In addition to announcing the game start, you may want to display explanatory 
             text at the start of the round. You can do this by calling the 
-            <a href="/script/api/player/actions/set_round_card_title.html">player.set_round_card_title</a> 
+            <a href="/script/api/player/actions/set_objective_text.html">player.set_objective_text</a> 
             function. Commonly, gametypes will display the score to win in the "round card," 
             unless the player has turned off the score limit, and this can be accomplished 
             using <a href="/script/api/format-string.html">format strings</a>.
@@ -67,10 +67,10 @@
          
             for each player do
                if game.score_to_win != 0 then
-                  current_player.set_round_card_title("Collect flags for your team.\r\n%n points to win.", game.score_to_win)
+                  current_player.set_objective_text("Collect flags for your team.\r\n%n points to win.", game.score_to_win)
                end
                if game.score_to_win == 0 then
-                  current_player.set_round_card_title("Collect flags for your team.")
+                  current_player.set_objective_text("Collect flags for your team.")
                end
                if current_player.announced_game_start == 0 and current_player.announce_start_timer.is_zero() then
                   send_incident(stockpile_game_start, current_player, no_player)

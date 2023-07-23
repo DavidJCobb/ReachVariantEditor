@@ -6,7 +6,7 @@
       <actions>
          <method name="set_text" id="46">
             <args>
-               <arg name="text" type="format-string" />
+               <arg name="text" type="format-string">The text to display. This is a <a href="script/api/format-string.html#persistent">persistent</a> format string.</arg>
             </args>
             <blurb>Set the HUD widget's text.</blurb>
             <example>
@@ -40,7 +40,7 @@
          </method>
          <method name="set_value_text" id="47">
             <args>
-               <arg name="text" type="format-string" />
+               <arg name="text" type="format-string">The text to display. This is a <a href="script/api/format-string.html#persistent">persistent</a> format string.</arg>
             </args>
             <blurb>Set the HUD widget's value text.</blurb>
          </method>

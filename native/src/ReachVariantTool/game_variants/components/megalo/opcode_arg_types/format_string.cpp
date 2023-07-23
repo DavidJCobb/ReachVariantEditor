@@ -1,4 +1,4 @@
-#include "tokens.h"
+#include "format_string.h"
 #include "../../../types/multiplayer.h"
 #include "variables/all_core.h"
 #include "../compiler/compiler.h"
@@ -85,16 +85,24 @@ namespace Megalo {
    //
    //
    //
-   OpcodeArgTypeinfo OpcodeArgValueStringTokens2::typeinfo = OpcodeArgTypeinfo(
+   OpcodeArgTypeinfo OpcodeArgValueFormatString::typeinfo = OpcodeArgTypeinfo(
       "_format_string",
       "Formatted String",
       "A format string and up to two tokens to insert into it.",
       //
       OpcodeArgTypeinfo::flags::none,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueStringTokens2>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueFormatString>
    );
-   //
-   bool OpcodeArgValueStringTokens2::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
+   OpcodeArgTypeinfo OpcodeArgValueFormatStringPersistent::typeinfo = OpcodeArgTypeinfo(
+      "_format_string",
+      "Formatted String",
+      "A format string and up to two tokens to insert into it.",
+      //
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueFormatStringPersistent>
+   );
+   
+   bool OpcodeArgValueFormatString::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       MegaloStringIndexOptional index;
       index.read(stream);
       this->string = mp.scriptData.strings.get_entry(index);
@@ -108,7 +116,7 @@ namespace Megalo {
          this->tokens[i].read(stream, mp);
       return true;
    }
-   void OpcodeArgValueStringTokens2::write(cobb::bitwriter& stream) const noexcept {
+   void OpcodeArgValueFormatString::write(cobb::bitwriter& stream) const noexcept {
       MegaloStringIndexOptional index = -1;
       if (this->string)
          index = this->string->index;
@@ -118,7 +126,7 @@ namespace Megalo {
       for (uint8_t i = 0; i < this->tokenCount; i++)
          this->tokens[i].write(stream);
    }
-   void OpcodeArgValueStringTokens2::to_string(std::string& out) const noexcept {
+   void OpcodeArgValueFormatString::to_string(std::string& out) const noexcept {
       if (this->tokenCount == 0) {
          if (!this->string) {
             out = "no string";
@@ -140,7 +148,7 @@ namespace Megalo {
       }
       cobb::sprintf(out, "format string ID %d and tokens: %s", this->string->index, out.c_str());
    }
-   void OpcodeArgValueStringTokens2::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
+   void OpcodeArgValueFormatString::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       ReachString* format = this->string;
       if (format) {
          std::string english = format->get_content(reach::language::english);
@@ -154,7 +162,7 @@ namespace Megalo {
          this->tokens[i].decompile(out, flags);
       }
    }
-   arg_compile_result OpcodeArgValueStringTokens2::compile(Compiler& compiler, cobb::string_scanner& arg_text, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueFormatString::compile(Compiler& compiler, cobb::string_scanner& arg_text, uint8_t part) noexcept {
       if (part == 0) {
          //
          // Get the format string.
@@ -194,45 +202,47 @@ namespace Megalo {
       auto* arg = compiler.arg_to_variable(arg_text);
       if (!arg)
          return arg_compile_result::failure("This argument is not a variable.");
-      if (arg->is_transient()) {
-         bool is_current_player      = false;
-         bool is_current_player_team = false;
+      if (this->persistent) {
+         if (arg->is_transient()) {
+            bool is_current_player      = false;
+            bool is_current_player_team = false;
 
-         auto* transient_which = arg->resolved.top_level.namespace_member.which;
-         if (transient_which == &variable_which_values::player::current) {
-            is_current_player = true;
-            if (auto* prop = arg->resolved.property.definition) {
-               if (prop->name == "team") {
-                  is_current_player      = false;
-                  is_current_player_team = true;
+            auto* transient_which = arg->resolved.top_level.namespace_member.which;
+            if (transient_which == &variable_which_values::player::current) {
+               is_current_player = true;
+               if (auto* prop = arg->resolved.property.definition) {
+                  if (prop->name == "team") {
+                     is_current_player      = false;
+                     is_current_player_team = true;
+                  }
                }
             }
-         }
 
-         QString warning;
-         if (is_current_player) {
-            warning = "`%1` is a transient value; that is: its value will likely be cleared before the game ever actually displays this text. If you wish to display different values to each player, try using `local_player` (and variables nested under it e.g. `local_player.number[0]`) instead of `current_player`.";
-         } else if (is_current_player_team) {
-            warning = "`%1` is a transient value; that is: its value will likely be cleared before the game ever actually displays this text. If you wish to display different values to each player based on their team, try using `local_team` (and variables nested under it e.g. `local_team.number[0]`) instead of `current_player.team`.";
-         } else {
-            warning = "`%1` is a transient value; that is: its value will likely be cleared before the game ever actually displays this text. You'll need to store the value into a normal variable and refer to that instead.";
+            QString warning;
+            if (is_current_player) {
+               warning = "`%1` is a transient value; that is: its value will likely be cleared before the game ever actually displays this text. If you wish to display different values to each player, try using `local_player` (and variables nested under it e.g. `local_player.number[0]`) instead of `current_player`.";
+            } else if (is_current_player_team) {
+               warning = "`%1` is a transient value; that is: its value will likely be cleared before the game ever actually displays this text. If you wish to display different values to each player based on their team, try using `local_team` (and variables nested under it e.g. `local_team.number[0]`) instead of `current_player.team`.";
+            } else {
+               warning = "`%1` is a transient value; that is: its value will likely be cleared before the game ever actually displays this text. You'll need to store the value into a normal variable and refer to that instead.";
+            }
+            warning = warning.arg(arg->to_string());
+            compiler.raise_warning(warning);
          }
-         warning = warning.arg(arg->to_string());
-         compiler.raise_warning(warning);
       }
       auto result = this->compile(compiler, *arg, part);
       delete arg;
       return result;
    }
-   arg_compile_result OpcodeArgValueStringTokens2::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueFormatString::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
       if (part == 0 || part > max_token_count)
          return arg_compile_result::failure();
       auto& token = this->tokens[part - 1];
       this->tokenCount = part;
       return token.compile(compiler, arg, part).set_more(part < max_token_count ? arg_compile_result::more_t::optional : arg_compile_result::more_t::no);
    }
-   void OpcodeArgValueStringTokens2::copy(const OpcodeArgValue* other) noexcept {
-      auto cast = dynamic_cast<const OpcodeArgValueStringTokens2*>(other);
+   void OpcodeArgValueFormatString::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueFormatString*>(other);
       assert(cast);
       this->string = cast->string;
       this->tokenCount = cast->tokenCount;

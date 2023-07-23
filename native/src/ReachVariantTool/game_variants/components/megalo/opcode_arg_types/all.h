@@ -13,6 +13,7 @@
 //
 #include "fireteam_list.h"
 #include "forge_label.h"
+#include "format_string.h"
 #include "icons.h"
 #include "incident.h"
 #include "object_type.h"
@@ -22,7 +23,6 @@
 #include "sound.h"
 #include "specific_variable.h"
 #include "timer_rate.h"
-#include "tokens.h"
 #include "variant_string_id.h"
 #include "vector3.h"
 #include "waypoint_icon.h"
@@ -30,5 +30,4 @@
 //
 // MCC extensions:
 //
-#include "haloscript_function_id.h"
 #include "megalo_scope.h"

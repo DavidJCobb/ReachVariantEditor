@@ -259,7 +259,7 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\player_set.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\tokens.cpp">
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\format_string.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="helpers\int128.cpp">
@@ -464,9 +464,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game_variants\components\megalo\code_block.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\haloscript_function_id.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\megalo_scope.cpp">
@@ -867,7 +864,7 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\specific_variable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\tokens.h">
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\format_string.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\vector3.h">
@@ -1152,9 +1149,6 @@
     <ClInclude Include="game_variants\components\megalo\code_block.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\haloscript_function_id.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\megalo_scope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1232,5 +1226,14 @@
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.h.bak" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.cpp.bak" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.inl.bak" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player.xml" />
+    <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player_team.xml" />
+    <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_target_player_team.xml" />
+    <Xml Include="docs\working - help docs\script\api\player\actions\set_round_card_icon.xml" />
+    <Xml Include="docs\working - help docs\script\api\player\actions\set_round_card_text.xml" />
+    <Xml Include="docs\working - help docs\script\api\player\actions\set_round_card_title.xml" />
+    <Xml Include="docs\working - help docs\script\api\player\properties\unknown_09.xml" />
   </ItemGroup>
 </Project>

@@ -454,14 +454,15 @@
          </condition>
       </conditions>
       <actions>
-         <method name="show_message_to" id="16">
+         <method name="show_message_to" name2="hud_post_message" id="16">
             <args>
                <arg name="who">
                   The <a href="script/api/player">player</a> or <a href="script/api/team">team</a> 
                   to display the message for, or the value <var>all_players</var>.
                </arg>
                <arg name="sound" type="sound">An optional sound to play with the message.</arg>
-               <arg name="text"  type="format-string">The text to display.</arg>
+               <arg name="text"  type="format-string">The text to display. This format string is 
+               non-persistent, so transient variables are allowed.</arg>
             </args>
             <blurb>Display a message in the kill feed.</blurb>
             <example>
@@ -502,12 +503,12 @@
                game.play_sound_for(all_players, timer_beep, true)
             </example>
          </method>
-         <method name="call_haloscript_function" id="100">
+         <method name="hs_function_call" id="100">
             <args>
-               <arg name="function ID" type="number">
+               <arg name="function ID" type="variant-string-id">
                   <p>
-                     The word <var>none</var>, or the numeric ID of a HaloScript function defined in the 
-                     current map.
+                     The HaloScript function name to call. ReachVariantTool has no way of reading any 
+                     extra names defined in your map file, so use numeric indices here.
                   </p>
                </arg>
             </args>
@@ -522,7 +523,8 @@
                </p>
                <p>
                   This function allows you to invoke HaloScript functions defined and made available to Megalo 
-                  on the current map.
+                  on the current map. Maps can make HaloScript functions available by writing the function names 
+                  into the <var>msit</var> tag.
                </p>
             </description>
          </method>
