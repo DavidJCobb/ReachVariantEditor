@@ -53,9 +53,14 @@ jobs:
     - name: Build
       working-directory: ${{ runner.temp }}\build
       run:  |
-            cd ${{ github.workspace }}/native/src/ReachVariantTool
-            qmake
-            nmake
+            qmake -r ${{ github.workspace }}\native\src\ReachVariantTool
+              ${{ runner.temp }}\jom\jom -j2
+              cd release
+              windeployqt --qmldir ${{ github.workspace }}\native\src\ReachVariantTool ReachVariantTool.exe --pdb --release --compiler-runtime
+              copy C:\Windows\System32\concrt140.dll . 
+              copy C:\Windows\System32\vccorlib140.dll .
+              copy C:\Windows\System32\msvcp140.dll .
+              copy C:\Windows\System32\vcruntime140.dll .
   
     - name: Zip build
       working-directory: ${{ runner.temp }}
