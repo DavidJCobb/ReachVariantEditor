@@ -27,22 +27,43 @@ jobs:
         version: '5.15.2'
         host: 'windows'
         target: 'desktop'
+        dir: ${{ runner.temp }}
         arch: 'win64_msvc2019_64'
         setup-python: true
+      
+    - name: Download JOM
+      uses: suisei-cn/actions-download-file@v1
+      with:
+          url:    http://download.qt.io/official_releases/jom/jom.zip
+          target: ${{ runner.temp }}\
 
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+    - name: Unzip JOM
+      working-directory: ${{ runner.temp }}
+      run:  |
+            7z x jom.zip -ojom
+
+    - name: Create build directory
+      run:  mkdir ${{ runner.temp }}\build
+
+    - name: Set up Visual Studio shell
+      uses: egor-tensin/vs-shell@v2
+      with:
+        arch: x64
 
     - name: Build
-      # Build your program with the given configuration
-      run: 
-        cd native/src/ReachVariantTool
-        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
+      working-directory: ${{ runner.temp }}\build
+      run:  |
+            cd native/src/ReachVariantTool
+            qmake
+            nmake
+  
+    - name: Zip build
+      working-directory: ${{ runner.temp }}
+      run:  |
+            7z a ReachVariantTool.zip ${{ runner.temp }}\build\* -r
+  
+    - name: Save build artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: ReachVariantTool.zip
+        path: ${{ runner.temp }}\ReachVariantTool.zip
