@@ -1152,6 +1152,9 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\megalo_scope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\compiler\variable_usage_set.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -1226,6 +1229,7 @@
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.h.bak" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.cpp.bak" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.inl.bak" />
+    <None Include="docs\working - help docs\script\api\object\actions\face_toward\calculator.js" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player.xml" />

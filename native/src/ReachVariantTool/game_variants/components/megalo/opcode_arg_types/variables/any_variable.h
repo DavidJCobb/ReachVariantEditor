@@ -18,6 +18,10 @@ namespace Megalo {
          virtual arg_compile_result compile(Compiler&, cobb::string_scanner&, uint8_t part) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
          virtual void copy(const OpcodeArgValue*) noexcept override;
+         virtual void mark_used_variables(Script::variable_usage_set& usage) const noexcept override {
+            if (this->variable)
+               this->variable->mark_used_variables(usage);
+         }
          //
          virtual variable_type get_variable_type() const noexcept;
          //

@@ -208,5 +208,8 @@ namespace Megalo {
          this->object.copy(&cast->object);
          this->playerIndex = cast->playerIndex;
       }
+      void OpcodeArgValueObjectPlayerVariable::mark_used_variables(Script::variable_usage_set& usage) const noexcept {
+         this->object.mark_used_variables(usage);
+      }
    #pragma endregion
 }

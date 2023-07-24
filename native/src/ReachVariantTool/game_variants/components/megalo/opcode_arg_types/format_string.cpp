@@ -2,6 +2,7 @@
 #include "../../../types/multiplayer.h"
 #include "variables/all_core.h"
 #include "../compiler/compiler.h"
+#include "../compiler/variable_usage_set.h"
 #include "../helpers/format_strings.h"
 
 namespace Megalo {
@@ -252,5 +253,12 @@ namespace Megalo {
          this->tokens[i].copy(cast->tokens[i]);
       for (; i < max_token_count; i++)
          this->tokens[i].clear();
+   }
+   void OpcodeArgValueFormatString::mark_used_variables(Script::variable_usage_set& usage) const noexcept {
+      for (size_t i = 0; i < this->tokenCount; i++) {
+         auto& token = this->tokens[i];
+         if (token.value)
+            token.value->mark_used_variables(usage);
+      }
    }
 }

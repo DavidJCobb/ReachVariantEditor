@@ -53,6 +53,7 @@ namespace Megalo {
    class OpcodeArgTypeinfo;
    namespace Script {
       class VariableReference;
+      struct variable_usage_set;
    }
 
    class OpcodeArgTypeinfo {
@@ -263,6 +264,7 @@ namespace Megalo {
          virtual OpcodeArgValue* create_of_this_type() const noexcept = 0;
          virtual void copy(const OpcodeArgValue*) noexcept = 0;
          virtual OpcodeArgValue* clone() const noexcept;
+         virtual void mark_used_variables(Script::variable_usage_set&) const noexcept {} // helper for the compiler
          //
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;

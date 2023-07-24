@@ -12,7 +12,6 @@ namespace Megalo {
       team,   // "team_none" or team designator string
       object, // "none" or "unknown"
       number, // "%i"
-      // number_with_sign, // Halo 4 only // "+%i" if positive; "%i" otherwise according to KSoft.Tool source
       timer,  // "%i:%02i:%02i" or "%i:%02i" or "0:%02i" according to KSoft.Tool source
    };
    //
@@ -67,6 +66,7 @@ namespace Megalo {
          virtual arg_compile_result compile(Compiler&, cobb::string_scanner&,    uint8_t part) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
          virtual void copy(const OpcodeArgValue*) noexcept override;
+         virtual void mark_used_variables(Script::variable_usage_set&) const noexcept override;
    };
 
    class OpcodeArgValueFormatStringPersistent : public OpcodeArgValueFormatString {

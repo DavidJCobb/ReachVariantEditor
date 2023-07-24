@@ -2,33 +2,31 @@
 #include "../../../../errors.h"
 #include "../../../../../helpers/strings.h"
 #include "../../compiler/compiler.h"
+#include "../../compiler/variable_usage_set.h"
 
 namespace {
    using namespace Megalo;
 
    const char* _which_to_string(const VariableScope* which_type, uint8_t which) {
-      if (which_type == &MegaloVariableScopeObject) {
-         auto& list = Megalo::variable_which_values::object::list;
-         if (which >= list.size())
-            return "invalid_object"; // not ideal... we should find a way to print the bad index
-         return list[which].name.c_str();
-      }
-      if (which_type == &MegaloVariableScopePlayer) {
-         auto& list = Megalo::variable_which_values::player::list;
-         if (which >= list.size())
-            return "invalid_player"; // not ideal... we should find a way to print the bad index
-         return list[which].name.c_str();
-      }
-      if (which_type == &MegaloVariableScopeTeam) {
-         auto& list = Megalo::variable_which_values::team::list;
-         if (which >= list.size())
-            return "invalid_team"; // not ideal... we should find a way to print the bad index
-         return list[which].name.c_str();
-      }
+      if (which_type == nullptr)
+         return nullptr;
       if (which_type == &MegaloVariableScopeGlobal)
          return "global";
       if (which_type == &MegaloVariableScopeTemporary)
          return "temporaries";
+
+      auto& list = which_type->list;
+      if (which < list.size())
+         return list[which].name.c_str();
+
+      // Else invalid.
+
+      switch (getScopeConstantForObject(*which_type)) {
+         case variable_scope::object: return "invalid_object";
+         case variable_scope::player: return "invalid_player";
+         case variable_scope::team:   return "invalid_team";
+      }
+
       return nullptr;
    }
    void _default_stringify(const char* format, const Variable& v, std::string& out) {
@@ -396,6 +394,56 @@ namespace Megalo {
       this->index  = cast->index;
       this->object = cast->object;
    }
+   void Variable::mark_used_variables(Script::variable_usage_set& usage) const noexcept {
+      variable_scope scope;
+      size_t index;
+
+      auto* scope_v_global    = this->type.get_variable_scope(variable_scope::global);
+      auto* scope_v_temporary = this->type.get_variable_scope(variable_scope::temporary);
+      if (this->scope == scope_v_global) {
+         scope = variable_scope::global;
+      } else if (this->scope == scope_v_temporary) {
+         scope = variable_scope::temporary;
+      } else {
+         return;
+      }
+
+      if (this->scope->index_type != VariableScopeIndicatorValue::index_type::none) {
+         usage.mark_variable(scope, this->type.var_type, this->index);
+      } else {
+         //
+         // If this is a handle type, then global.<type>[n] and temporaries.<type>[n] 
+         // don't use `this->index`; the index, `n`, is identified by the "which" value.
+         //
+         const auto& typeinfo = this->get_variable_typeinfo();
+
+         size_t first;
+         size_t count;
+         switch (scope) {
+            case variable_scope::global:
+               if (!typeinfo.first_global)
+                  return;
+               first = typeinfo.first_global->as_integer();
+               count = MegaloVariableScopeGlobal.max_variables_of_type(this->type.var_type);
+               break;
+            case variable_scope::temporary:
+               if (!typeinfo.first_temporary)
+                  return;
+               first = typeinfo.first_temporary->as_integer();
+               count = MegaloVariableScopeTemporary.max_variables_of_type(this->type.var_type);
+               break;
+            default:
+               return;
+         }
+
+         size_t index = this->which - first;
+         if (index >= count)
+            return;
+
+         usage.mark_variable(scope, this->type.var_type, index);
+      }
+   }
+
    bool Variable::is_none() const noexcept {
       bool this_type_is_a_scope = getScopeObjectForConstant(this->type.var_type) != nullptr;
       if (!this_type_is_a_scope)

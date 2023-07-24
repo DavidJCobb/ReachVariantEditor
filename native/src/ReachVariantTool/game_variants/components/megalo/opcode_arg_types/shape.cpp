@@ -178,6 +178,24 @@ namespace Megalo {
       this->top.copy(&cast->top);
       this->bottom.copy(&cast->bottom);
    }
+   void OpcodeArgValueShape::mark_used_variables(Script::variable_usage_set& usage) const noexcept {
+      switch (this->shapeType) {
+         case ShapeType::sphere:
+            this->radius.mark_used_variables(usage);
+            break;
+         case ShapeType::cylinder:
+            this->radius.mark_used_variables(usage);
+            this->top.mark_used_variables(usage);
+            this->bottom.mark_used_variables(usage);
+            break;
+         case ShapeType::box:
+            this->radius.mark_used_variables(usage);
+            this->length.mark_used_variables(usage);
+            this->top.mark_used_variables(usage);
+            this->bottom.mark_used_variables(usage);
+            break;
+      }
+   }
 
    OpcodeArgValueScalar& OpcodeArgValueShape::axis(uint8_t i) noexcept {
       switch (this->shapeType) {

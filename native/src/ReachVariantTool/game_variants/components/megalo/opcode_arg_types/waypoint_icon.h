@@ -18,5 +18,8 @@ namespace Megalo {
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
          virtual arg_compile_result compile(Compiler&, cobb::string_scanner&, uint8_t part) noexcept override;
          virtual void copy(const OpcodeArgValue*) noexcept override;
+         virtual void mark_used_variables(Script::variable_usage_set& usage) const noexcept override {
+            number.mark_used_variables(usage);
+         }
    };
 }

@@ -12,6 +12,7 @@
 #include "parsing/alias.h"
 #include "parsing/variable_reference.h"
 #include "../../../types/multiplayer.h"
+#include "variable_usage_set.h"
 
 namespace Megalo {
    class OpcodeArgValueMegaloScope;
@@ -271,6 +272,12 @@ namespace Megalo {
          std::vector<Script::Alias*> aliases_in_scope; // unowned pointers; the aliases are owned by their containing Blocks
          std::vector<Script::UserDefinedEnum> enums_in_scope;
          std::vector<Script::UserDefinedFunction> functions_in_scope;
+         struct {
+            // see Compiler::__after_compiled_statement comments
+
+            Script::variable_usage_set is_allocated;
+            Script::variable_usage_set is_initialized;
+         } temporary_allocated_state;
          std::vector<Script::Block*> already_compiled_blocks;
          GameVariantDataMultiplayer& variant;
          //
@@ -383,8 +390,9 @@ namespace Megalo {
          statement_side_t _extract_statement_side(QString& out_str, int32_t& out_int);
          //
          static keyword_handler_t __get_handler_for_keyword(QString) noexcept;
-         //
-         Script::VariableReference* __parseActionLHS(const pos& prior);
+
+         void __after_compiled_statement(const Script::Statement&);
+         
          Script::VariableReference* __parseActionRHS(QString& op, const pos& prior, Script::VariableReference* lhs, bool allow_abs_hack);
          void _parseAction();
          bool _parseCondition(); // return value = stop looking for more conditions

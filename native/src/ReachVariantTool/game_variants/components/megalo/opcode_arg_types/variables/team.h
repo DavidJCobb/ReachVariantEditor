@@ -9,6 +9,7 @@ namespace Megalo {
          //
          OpcodeArgValueTeam();
          //
+         virtual const OpcodeArgTypeinfo& get_variable_typeinfo() const noexcept override { return typeinfo; }
          virtual Variable* create_zero_or_none() const noexcept override;
          virtual bool set_to_zero_or_none() noexcept override;
    };

@@ -244,6 +244,17 @@ namespace Megalo {
          this->numerator.copy(&cast->numerator);
          this->denominator.copy(&cast->denominator);
       }
+      void OpcodeArgValueMeterParameters::mark_used_variables(Script::variable_usage_set& usage) const noexcept {
+         switch (this->type) {
+            case MeterType::timer:
+               this->timer.mark_used_variables(usage);
+               break;
+            case MeterType::number:
+               this->numerator.mark_used_variables(usage);
+               this->denominator.mark_used_variables(usage);
+               break;
+         }
+      }
 
       Variable& OpcodeArgValueMeterParameters::sub_variable(uint8_t i) noexcept {
          switch (this->type) {
