@@ -53,7 +53,7 @@ jobs:
     - name: Build
       working-directory: ${{ runner.temp }}\build
       run:  |
-            cd native/src/ReachVariantTool
+            cd ${{ github.workspace }}/native/src/ReachVariantTool
             qmake
             nmake
   
