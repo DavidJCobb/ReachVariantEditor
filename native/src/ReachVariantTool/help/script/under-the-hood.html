@@ -653,6 +653,59 @@ class integer_reference {
             delete indexed data objects if they aren't in use by the script).
          </p>
       </section>
+      
+      <section>
+         <h2>ReachVariantTool's compiler</h2>
+         <p>
+            ReachVariantTool uses a mostly-single-pass compiler for its Megalo dialect. Parsing 
+            and compilation are done as a single step, and the resulting grammar is 
+            <a href="https://en.wikipedia.org/wiki/Context-sensitive_grammar" target="_blank">context-dependent</a> 
+            rather than <a href="https://en.wikipedia.org/wiki/Context-free_grammar" target="_blank">context-free</a>. 
+            There is not any formal grammar; rather, the grammar is entirely a side-effect of 
+            how the parser is implemented.</p>
+         <p>
+            (This is not a terribly good way to design or implement a scripting language, but 
+            in my defense, I had never come across Robert Nystrom's excellent book 
+            <a href="https://craftinginterpreters.com/contents.html" target="_blank"><i>Crafting Interpreters</i></a> 
+            before.)
+         </p>
+         <p>
+            The compiler reads your script source code and instantiates objects which represent 
+            the basic elements of a script: blocks (including user-defined functions), comparisons, 
+            statements, aliases, and user-defined enums. The script is represented as a tree structure 
+            wherein blocks are branch nodes, comparisons act as annotations to blocks, and statements 
+            and aliases are leaf nodes contained within a block. Additionally, during parsing, the 
+            compiler retains its own set of unowned pointers to keep track of what aliases, user-defined 
+            functions, and user-defined enums are in scope. (User-defined enums are tracked only by the 
+            compiler and do not exist within the block hierarchy; however, each enum has a pointer to 
+            the block in which it was defined, which allows enums to be block-scoped: we know when to 
+            delete them.)
+         </p>
+         <p>
+            Statements are compiled into Megalo opcodes and operands as they are read. Blocks are not 
+            compiled immediately as they're read; rather, top-level blocks are compiled once their end 
+            is fully parsed. This is necessary in order to properly handle if-blocks.
+         </p>
+         <p>
+            Variable references are parsed as they are seen. ReachVariantTool only stores enough data 
+            to reliably identify a valid variable reference — so, fields for a top-level variable, 
+            nested variable, property, and accessor; as well as fields for integer constants. Invalid 
+            variable references (e.g. references nested too deeply) can't be retained at all, which 
+            also means that strict typing cannot be enforced for them. For example, ReachVariantTool 
+            cannot emit additional errors if you try to compare <code>global.object[0].number[1].player[2]</code> 
+            to <code>no_team</code>.
+         </p>
+         <p>
+            The parser has a limited backtracking capability: handlers for keywords and other language 
+            constructs can create a backup of its current position, and then restore that backup, 
+            essentially allowing the compiler to rewind to places it's already been. This is used for 
+            things like overload resolution (i.e. <code>game.send_incident</code>): because parsing 
+            and compiling are done as a single step, the only way to tell which overload the user is 
+            invoking is trial-and-error. Function calls are compiled by finding an opcode that has a 
+            matching name and has been designated as a function, and attempting to compile each of the 
+            passed-in arguments into operands for that opcode.
+         </p>
+      </section>
    
       </main>
       <script src="resources/sidebar.js"></script>

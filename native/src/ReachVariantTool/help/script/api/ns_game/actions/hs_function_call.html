@@ -2,8 +2,8 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
-      <title>game.betrayal_penalty | ReachVariantTool Documentation</title>
-      <base href="../../../" />
+      <title>game.hs_function_call | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
          <link rel="stylesheet" href="resources/noscript.css" />
@@ -80,13 +80,30 @@
          </ul>
       </nav>
       <main>
-         <header><h1>game.betrayal_penalty</h1><span class="type">Type: <a href="script/api/number.html">Number</a></span></header>
-<p>The betrayal penalty time for respawning players, in seconds.</p>
-<p>This value is read-only.</p>
-<h2>See also</h2>
-<ul>
-   <li><a href="script/api/ns_game/respawn_growth.html">game.respawn_growth</a></li>
-</ul>
+         <header><h1>game.hs_function_call</h1></header>
+
+               <p>
+                  This function was added to the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i> 
+                  in mid-July 2023, being backported from <i>Halo 4</i>'s Megalo engine. Gametypes that 
+                  use this function will likely fail to load on Xbox 360 builds of <i>Halo: Reach</i> 
+                  (even when played via Xbox One backward compatibility).
+               </p>
+               <p>
+                  This function allows you to invoke HaloScript functions defined and made available to Megalo 
+                  on the current map. Maps can make HaloScript functions available by writing the function names 
+                  into the <var>msit</var> tag.
+               </p>
+            
+<h2>Arguments</h2>
+<dl>
+   <dt><a href="script/api/variant-string-id.html">function ID</a></dt>
+      <dd>
+                  <p>
+                     The HaloScript function name to call. ReachVariantTool has no way of reading any 
+                     extra names defined in your map file, so use numeric indices here.
+                  </p>
+               </dd>
+</dl>
 
       </main>
       <script src="resources/sidebar.js"></script>
