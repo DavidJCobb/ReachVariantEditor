@@ -25,17 +25,6 @@
 #define MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS 1
 
 namespace {
-   //
-   // Control whether `alias <name> = allocate temporary <type>` statements are allowed 
-   // inside of user-defined functions. As of this writing, the compiler, as currently 
-   // designed, has no way to ensure that a function doesn't clobber the temporary 
-   // variables of its caller (particularly when that caller is another function), so 
-   // we do not allow this syntax in there.
-   //
-   constexpr const bool allow_allocate_inside_of_functions = false;
-}
-
-namespace {
    constexpr const char* ce_assignment_operator = "=";
    bool _is_assignment_operator(QString s) {
       constexpr std::array operators = {
@@ -765,6 +754,10 @@ namespace Megalo {
       }
       this->aliases_in_scope.clear(); // don't free contents; every Alias should have been inside of a Block and freed by that Block
       this->functions_in_scope.clear();
+
+      for (auto* item : this->already_compiled_blocks)
+         delete item;
+      this->already_compiled_blocks.clear();
    }
 
    size_t Compiler::get_new_forge_label_count() const {
@@ -2853,119 +2846,194 @@ namespace Megalo {
          this->block->compile(*this);
          //
          // And now that the block is compiled, discard it.
+         // 
+         // EDIT: Deleting blocks here makes it impossible to track their aliases for the "remember 
+         // aliases allocated by in-scope user-defined functions so we can make allocation-to-alias 
+         // not clobber when done from inside of a function" feature, so instead we're just going 
+         // to chuck them into a list for safekeeping and delete them all later.
          //
+         this->already_compiled_blocks.push_back(this->block);
          parent->remove_item(this->block);
-         delete this->block;
+         // delete this->block;
       }
       this->block = parent;
       return true;
    }
    
    #pragma region keyword handlers
-   Script::Alias* Compiler::_allocate_alias(QString name, QString member_type) {
-      int i = member_type.indexOf('.');
-      {
-         int j = -1;
-         if (i >= 0) {
-            j = member_type.indexOf('.', i + 1); // check for multiple dots
+      #pragma region Compiler::_allocation_request_type
+      bool Compiler::_allocation_request_type::parse_or_fail(Compiler& compiler, const QString& member_type) {
+         int i = member_type.indexOf('.');
+         {
+            int j = -1;
+            if (i >= 0) {
+               j = member_type.indexOf('.', i + 1); // check for multiple dots
+            }
+            if (i < 0 || j >= 0) {
+               compiler.raise_fatal(QString("Expected a kind of variable, e.g. `global.number` or `player.player`; got `%1`.").arg(member_type));
+               return false;
+            }
          }
-         if (i < 0 || j >= 0) {
-            this->raise_fatal(QString("Expected a kind of variable, e.g. `global.number` or `player.player`; got `%1`.").arg(member_type));
-            return nullptr;
+         QString base_name = member_type.left(i);
+         QString type_name = member_type.right(member_type.size() - i - 1);
+         if (base_name.isEmpty() || type_name.isEmpty()) {
+            compiler.raise_fatal(QString("Expected a kind of variable, e.g. `global.number` or `player.player`; got `%1`.").arg(member_type));
+            return false;
          }
-      }
-      QString base_name = member_type.left(i);
-      QString type_name = member_type.right(member_type.size() - i - 1);
-      if (base_name.isEmpty() || type_name.isEmpty()) {
-         this->raise_fatal(QString("Expected a kind of variable, e.g. `global.number` or `player.player`; got `%1`.").arg(member_type));
-         return nullptr;
+
+         const auto& type_registry = OpcodeArgTypeRegistry::get();
+         this->context_namespace = Script::namespaces::get_by_name(base_name);
+         this->context_type_info = context_namespace ? nullptr : type_registry.get_variable_type(base_name);
+         this->member_type_info  = type_registry.get_variable_type(type_name);
+
+         if (!context_namespace && !context_type_info) {
+            compiler.raise_error(QString("Expected a type of variable following the format `base_name.type_name`, where `base_name` is the name of something that can contain variables (e.g. `global`, `player`, etc.). The base name seen was `%1`.").arg(base_name));
+            return false;
+         }
+         if (context_namespace && !context_namespace->can_have_variables) {
+            compiler.raise_error(QString("The specified namespace (%1) cannot contain variables.").arg(context_namespace->name.c_str()));
+            return false;
+         }
+         if (context_type_info && !context_type_info->can_have_variables()) {
+            compiler.raise_error(QString("The specified base type (%1) cannot contain variables.").arg(context_type_info->internal_name.c_str()));
+            return false;
+         }
+         if (!member_type_info) {
+            compiler.raise_error(QString("Expected a type of variable following the format `base_name.type_name`, where `type_name` is a variable type. The type name seen was `%1`.").arg(type_name));
+            return false;
+         }
+
+         return true;
       }
 
-      const auto& type_registry = OpcodeArgTypeRegistry::get();
-      const Script::Namespace* context_namespace = Script::namespaces::get_by_name(base_name);
-      const OpcodeArgTypeinfo* context_type_info = context_namespace ? nullptr : type_registry.get_variable_type(base_name);
-      const OpcodeArgTypeinfo* member_type_info  = type_registry.get_variable_type(type_name);
-
-      bool failed = false;
-      if (!context_namespace && !context_type_info) {
-         failed = true;
-         this->raise_error(QString("Expected a type of variable following the format `base_name.type_name`, where `base_name` is the name of something that can contain variables (e.g. `global`, `player`, etc.). The base name seen was `%1`.").arg(base_name));
-      }
-      if (context_namespace && !context_namespace->can_have_variables) {
-         failed = true;
-         this->raise_error(QString("The specified namespace (%1) cannot contain variables.").arg(context_namespace->name.c_str()));
-      }
-      if (context_type_info && !context_type_info->can_have_variables()) {
-         failed = true;
-         this->raise_error(QString("The specified base type (%1) cannot contain variables.").arg(context_type_info->internal_name.c_str()));
-      }
-      if (!member_type_info) {
-         failed = true;
-         this->raise_error(QString("Expected a type of variable following the format `base_name.type_name`, where `type_name` is a variable type. The type name seen was `%1`.").arg(type_name));
-      }
-      if (failed) {
-         return nullptr;
-      }
-
-      uint32_t seen_indices_mask = 0;
-      size_t   context_slot_count = 0;
-      {
-         auto vt = getVariableTypeForTypeinfo(member_type_info);
-         if (context_type_info) {
-            auto* scope = getScopeObjectForTypeinfo(context_type_info);
+      size_t Compiler::_allocation_request_type::max_slots_available() const {
+         auto vt = getVariableTypeForTypeinfo(this->member_type_info);
+         if (this->context_type_info) {
+            const auto* scope = getScopeObjectForTypeinfo(this->context_type_info);
             assert(scope != nullptr);
-            context_slot_count = scope->max_variables_of_type(vt);
-         } else if (context_namespace) {
-            if (context_namespace == &Script::namespaces::global) {
-               context_slot_count = Megalo::MegaloVariableScopeGlobal.max_variables_of_type(vt);
-            } else if (context_namespace == &Script::namespaces::temporaries) {
-               context_slot_count = Megalo::MegaloVariableScopeTemporary.max_variables_of_type(vt);
+            return scope->max_variables_of_type(vt);
+         }
+         if (this->context_namespace) {
+            if (this->context_namespace == &Script::namespaces::global) {
+               return Megalo::MegaloVariableScopeGlobal.max_variables_of_type(vt);
+            } else if (this->context_namespace == &Script::namespaces::temporaries) {
+               return Megalo::MegaloVariableScopeTemporary.max_variables_of_type(vt);
             } else {
                assert(false && "unhandled namespace!");
             }
          }
+         return 0;
       }
 
-      for (const auto* existing : this->aliases_in_scope) {
-         if (existing->invalid || !existing->target || !existing->target->is_resolved)
-            continue;
-         auto& existing_info = existing->target->resolved;
+      bool Compiler::_allocation_request_type::existing_alias_matches(const Script::Alias& existing) const {
+         if (existing.invalid || !existing.target || !existing.target->is_resolved)
+            return false;
+         const auto& existing_info = existing.target->resolved;
 
          if (existing_info.top_level.is_constant)
-            continue;
+            return false;
          if (existing_info.top_level.is_static)
-            continue;
-
+            return false;
          if (existing_info.top_level.namespace_member.scope || existing_info.top_level.namespace_member.which)
-            continue;
+            return false;
 
-         if (context_namespace) {
-            auto* existing_basis_type = existing->target->get_alias_basis_type();
+         if (this->context_namespace) {
+            auto* existing_basis_type = existing.target->get_alias_basis_type();
             if (existing_basis_type) // ignore relative aliases
-               continue;
+               return false;
             if (existing_info.nested.type) // ignore aliases of member-variables
-               continue;
-            if (existing_info.top_level.type != member_type_info) // ignore aliases of a different type
-               continue;
+               return false;
+            if (existing_info.top_level.type != this->member_type_info) // ignore aliases of a different type
+               return false;
 
             if (existing_info.top_level.is_temporary) {
-               if (context_namespace == &Script::namespaces::temporaries) {
-                  seen_indices_mask |= 1 << existing_info.top_level.index;
+               if (this->context_namespace == &Script::namespaces::temporaries) {
+                  return true;
                }
             } else {
-               if (context_namespace == &Script::namespaces::global) {
-                  seen_indices_mask |= 1 << existing_info.top_level.index;
+               if (this->context_namespace == &Script::namespaces::global) {
+                  return true;
                }
             }
-         } else {
-            auto* existing_basis_type = existing->target->get_alias_basis_type();
-            if (!existing_basis_type) // ignore absolute aliases
+            return false;
+         }
+
+         auto* existing_basis_type = existing.target->get_alias_basis_type();
+         if (!existing_basis_type) // ignore absolute aliases
+            return false;
+         if (existing_basis_type != this->context_type_info) // ignore aliases relative to a different type
+            return false;
+         if (existing_info.nested.type != this->member_type_info) // ignore aliases of a different type
+            return false;
+         return true;
+      }
+
+      QString Compiler::_allocation_request_type::to_alias_target(size_t index) const {
+         assert(this->member_type_info != nullptr);
+         assert(this->context_namespace || this->context_type_info);
+         //
+         auto target = QString("%3.%2[%1]")
+            .arg(index)
+            .arg(this->member_type_info->internal_name.c_str());
+         if (this->context_namespace)
+            target = target.arg(this->context_namespace->name.c_str());
+         else
+            target = target.arg(this->context_type_info->internal_name.c_str());
+         return target;
+      }
+      #pragma endregion
+
+   Script::Alias* Compiler::_allocate_alias(QString name, const _allocation_request_type& request_type) {
+      uint32_t seen_indices_mask  = 0;
+      size_t   context_slot_count = request_type.max_slots_available();
+
+      for (const auto* existing : this->aliases_in_scope) {
+         assert(existing != nullptr);
+         if (!existing->target)
+            continue;
+
+         // fast early-out
+         uint32_t mask = 1 << existing->target->resolved.top_level.index;
+         if (seen_indices_mask & mask)
+            continue;
+
+         if (request_type.existing_alias_matches(*existing)) {
+            seen_indices_mask |= mask;
+         }
+      }
+
+      //
+      // User-defined functions cannot allocate-to-alias safely unless we track a UDF's aliases, 
+      // and prevent the target variables from being reallocated while the UDF is in scope. Our 
+      // goal is to ensure that the following doesn't break:
+      // 
+      //    function test()
+      //       alias local_variable = allocate temporary number
+      //       local_variable = 0
+      //    end
+      // 
+      //    alias local_of_caller = allocate temporary number
+      //    local_of_caller = 1
+      //    test()
+      // 
+      //    if local_of_caller != 1 then
+      //       game.show_message_to(all_players, none, "Broken!")
+      //    end
+      //
+      for (const auto& udf : this->functions_in_scope) {
+         for (const auto* existing : udf.descendant_aliases) {
+            assert(existing != nullptr);
+            if (!existing->target)
                continue;
-            if (existing_basis_type != context_type_info) // ignore aliases relative to a different type
+
+            // fast early-out
+            uint32_t mask = 1 << existing->target->resolved.top_level.index;
+            if (seen_indices_mask & mask)
                continue;
-            if (existing_info.nested.type != member_type_info) // ignore aliases of a different type
-               continue;
-            seen_indices_mask |= 1 << existing_info.nested.index;
+
+            if (request_type.existing_alias_matches(*existing)) {
+               seen_indices_mask |= mask;
+            }
          }
       }
 
@@ -2975,85 +3043,29 @@ namespace Megalo {
             //
             // Found an available index!
             //
-            auto target = QString("%3.%2[%1]")
-               .arg(i)
-               .arg(member_type_info->internal_name.c_str());
-            if (context_namespace)
-               target = target.arg(context_namespace->name.c_str());
-            else
-               target = target.arg(context_type_info->internal_name.c_str());
-            //
-            return new Script::Alias(*this, name, target);
+            return new Script::Alias(*this, name, request_type.to_alias_target(i));
          }
       }
 
-      if (context_namespace) {
+      if (request_type.context_namespace) {
+         QString format;
+         if (request_type.context_namespace == &Script::namespaces::temporaries) {
+            format = "All available temporary %2 variables are already in use by other in-scope aliases.";
+         } else {
+            format = "All available %1.%2 variables are already in use by other in-scope aliases.";
+         }
          this->raise_error(
-            QString("All available %1.%2 variables are already in use by other in-scope aliases.")
-               .arg(context_namespace->name.c_str())
-               .arg(member_type_info->internal_name.c_str())
+            format
+               .arg(request_type.context_namespace->name.c_str())
+               .arg(request_type.member_type_info->internal_name.c_str())
          );
       } else {
          this->raise_error(
             QString("All available %1.%2 variables are already in use by other in-scope aliases.")
-               .arg(context_type_info->internal_name.c_str())
-               .arg(member_type_info->internal_name.c_str())
+               .arg(request_type.context_type_info->internal_name.c_str())
+               .arg(request_type.member_type_info->internal_name.c_str())
          );
       }
-      return nullptr;
-   }
-   Script::Alias* Compiler::_allocate_alias(QString name, const OpcodeArgTypeinfo& temporary_type) {
-      auto vt = getVariableTypeForTypeinfo(&temporary_type);
-      uint32_t seen_indices_mask  = 0;
-      size_t   context_slot_count = Megalo::MegaloVariableScopeTemporary.max_variables_of_type(vt);
-
-      for (const auto* existing : this->aliases_in_scope) {
-         if (existing->invalid || !existing->target || !existing->target->is_resolved)
-            continue;
-
-         auto* existing_basis_type = existing->target->get_alias_basis_type();
-         if (existing_basis_type) // ignore relative aliases
-            continue;
-
-         auto& existing_info = existing->target->resolved;
-         if (existing_info.top_level.type != &temporary_type) // ignore aliases of a different type
-            continue;
-
-         if (existing_info.top_level.is_constant)
-            continue;
-         if (existing_info.top_level.is_static)
-            continue;
-
-         if (existing_info.top_level.namespace_member.scope || existing_info.top_level.namespace_member.which)
-            //
-            // Seems like these only get set for namespace members, not top-level globals/temporaries, 
-            // even when the latter are of types that use which-values for their globals.
-            //
-            continue;
-
-         if (existing_info.top_level.is_temporary) {
-            seen_indices_mask |= 1 << existing_info.top_level.index;
-         }
-      }
-
-      for (size_t i = 0; i < context_slot_count; ++i) {
-         uint32_t bit = 1 << i;
-         if ((seen_indices_mask & bit) == 0) {
-            //
-            // Found an available index!
-            //
-            auto target = QString("temporaries.%2[%1]")
-               .arg(i)
-               .arg(temporary_type.internal_name.c_str());
-            //
-            return new Script::Alias(*this, name, target);
-         }
-      }
-
-      this->raise_error(
-         QString("All available temporary %1 variables are already in use by other in-scope aliases.")
-            .arg(temporary_type.internal_name.c_str())
-      );
       return nullptr;
    }
    const Script::Alias* Compiler::_alias_is_explicit_reference_to_allocated(const Script::Alias& new_alias) {
@@ -3115,6 +3127,50 @@ namespace Megalo {
       }
       return nullptr;
    }
+   void Compiler::_store_new_alias(Script::Alias& new_alias) {
+      this->block->insert_item(&new_alias);
+      if (!new_alias.invalid)
+         //
+         // TODO: Should we add invalid aliases to `aliases_in_scope` so that references to them don't throw 
+         // spurious errors? (Be sure to update the non-`allocate` code, too.) (See notes there, too.)
+         //
+         this->aliases_in_scope.push_back(&new_alias);
+
+      bool  warned_on_top_level_function = false;
+      bool  may_need_top_level_warning   = new_alias.via_allocate && new_alias.target->resolved.top_level.is_temporary;
+
+      auto* udf_block = this->block->get_nearest_function();
+      while (udf_block != nullptr) {
+         for (auto& in_scope : this->functions_in_scope) {
+            if (in_scope.content == udf_block) {
+               in_scope.descendant_aliases.push_back(&new_alias);
+
+               if (may_need_top_level_warning && !warned_on_top_level_function) {
+                  if (in_scope.parent == this->root) {
+                     warned_on_top_level_function = true;
+                     this->raise_warning(
+                        QString(
+                           "Alias %1 is a temporary variable, allocated inside of user-defined function %2(). Variables that "
+                           "are aliased from inside of a user-defined function cannot be allocated to new aliases until that "
+                           "function goes out of scope; this is a safety measure to prevent variable conflicts. However, %2() "
+                           "is outside of all code blocks, so it will never go out of scope; this temporary variable will remain "
+                           "reserved for the rest of the script and can't be repurposed by code further down. Is this "
+                           "intentional? A global variable may work better here."
+                        )
+                           .arg(new_alias.pretty_printable_name())
+                           .arg(in_scope.name)
+                     );
+                  }
+               }
+
+            }
+         }
+
+         udf_block = dynamic_cast<Script::Block*>(udf_block->parent);
+         if (udf_block)
+            udf_block = udf_block->get_nearest_function();
+      }
+   }
    void Compiler::_handleKeyword_Alias(const pos start) {
       auto name = this->extract_word();
       if (name.isEmpty()) {
@@ -3128,10 +3184,12 @@ namespace Megalo {
       if (this->extract_word("allocate")) {
          Script::Alias* item = nullptr;
 
-         auto& type_registry = OpcodeArgTypeRegistry::get();
-         if (this->extract_word("temporary")) {
-            auto  prior = this->backup_stream_state();
+         _allocation_request_type request_type;
 
+         if (this->extract_word("temporary")) {
+            auto& type_registry = OpcodeArgTypeRegistry::get();
+            auto  prior         = this->backup_stream_state();
+            
             auto  type_name = this->extract_word();
             auto* type_info = type_registry.get_variable_type(type_name);
             if (!type_info) {
@@ -3148,8 +3206,23 @@ namespace Megalo {
                //
                return;
             }
-               item = this->_allocate_alias(name, *type_info);
 
+            request_type = {
+               .context_namespace = &Script::namespaces::temporaries,
+               .member_type_info  = type_info,
+            };
+         } else {
+            auto member_name = this->extract_word();
+            if (!request_type.parse_or_fail(*this, member_name)) {
+               return;
+            }
+         }
+
+         item = this->_allocate_alias(name, request_type);
+         if (!item)
+            return;
+
+         if (request_type.context_namespace == &Script::namespaces::temporaries) {
             if (this->block == this->root) {
                this->raise_warning(
                   start,
@@ -3161,35 +3234,15 @@ namespace Megalo {
                      .arg(item->pretty_printable_name())
                );
             }
-         } else {
-            auto prior       = this->backup_stream_state();
-            auto member_name = this->extract_word();
-            //
-            item = this->_allocate_alias(name, member_name);
          }
-         if (item) {
-            item->via_allocate = true;
-            if (this->has_fatal()) { // the alias name had a fatal error e.g. using a keyword as a name
-               delete item;
-               return;
-            }
-            item->set_start(start);
-            item->set_end(this->state);
-            this->block->insert_item(item);
-            if constexpr (allow_allocate_inside_of_functions == false) {
-               if (this->block->get_nearest_function()) {
-                  this->raise_error(start, "Due to technical limitations in how ReachVariantTool's compiler works, variables cannot be safely allocated to aliases while inside of a user-defined function. Variables allocated outside of a function (i.e. by a function's containing block) can still be used from inside of the function, however.");
-                  item->invalid = true;
-               }
-            }
-            if (!item->invalid) {
-               //
-               // TODO: Should we add invalid aliases to `aliases_in_scope` so that references to them don't throw 
-               // spurious errors? (Be sure to update the non-`allocate` code, too.) (See notes there, too.)
-               //
-               this->aliases_in_scope.push_back(item);
-            }
+         item->via_allocate = true;
+         if (this->has_fatal()) { // the alias name had a fatal error e.g. using a keyword as a name
+            delete item;
+            return;
          }
+         item->set_start(start);
+         item->set_end(this->state);
+         this->_store_new_alias(*item);
          return;
       }
       Script::Alias* item = nullptr;
@@ -3225,14 +3278,8 @@ namespace Megalo {
       }
       item->set_start(start);
       item->set_end(this->state);
-      this->block->insert_item(item);
-      if (!item->invalid) { // aliases can also run into non-fatal errors
-         //
-         // TODO: Should we add invalid aliases to `aliases_in_scope` so that references to them don't throw 
-         // spurious errors? (Be sure to update the `allocate` code, too.) (See notes there, too.)
-         //
-         this->aliases_in_scope.push_back(item);
-
+      this->_store_new_alias(*item);
+      if (!item->invalid) {
          if (auto* colliding_with = this->_alias_is_explicit_reference_to_allocated(*item)) {
             this->raise_warning(
                start,

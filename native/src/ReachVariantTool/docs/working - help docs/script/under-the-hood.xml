@@ -498,62 +498,32 @@
             compiler retains its own set of unowned pointers to keep track of what aliases, user-defined 
             functions, and user-defined enums are in scope. (User-defined enums are tracked only by the 
             compiler and do not exist within the block hierarchy; however, each enum has a pointer to 
-            the block in which it was defined, which allows enums to be block-scoped.)
+            the block in which it was defined, which allows enums to be block-scoped: we know when to 
+            delete them.)
          </p>
          <p>
             Statements are compiled into Megalo opcodes and operands as they are read. Blocks are not 
-            immediately compiled into Megalo triggers and call instructions, however; they're compiled 
-            only after the full script code has been parsed. This is necessary in order to properly 
-            handle if-blocks.
-         </p>
-         
-         <h3>An example of a compiler flaw</h3>
-         <p>
-            Consider the following code:
-         </p>
-         <pre>
-            if global.object[0].player[1].number[2] == 3 then
-               -- ...
-            end
-         </pre>
-         <p>
-            A more robust compiler would first convert the script to an 
-            <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree" target="_blank">abstract syntax tree</a> 
-            &mdash; a collection of objects representing raw syntax elements &mdash; and then, in a 
-            second pass, attempt to compile that data into a valid Megalo representation.
+            compiled immediately as they're read; rather, top-level blocks are compiled once their end 
+            is fully parsed. This is necessary in order to properly handle if-blocks.
          </p>
          <p>
-            With an AST, the left-side comparand would be parsed into a data structure representing 
-            member access. No attempt would be made to validate variable access or typing; we would 
-            simply represent <code>global</code>, <code>object</code>, <code>player</code>, and 
-            <code>number</code> as <a href="https://en.wikipedia.org/wiki/Identifier_(computer_languages)" target="_blank">identifiers</a> 
-            of some sort. Once the AST has been created, we could then scan over it and see what 
-            this comparand actually maps to. A benefit of this is that even though the lefthand 
-            comparand shown above can't actually compile (because the variable is nested too 
-            deeply), we would still be able to identify its type, so we could, for example, emit 
-            additional errors if you try to compare this inaccessible number variable to an object.
+            Variable references are parsed as they are seen. ReachVariantTool only stores enough data 
+            to reliably identify a valid variable reference &mdash; so, fields for a top-level variable, 
+            nested variable, property, and accessor; as well as fields for integer constants. Invalid 
+            variable references (e.g. references nested too deeply) can't be retained at all, which 
+            also means that strict typing cannot be enforced for them. For example, ReachVariantTool 
+            cannot emit additional errors if you try to compare <code>global.object[0].number[1].player[2]</code> 
+            to <code>no_team</code>.
          </p>
-         <p>
-            ReachVariantTool, by contrast, parses and compiles in a single step, and so attempts to 
-            interpret only those variable references that are actually valid. When it reads the 
-            first part of the variable (<code>global</code>), it checks whether that refers to a 
-            namespace, a typename, an enumeration, or some other construct, and what it finds will 
-            influence how the next parts of the variable are read. In this case, upon encountering 
-            <code>player[1]</code>, we will immediately abort variable parsing, as this variable is 
-            nested too deeply. ReachVariantTool isn't even able to store invalid variables; the data 
-            structure used to store variable references only has the exact fields needed to store 
-            valid references (i.e. fields for a top-level variable, a nested variable, a property, 
-            and an accessor).
-         </p>
-         
-         <h3>Limited backtracking</h3>
          <p>
             The parser has a limited backtracking capability: handlers for keywords and other language 
             constructs can create a backup of its current position, and then restore that backup, 
             essentially allowing the compiler to rewind to places it's already been. This is used for 
             things like overload resolution (i.e. <code>game.send_incident</code>): because parsing 
             and compiling are done as a single step, the only way to tell which overload the user is 
-            invoking is trial-and-error.
+            invoking is trial-and-error. Function calls are compiled by finding an opcode that has a 
+            matching name and has been designated as a function, and attempting to compile each of the 
+            passed-in arguments into operands for that opcode.
          </p>
       </section>
    </body>

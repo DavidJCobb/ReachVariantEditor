@@ -19,6 +19,7 @@ namespace Megalo {
    //
    namespace Script {
       class Enum;
+      class Namespace;
       //
       class Comparison;
       class Block : public ParsedItem {
@@ -172,6 +173,8 @@ namespace Megalo {
             int32_t trigger_index = -1;
             Block*  content = nullptr;
             Block*  parent  = nullptr; // used so we can tell when the function goes out of scope
+
+            std::vector<const Alias*> descendant_aliases; // used for allocation
             
             UserDefinedFunction() {}
             UserDefinedFunction(const QString& n, int32_t ti, Block& b) : name(n), trigger_index(ti), content(&b), parent(dynamic_cast<Block*>(b.parent)) {}
@@ -268,6 +271,7 @@ namespace Megalo {
          std::vector<Script::Alias*> aliases_in_scope; // unowned pointers; the aliases are owned by their containing Blocks
          std::vector<Script::UserDefinedEnum> enums_in_scope;
          std::vector<Script::UserDefinedFunction> functions_in_scope;
+         std::vector<Script::Block*> already_compiled_blocks;
          GameVariantDataMultiplayer& variant;
          //
          log_t notices;
@@ -410,10 +414,22 @@ namespace Megalo {
          //
          QString extract_operator();
          //
-         #pragma region Variable declaration helpers
-            Script::Alias* _allocate_alias(QString name, QString member_type);
-            Script::Alias* _allocate_alias(QString name, const OpcodeArgTypeinfo& temporary_type);
+         #pragma region Alias declaration helpers
+            struct _allocation_request_type {
+               const Script::Namespace* context_namespace = nullptr;
+               const OpcodeArgTypeinfo* context_type_info = nullptr;
+               const OpcodeArgTypeinfo* member_type_info  = nullptr;
+
+               bool    parse_or_fail(Compiler& compiler, const QString& member_type);
+               size_t  max_slots_available() const;
+               bool    existing_alias_matches(const Script::Alias& existing) const;
+               QString to_alias_target(size_t index) const;
+            };
+            Script::Alias* _allocate_alias(QString name, const _allocation_request_type&);
             const Script::Alias* _alias_is_explicit_reference_to_allocated(const Script::Alias& new_alias);
+            void _store_new_alias(Script::Alias&);
+         #pragma endregion
+         #pragma region Variable declaration helpers
             void _declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified);
          #pragma endregion
          //

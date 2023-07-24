@@ -204,62 +204,71 @@
          one that allocates a variable.
       </p>
       
-      <h3>Technical limitation: user-defined functions</h3>
+      <h3>User-defined functions</h3>
       <p>
-         Due to technical limitations, you are not allowed to allocate variables to aliases 
-         while inside of a user-defined function. Trying to do so will trigger a compiler 
-         error.
+         Allocation-to-aliases works inside of user-defined functions; however, there 
+         are technical limitations that arise as a result of flaws in ReachVariantTool's 
+         design.
+      </p>
+      <p>
+         If a user-defined function is in scope, and the function definition contains 
+         aliases, then none of the aliased variables can be allocated to a new alias 
+         until the function goes out of scope. This is an exception to the normal rules 
+         for allocation-to-aliases, and is a safety measure to prevent variable collisions 
+         in situations like the following:
       </p>
       <pre>
-         function my_function()
+         function some_helper_function()
+            alias local_variable = allocate temporary number
             
-            -- This is an error:
-            alias temporary_variable = allocate temporary number
-            
+            local_variable = 5
+         end
+         
+         alias some_important_variable = allocate temporary number
+         some_important_variable = 1
+         
+         some_helper_function()
+         
+         if some_important_variable != 1 then
+            game.show_message_to(all_players, none, "Oh no!")
          end
       </pre>
       <p>
-         The reason for this is that ReachVariantTool handles variables as it reads your 
-         code; it never backtracks, so it can't fix them up based on anything it sees 
-         later in your script. This means that in situations like the following, there's 
-         no way to prevent a function definition's allocated variables from <dfn>clobbering</dfn> 
-         the variables of its caller:
+         In that code snippet, we allocate a temporary variable to an alias, <var>local_variable</var>, 
+         inside the function. However, once we reach the end of the function body, that alias is, 
+         technically, out of scope. The only way to prevent <var>some_important_variable</var> from 
+         accidentally reusing that same variable &mdash; leading to a variable collision, where 
+         calling the function accidentally <a href="https://en.wikipedia.org/wiki/Clobbering" target="_blank">clobbers</a> 
+         data in the caller &mdash; is to make it so that variables that are aliased in any in-scope 
+         function are reserved.
+      </p>
+      <p>
+         This is a very imperfect workaround. In the following situation, for example, both of the 
+         user-defined functions are forced to use separate variables even though there's no risk 
+         of a collsiion between them (because neither function calls the other):
       </p>
       <pre>
-         function my_function()
-            -- Let's pretend, for a second, that ReachVariantTool allows this:
-            alias temporary_variable = allocate temporary number
-            
-            temporary_variable = 5
+         function first()
+            alias first_alias = allocate temporary number
          end
          
-         -- The `temporary_variable` alias in `my_function()` is now out of scope. The 
-         -- compiler doesn't know it exists anymore. This means that the compiler thinks 
-         -- that variable is safe to use...
-         
-         -- ... so that variable gets allocated to this alias here.
-         alias important_variable = allocate temporary number
-         
-         important_variable = 5
-         
-         -- So code that comes later in the file will try to use a variable that's already 
-         -- taken by code that comes earlier in the file yet executes later during play. 
-         -- Since the compiler always handles variables and aliases going downward, it 
-         -- can't backtrack and fix this.
-         my_function()
-         
-         if important_variable != 5 then
-            crash_the_game()
+         function second()
+            alias second_alias = allocate temporary number
          end
       </pre>
       <p>
-         The workaround is to pre-allocate your aliases just outside of the function:
+         This is all necessary because of technical limitations in ReachVariantTool's design: it 
+         only reads your code once, and it never backtracks to revise what it's compiled. When it 
+         sees the definition of <code>second_alias</code>, it hasn't yet read the rest of <code>second()</code>, 
+         so it doesn't know for sure whether <code>second()</code> calls <code>first()</code>; it only 
+         knows that <code>second()</code> <em>can</em> call <code>first()</code>, so it gives <code>second()</code> 
+         a separate variable in order to avoid any potential collisions.
       </p>
-      <pre>
-         alias function_local_variable = allocate temporary number
-         function my_function()
-            function_local_variable = 5
-         end
-      </pre>
+      <p>
+         A side-effect of this is that if you define a function outside of any other block, and that 
+         function allocates temporary variables, then you will accidentally reserve those variables 
+         for the entire rest of the script, preventing any other code from reusing them. One fix for  
+         this is to nest your functions in whatever blocks of code actually use them.
+      </p>
    </body>
 </article>

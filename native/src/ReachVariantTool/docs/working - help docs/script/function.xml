@@ -38,6 +38,55 @@
          my_cool_code()
       </pre>
       
+      <h2>Scoping</h2>
+      <p>
+         Like <a href="alias">aliases</a>, user-defined functions are block-scoped: they are 
+         only available from inside of the block in which they were defined.
+      </p>
+      <pre>
+         --
+         -- Let's loop over every player. If a player is holding an Assault Rifle, replace it 
+         -- with a DMR; but if they're already holding a DMR, replace it with an Assault Rifle.
+         --
+         
+         for each player do
+            alias current_weapon = allocate temporary object
+            
+            --
+            -- We need to run the same code for both of the player's weapons, so let's define 
+            -- a helper function so that we can avoid copying and pasting.
+            --
+            
+            function swap_weapon()
+               alias swapped_weapon = allocate temporary object
+               
+               swapped_weapon = no_object
+               if current_weapon.is_of_type(assault_rifle) then
+                  swapped_weapon = current_player.place_at_me(dmr)
+               end
+               if current_weapon.is_of_type(dmr) then
+                  swapped_weapon = current_player.place_at_me(assault_rifle)
+               end
+               current_weapon.delete()
+               current_player.add_weapon(swapped_weapon)
+            end
+            
+            current_weapon = current_player.get_weapon(secondary)
+            swap_weapon()
+            
+            current_weapon = current_player.get_weapon(primary)
+            swap_weapon()
+         
+         end
+         
+         --
+         -- The `swap_weapon()` function was defined inside of the loop. Now that we're outside 
+         -- of the loop, the function has gone "out of scope;" we can't call it anymore. This is 
+         -- useful for organizing code: if a function is only used in a small part of your script, 
+         -- then it's best to keep it near that part of your script.
+         --
+      </pre>
+      
       <h2>Recursion</h2>
       <p>
          User-defined functions can be <dfn>recursive</dfn>: that is, they can call themselves 
