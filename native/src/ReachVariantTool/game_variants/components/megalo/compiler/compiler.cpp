@@ -3050,14 +3050,14 @@ namespace Megalo {
       if (request_type.context_namespace) {
          QString format;
          if (request_type.context_namespace == &Script::namespaces::temporaries) {
-            format = "All available temporary %2 variables are already in use by other in-scope aliases.";
+            format = "All available temporary %1 variables are already in use by other in-scope aliases.";
          } else {
-            format = "All available %1.%2 variables are already in use by other in-scope aliases.";
+            format = "All available %2.%1 variables are already in use by other in-scope aliases.";
          }
          this->raise_error(
             format
-               .arg(request_type.context_namespace->name.c_str())
                .arg(request_type.member_type_info->internal_name.c_str())
+               .arg(request_type.context_namespace->name.c_str())
          );
       } else {
          this->raise_error(
@@ -4112,6 +4112,10 @@ namespace Megalo {
                this->restore_stream_state(after_inline);
                return;
             }
+         }
+         if (word == "alt" || word == "altif") {
+            this->restore_stream_state(after_inline);
+            return;
          }
          //
          // Invalid word.

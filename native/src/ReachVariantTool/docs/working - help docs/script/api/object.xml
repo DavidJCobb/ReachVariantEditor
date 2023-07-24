@@ -1298,6 +1298,27 @@
                   pointing exactly to your right before you rotate it with this function,
                   then this will exactly match what you see in a graphing calculator.
                </p>
+               
+               <!-- *very* quick-and-dirty helper calculator: -->
+               <p>
+                  You can use this calculator to compute the right x/y values to use for a 
+                  given yaw-angle change:
+               </p>
+               
+               <script src="script/api/object/actions/face_toward/calculator.js"></script>
+               <style>
+                  face-toward-calculator {
+                     display: flex;
+                     flex-flow: row nowrap;
+                     gap: 1em;
+                  }
+               </style>
+               
+               <face-toward-calculator></face-toward-calculator>
+               <noscript>
+                  <p>Wait, no, you can't. You need JavaScript for this. (Sorry.)</p>
+               </noscript>
+               <!-- end calculator -->
             </note>
             <category id="positioning" />
          </method>
