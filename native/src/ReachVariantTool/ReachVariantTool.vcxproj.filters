@@ -469,6 +469,9 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\megalo_scope.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\widgets\RoundCardTextPreview.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -1153,6 +1156,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\compiler\variable_usage_set.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\widgets\RoundCardTextPreview.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

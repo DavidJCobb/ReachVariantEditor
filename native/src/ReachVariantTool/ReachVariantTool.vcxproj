@@ -247,6 +247,7 @@
     <ClCompile Include="ui\script_editor\page_script_widgets.cpp" />
     <ClCompile Include="ui\script_editor\page_string_table.cpp" />
     <ClCompile Include="ui\widgets\option_toggles.cpp" />
+    <ClCompile Include="ui\widgets\RoundCardTextPreview.cpp" />
     <ClCompile Include="ui\widgets\string_picker.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -352,6 +353,7 @@
     <ClInclude Include="helpers\miscellaneous.h" />
     <ClInclude Include="helpers\numeric.h" />
     <ClInclude Include="helpers\pointer_list.h" />
+    <ClInclude Include="ui\widgets\RoundCardTextPreview.h" />
     <QtMoc Include="ui\script_editor\page_script_code.h" />
     <QtMoc Include="ui\script_editor\page_map_perms.h" />
     <QtMoc Include="ui\script_editor\page_metadata_strings.h" />

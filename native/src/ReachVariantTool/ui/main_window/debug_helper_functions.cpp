@@ -7,6 +7,13 @@
 #include <QTextStream>
 #include "../../game_variants/types/multiplayer.h"
 
+#include <QApplication>
+#include <QBoxLayout>
+#include <QDialog>
+#include <QFont>
+#include <QFontDatabase>
+#include <QLabel>
+
 namespace DebugHelperFunctions {
    void break_on_variant() {
       auto variant = ReachEditorState::get().variant();
@@ -116,5 +123,59 @@ namespace DebugHelperFunctions {
          }
          out << "\r\n";
       }
+   }
+   void test_loading_hrek_fonts(QWidget* parentWindow) {
+      QString eurostile = QFileDialog::getOpenFileName(
+         parentWindow,
+         "Eurostile",
+         "",
+         "OpenType Font (*.otf);;TrueType Font (*.ttf);;All Files (*)"
+      );
+      QString tv_nord = QFileDialog::getOpenFileName(
+         parentWindow,
+         "TV Nord",
+         "",
+         "OpenType Font (*.otf);;TrueType Font (*.ttf);;All Files (*)"
+      );
+
+      QFontDatabase font_db;
+      auto id_eurostile = font_db.addApplicationFont(eurostile);
+      auto id_tv_nord   = font_db.addApplicationFont(tv_nord);
+
+      auto* dialog = new QDialog(parentWindow);
+      auto* layout = new QVBoxLayout(dialog);
+      dialog->setLayout(layout);
+
+      {
+         QString family;
+         auto    list = QFontDatabase::applicationFontFamilies(id_eurostile);
+         if (!list.isEmpty()) {
+            family = list[0];
+         }
+
+         QFont font(family);
+         font.setPixelSize(40);
+
+         auto* label = new QLabel("This is text in Eurostile.");
+         label->setFont(font);
+         layout->addWidget(label);
+      }
+      {
+         QString family;
+         auto    list = QFontDatabase::applicationFontFamilies(id_tv_nord);
+         if (!list.isEmpty()) {
+            family = list[0];
+         }
+
+         QFont font(family);
+         font.setPixelSize(24);
+
+         auto* label = new QLabel("This is text in TV Nord.");
+         label->setFont(font);
+         layout->addWidget(label);
+      }
+
+      dialog->exec();
+      delete dialog;
    }
 }

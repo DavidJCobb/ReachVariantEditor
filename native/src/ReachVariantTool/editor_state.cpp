@@ -3,6 +3,7 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileDialog>
+#include <QFontDatabase>
 #include <QMessageBox>
 #include <QProcess>
 #include <QSaveFile>
@@ -53,6 +54,28 @@ ReachEditorState::ReachEditorState() {
          dir.cd("AppData/LocalLow/MCC/LocalFiles/");
          if (dir.exists()) {
             this->dirSavedVariants = dir.absolutePath();
+         }
+      }
+   }
+   {
+      std::wstring dir;
+      if (cobb::steam::get_game_directory(1695793, dir)) {
+         QString hrek = QString::fromWCharArray(dir.c_str());
+         if (!hrek.isEmpty()) {
+            hrek += "/data/ui/fonts/";
+
+            auto id = QFontDatabase::addApplicationFont(hrek + "EurostileLTPro-Demi.otf");
+            if (id > 0) {
+               auto families = QFontDatabase::applicationFontFamilies(id);
+               if (!families.isEmpty())
+                  this->reachUIFontFamilyNames.eurostile = families[0];
+            }
+            id = QFontDatabase::addApplicationFont(hrek + "CHT_TNRGC__+DFYuanBold-B5.ttf");
+            if (id > 0) {
+               auto families = QFontDatabase::applicationFontFamilies(id);
+               if (!families.isEmpty())
+                  this->reachUIFontFamilyNames.tv_nord = families[0];
+            }
          }
       }
    }
@@ -282,4 +305,12 @@ void ReachEditorState::getDefaultSaveDirectory(QString& out) const noexcept {
          out = this->dirSavedVariants;
          return;
    }
+}
+
+
+std::optional<QString> ReachEditorState::getReachEditingKitWidgetFontFamily() const {
+   return this->reachUIFontFamilyNames.eurostile;
+}
+std::optional<QString> ReachEditorState::getReachEditingKitBodyTextFontFamily() const {
+   return this->reachUIFontFamilyNames.tv_nord;
 }

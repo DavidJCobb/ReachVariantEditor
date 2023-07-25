@@ -2,6 +2,7 @@
 #include "localized_string_library.h"
 #include "../editor_state.h"
 #include "../game_variants/types/multiplayer.h"
+#include "./widgets/RoundCardTextPreview.h"
 #include <QAbstractTextDocumentLayout>
 
 namespace {
@@ -148,6 +149,42 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
          }
          QApplication::beep();
       });
+   }
+
+   if (ReachEditorState::get().getReachEditingKitBodyTextFontFamily().has_value()) {
+      this->ui.togglePreviewRoundCard->setDisabled(false);
+
+      QObject::connect(this->ui.togglePreviewRoundCard, &QCheckBox::toggled, this, [this](bool checked) {
+         if (!this->_roundCardPreview.dialog) {
+            assert(!this->_roundCardPreview.preview);
+
+            auto* dialog = this->_roundCardPreview.dialog  = new QDialog(this);
+            auto* widget = this->_roundCardPreview.preview = new RoundCardTextPreview(dialog);
+
+            auto* layout = new QVBoxLayout(dialog);
+            dialog->setLayout(layout);
+            layout->addWidget(widget);
+
+            const auto* variant = ReachEditorState::get().multiplayerData();
+            if (variant)
+               widget->setVariantName(QString::fromUtf16(variant->variantHeader.title));
+         }
+         if (checked)
+            this->_roundCardPreview.dialog->show();
+         else
+            this->_roundCardPreview.dialog->hide();
+      });
+
+      for (auto* field : this->languageFields) {
+         QObject::connect(field, &QPlainTextEdit::textChanged, this, [this, field]() {
+            if (!this->_roundCardPreview.preview)
+               return;
+            this->_roundCardPreview.preview->setObjective(field->toPlainText());
+            this->_roundCardPreview.dialog->update(); // force redraw even though that dialog is unfocused
+         });
+      }
+   } else {
+      this->ui.togglePreviewRoundCard->setDisabled(true);
    }
 }
 /*static*/ bool LocalizedStringEditorModal::editString(QWidget* parent, uint32_t flags, ReachString* target) {

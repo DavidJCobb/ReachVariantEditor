@@ -226,6 +226,11 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       QObject::connect(this->ui.actionDebugbreak, &QAction::triggered, DebugHelperFunctions::break_on_variant);
       QObject::connect(this->ui.actionDebugExportTriggersText, &QAction::triggered, [this]() { DebugHelperFunctions::export_variant_triggers_english(this); });
       QObject::connect(this->ui.actionDebugExportStringsText, &QAction::triggered, [this]() { DebugHelperFunctions::export_variant_strings(this); });
+      {
+         auto* action = new QAction("Debug: test fonts", this);
+         QObject::connect(action, &QAction::triggered, [this]() { DebugHelperFunctions::test_loading_hrek_fonts(this); });
+         this->ui.menuTools->addAction(action);
+      }
    #else
       this->ui.actionDebugbreak->setEnabled(false);
       this->ui.actionDebugbreak->setVisible(false);

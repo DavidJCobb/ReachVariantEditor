@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 #include <QObject>
 
 class GameVariant;
@@ -38,6 +39,11 @@ class ReachEditorState : public QObject {
       QString dirBuiltInVariants;
       QString dirMatchmakingVariants;
       //
+      struct {
+         std::optional<QString> eurostile;
+         std::optional<QString> tv_nord;
+      } reachUIFontFamilyNames;
+      
    signals:
       void variantAbandoned(GameVariant* variant); // the game variant is deleted after this is emitted
       void variantAcquired(GameVariant* variant);
@@ -87,4 +93,7 @@ class ReachEditorState : public QObject {
 
       void getDefaultLoadDirectory(QString& out) const noexcept;
       void getDefaultSaveDirectory(QString& out) const noexcept;
+
+      std::optional<QString> getReachEditingKitWidgetFontFamily() const;
+      std::optional<QString> getReachEditingKitBodyTextFontFamily() const;
 };

@@ -3,16 +3,18 @@
 #include <vector>
 #include "../formats/localized_string_table.h"
 
+class RoundCardTextPreview;
+
 class LocalizedStringEditorModal : public QDialog {
    Q_OBJECT
    public:
       using Flags = ReachStringFlags::type;
    public:
       LocalizedStringEditorModal(QWidget* parent = nullptr);
-      //
+      
       static bool editString(QWidget* parent, uint32_t flags = 0, ReachString* target = nullptr);
       static bool editString(QWidget* parent, uint32_t flags, MegaloStringRef& targetRef);
-      //
+      
    private:
       Ui::LocalizedStringEditorModal ui;
       //
@@ -24,7 +26,11 @@ class LocalizedStringEditorModal : public QDialog {
       bool _isNotInStandardStringTable   = false; // for metadata, team names, etc.
       bool _limitToSingleLanguageStrings = false;
       int  _maxLength = -1; // special-case for team names
-      //
+      struct {
+         QDialog* dialog = nullptr; // owned
+         RoundCardTextPreview* preview = nullptr;
+      } _roundCardPreview;
+      
       void updateControls();
       void updateTextboxes(ReachString* use = nullptr);
 };
