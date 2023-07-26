@@ -262,6 +262,16 @@ namespace Megalo {
             Trigger* trigger = nullptr;
             QString  label_name;
          };
+
+         struct UnresolvedOpcodeForgeLabel {
+            struct argument {
+               size_t  argument_index;
+               QString label_name;
+            };
+
+            Opcode* opcode = nullptr;
+            std::vector<argument> labels;
+         };
          
          Script::Block* root  = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
          Script::Block* block = nullptr; // current block being parsed
@@ -287,6 +297,7 @@ namespace Megalo {
          log_t fatal_errors;
          //
          std::vector<UnresolvedTriggerForgeLabel> triggers_pending_forge_labels;
+         std::vector<UnresolvedOpcodeForgeLabel>  opcodes_pending_forge_labels;
          
          void _commit_unresolved_strings(unresolved_str_list&);
          
@@ -325,6 +336,7 @@ namespace Megalo {
          inline unresolved_str_list& get_unresolved_string_references() noexcept { return this->results.unresolved_strings; }
          //
          size_t get_new_forge_label_count() const;
+         bool new_forge_label_not_yet_tracked(const QString& name) const;
          
          inline bool has_errors() const noexcept { return !this->errors.empty() || !this->fatal_errors.empty(); }
          inline bool has_fatal() const noexcept { return !this->fatal_errors.empty(); }
@@ -403,7 +415,7 @@ namespace Megalo {
          void _applyConditionModifiers(Script::Comparison*); // applies "not", "and", "or", and then resets the relevant state on the Compiler
          Script::VariableReference* __parseVariable(QString, bool is_alias_definition = false, bool is_write_access = false); // adds the variable to the appropriate VariableDeclarationSet as appropriate
          //
-         void __parseFunctionArgs(const OpcodeBase&, Opcode&, unresolved_str_list&);
+         void __parseFunctionArgs(const OpcodeBase&, Opcode&, unresolved_str_list&, UnresolvedOpcodeForgeLabel&);
          Script::Statement* _parseFunctionCall(const pos& pos, QString stem, bool is_condition, Script::VariableReference* assign_to = nullptr);
          
          void _openBlock(Script::Block*);

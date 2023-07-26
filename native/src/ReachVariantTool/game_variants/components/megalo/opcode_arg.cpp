@@ -57,6 +57,11 @@ namespace Megalo {
       result.error = content;
       return result;
    }
+   /*static*/ arg_compile_result arg_compile_result::unresolved_label(QString content) {
+      auto result = arg_compile_result(code_t::unresolved_label);
+      result.error = content;
+      return result;
+   }
 
    OpcodeArgValue* OpcodeArgValue::clone() const noexcept {
       auto arg = this->create_of_this_type();

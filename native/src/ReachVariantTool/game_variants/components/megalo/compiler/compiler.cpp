@@ -5,6 +5,7 @@
 #include "namespaces.h"
 #include "../../../helpers/qt/string.h"
 #include "../opcode_arg_types/all_indices.h" // OpcodeArgValueTrigger
+#include "../opcode_arg_types/forge_label.h"
 #include "../opcode_arg_types/megalo_scope.h"
 #include "../opcode_arg_types/variables/all_core.h"
 #include "../opcode_arg_types/variables/any_variable.h"
@@ -356,10 +357,6 @@ namespace Megalo {
             }
             if (index == -1) {
                compiler._trigger_needs_forge_label(*t, this->label_name);
-               compiler.raise_notice(
-                  QString("The specified Forge label (\"%1\") isn't defined in the game variant data. If compilation succeeds, a label with this name will be created for you.")
-                     .arg(this->label_name)
-               );
             } else
                t->forgeLabel = &list[index];
          }
@@ -764,11 +761,34 @@ namespace Megalo {
       size_t count = 0;
       //
       QVector<QString> seen;
-      for (auto& item : this->triggers_pending_forge_labels)
-         if (!seen.contains(item.label_name))
+      for (auto& item : this->triggers_pending_forge_labels) {
+         if (!seen.contains(item.label_name)) {
             ++count;
+            seen.push_back(item.label_name);
+         }
+      }
+      for (auto& item : this->opcodes_pending_forge_labels) {
+         for (auto& entry : item.labels) {
+            if (!seen.contains(entry.label_name)) {
+               ++count;
+               seen.push_back(entry.label_name);
+            }
+         }
+      }
       //
       return count;
+   }
+   bool Compiler::new_forge_label_not_yet_tracked(const QString& name) const {
+      for (auto& item : this->triggers_pending_forge_labels)
+         if (item.label_name == name)
+            return false;
+      for (auto& item : this->opcodes_pending_forge_labels) {
+         for (auto& entry : item.labels) {
+            if (entry.label_name == name)
+               return false;
+         }
+      }
+      return true;
    }
    
    bool Compiler::try_decode_enum_reference(QString word, int32_t& out) const {
@@ -1310,11 +1330,11 @@ namespace Megalo {
          {  // Ensure that we're under the limits for new Forge labels.
             auto& mp     = this->variant;
             auto& labels = mp.scriptContent.forgeLabels;
-            if (labels.size() + this->triggers_pending_forge_labels.size() > Megalo::Limits::max_script_labels) {
+            if (labels.size() + this->get_new_forge_label_count() > Megalo::Limits::max_script_labels) {
                this->raise_error(
                   QString("The existing game variant contains %1 Forge labels, and the compiled script contains %2 unrecognized Forge labels. We cannot create these labels, as only a total of %3 are allowed.")
                      .arg(labels.size())
-                     .arg(this->triggers_pending_forge_labels.size())
+                     .arg(this->get_new_forge_label_count())
                      .arg(Limits::max_script_labels)
                );
             }
@@ -1395,28 +1415,27 @@ namespace Megalo {
          //
          auto& labels = mp.scriptContent.forgeLabels;
          auto& string_table = mp.scriptData.strings;
-         //
+         
          struct _HandledLabel {
             QString name;
             size_t  index;
          };
          std::vector<_HandledLabel> handled;
-         //
-         for (auto& item : this->triggers_pending_forge_labels) {
+
+         auto _get_or_create_label = [&handled, &labels, &string_table](QString name) -> ReachForgeLabel* {
             //
             // If multiple triggers referred to the same not-yet-created label, then after we 
             // create it for the first trigger, we should reuse it for subsequent triggers.
             //
             size_t existing = std::string::npos;
             for (auto& prior : handled) {
-               if (prior.name == item.label_name) {
+               if (prior.name == name) {
                   existing = prior.index;
                   break;
                }
             }
             if (existing != std::string::npos) {
-               item.trigger->forgeLabel = labels[existing];
-               continue;
+               return &labels[existing];
             }
             //
             // Create the string, if no existing string is there:
@@ -1424,11 +1443,11 @@ namespace Megalo {
             ReachString* str = nullptr;
             {
                bool multiple;
-               str = string_table.lookup(item.label_name, multiple);
+               str = string_table.lookup(name, multiple);
                if (!str || multiple) {
                   str = string_table.add_new();
                   for (int i = 0; i < reach::language_count; ++i)
-                     str->get_write_access((reach::language)i) = item.label_name.toStdString();
+                     str->get_write_access((reach::language)i) = name.toStdString();
                }
             }
             //
@@ -1437,14 +1456,27 @@ namespace Megalo {
             auto& label = *labels.emplace_back();
             label.is_defined = true;
             label.name = str;
-            handled.push_back({ item.label_name, labels.size() - 1 });
-            //
-            // Assign the label:
-            //
-            item.trigger->forgeLabel = &label;
+            handled.push_back({ name, labels.size() - 1 });
+
+            return &label;
+         };
+         
+         for (auto& item : this->opcodes_pending_forge_labels) {
+            auto* opcode = item.opcode;
+            for (auto& pending_label : item.labels) {
+               assert(&(opcode->function->arguments[pending_label.argument_index].typeinfo) == &OpcodeArgValueForgeLabel::typeinfo);
+               OpcodeArgValueForgeLabel* argument = (OpcodeArgValueForgeLabel*)opcode->arguments[pending_label.argument_index];
+               if (!argument)
+                  argument = new OpcodeArgValueForgeLabel;
+               argument->value = _get_or_create_label(pending_label.label_name);
+            }
+         }
+         for (auto& item : this->triggers_pending_forge_labels) {
+            item.trigger->forgeLabel = _get_or_create_label(item.label_name);
          }
       }
       this->triggers_pending_forge_labels.clear();
+      this->opcodes_pending_forge_labels.clear();
       this->results.triggers.clear();
       //
       mp.scriptContent.entryPoints = this->results.events;
@@ -2316,7 +2348,7 @@ namespace Megalo {
    }
    //
    #pragma region function call handling
-   void Compiler::__parseFunctionArgs(const OpcodeBase& function, Opcode& opcode, Compiler::unresolved_str_list& unresolved_strings) {
+   void Compiler::__parseFunctionArgs(const OpcodeBase& function, Opcode& opcode, unresolved_str_list& unresolved_strings, UnresolvedOpcodeForgeLabel& unresolved_labels) {
       auto& mapping = function.mapping;
       opcode.function = &function;
       opcode.arguments.resize(function.arguments.size());
@@ -2379,7 +2411,7 @@ namespace Megalo {
          bool success = result.is_success();
          if (failure) {
             bool irresolvable = result.is_irresolvable_failure();
-            //
+            
             QString error = QString("Failed to parse script argument %1 (type %2).").arg(script_arg_index + 1).arg(function.arguments[mapped_index].typeinfo.friendly_name);
             if (!result.error.isEmpty()) {
                error.reserve(error.size() + 1 + result.error.size());
@@ -2412,6 +2444,19 @@ namespace Megalo {
                      unresolved_str(*current_argument, opcode_arg_part) // value
                   );
                   this->validate_format_string_tokens(s);
+               }
+               if (result.is_unresolved_label()) {
+                  auto s = result.get_unresolved_label();
+                  if (this->new_forge_label_not_yet_tracked(s)) {
+                     this->raise_notice(
+                        QString("The specified Forge label (\"%1\") isn't defined in the game variant data. If compilation succeeds, a label with this name will be created for you.")
+                           .arg(s)
+                     );
+                  }
+                  unresolved_labels.labels.push_back(UnresolvedOpcodeForgeLabel::argument{
+                     .argument_index = (size_t)mapped_index,
+                     .label_name     = result.get_unresolved_label()
+                  });
                }
             }
          }
@@ -2652,6 +2697,8 @@ namespace Megalo {
       auto start = this->backup_stream_state();
       auto check = this->create_log_checkpoint();
       unresolved_str_list unresolved_strings;
+      UnresolvedOpcodeForgeLabel unresolved_labels;
+      unresolved_labels.opcode = opcode.get();
       for (auto* function : opcode_bases) {
          //
          // If two opcodes have the same name and context (or lack thereof), then they are overloads of 
@@ -2660,10 +2707,11 @@ namespace Megalo {
          //
          opcode->reset();
          unresolved_strings.clear();
+         unresolved_labels.labels.clear();
          this->revert_to_log_checkpoint(check);
          this->restore_stream_state(start);
          //
-         this->__parseFunctionArgs(*function, *opcode.get(), unresolved_strings); // advances us past the closing ")" EVEN IF IT FAILS FOR ANY REASON
+         this->__parseFunctionArgs(*function, *opcode.get(), unresolved_strings, unresolved_labels); // advances us past the closing ")" EVEN IF IT FAILS FOR ANY REASON
          if (!this->checkpoint_has_errors(check)) {
             match = function;
             break;
@@ -2866,6 +2914,10 @@ namespace Megalo {
          this->__after_compiled_statement(*statement);
       }
       this->_commit_unresolved_strings(unresolved_strings);
+      if (!unresolved_labels.labels.empty()) {
+         assert(unresolved_labels.opcode != nullptr);
+         this->opcodes_pending_forge_labels.push_back(unresolved_labels);
+      }
       return statement;
    }
    #pragma endregion
@@ -2879,6 +2931,12 @@ namespace Megalo {
       return -1;
    }
    void Compiler::_trigger_needs_forge_label(Trigger& t, QString name) {
+      if (this->new_forge_label_not_yet_tracked(name)) {
+         this->raise_notice(
+            QString("The specified Forge label (\"%1\") isn't defined in the game variant data. If compilation succeeds, a label with this name will be created for you.")
+               .arg(name)
+         );
+      }
       this->triggers_pending_forge_labels.push_back({ &t, name });
    }
    VariableDeclarationSet* Compiler::_get_variable_declaration_set(variable_scope vs) noexcept {

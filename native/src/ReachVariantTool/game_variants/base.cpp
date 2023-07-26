@@ -407,6 +407,7 @@ bool GameVariant::read_mglo(const void* data, size_t size) {
    this->blamHeader.header.found.version = 1;
    this->blamHeader.header.found.flags   = 2;
    this->blamHeader.data.unk0C = 0xFFFE;
+   this->multiplayer.type = ReachGameEngine::multiplayer;
    if (auto mp = this->get_multiplayer_data()) {
       if (error_report.state == GameEngineVariantLoadError::load_state::failure) {
          return false;

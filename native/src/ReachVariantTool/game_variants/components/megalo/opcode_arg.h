@@ -214,38 +214,46 @@ namespace Megalo {
          success,
          unresolved_string, // implies success
          base_class_is_expecting_override_behavior, // used by Variable to signal to subclasses that they should run their own logic
+         unresolved_label, // implies success
       };
       enum class more_t : uint8_t {
          no,       // we're good
          needed,   // we require another script argument
          optional, // we can take another script argument
       };
-      //
+      
       QString error; // if the (code) indicates an unresolved string, then this is the string content, not an error
       code_t  code = code_t::failure;
       more_t  more = more_t::no;
-      //
+      
       static arg_compile_result failure(bool irresolvable = false);
       static arg_compile_result failure(const char*, bool irresolvable = false); // overload needed because const char* implicitly casts to bool, not QString
       static arg_compile_result failure(QString, bool irresolvable = false);
       static arg_compile_result success();
       static arg_compile_result unresolved_string(QString);
+      static arg_compile_result unresolved_label(QString);
       //
       arg_compile_result() {}
       arg_compile_result(code_t c) : code(c) {}
+      
+      [[nodiscard]] constexpr bool is_failure() const noexcept { return this->code == code_t::failure || this->code == code_t::failure_irresolvable || this->code == code_t::base_class_is_expecting_override_behavior; }
+      [[nodiscard]] constexpr bool is_irresolvable_failure() const noexcept { return this->code == code_t::failure_irresolvable; }
+      [[nodiscard]] constexpr bool is_success() const noexcept { return this->code == code_t::success || this->code == code_t::unresolved_string || this->code == code_t::unresolved_label; }
+      [[nodiscard]] constexpr bool is_unresolved_label() const noexcept { return this->code == code_t::unresolved_label; }
+      [[nodiscard]] constexpr bool is_unresolved_string() const noexcept { return this->code == code_t::unresolved_string; }
+      [[nodiscard]] constexpr bool needs_another() const noexcept { return this->more == more_t::needed; }
+      [[nodiscard]] constexpr bool can_take_another() const noexcept { return this->more == more_t::optional; }
       //
-      [[nodiscard]] inline bool is_failure() const noexcept { return this->code == code_t::failure || this->code == code_t::failure_irresolvable || this->code == code_t::base_class_is_expecting_override_behavior; }
-      [[nodiscard]] inline bool is_irresolvable_failure() const noexcept { return this->code == code_t::failure_irresolvable; }
-      [[nodiscard]] inline bool is_success() const noexcept { return this->code == code_t::success || this->code == code_t::unresolved_string; }
-      [[nodiscard]] inline bool is_unresolved_string() const noexcept { return this->code == code_t::unresolved_string; }
-      [[nodiscard]] inline bool needs_another() const noexcept { return this->more == more_t::needed; }
-      [[nodiscard]] inline bool can_take_another() const noexcept { return this->more == more_t::optional; }
-      //
-      inline arg_compile_result& set_more(more_t more) noexcept { this->more = more; return *this; }
-      inline arg_compile_result& set_needs_more(bool yes) noexcept { this->more = yes ? more_t::needed : more_t::no; return *this; }
+      constexpr arg_compile_result& set_more(more_t more) noexcept { this->more = more; return *this; }
+      constexpr arg_compile_result& set_needs_more(bool yes) noexcept { this->more = yes ? more_t::needed : more_t::no; return *this; }
       //
       inline QString get_unresolved_string() const noexcept {
          if (this->is_unresolved_string())
+            return this->error;
+         return "";
+      }
+      inline QString get_unresolved_label() const noexcept {
+         if (this->is_unresolved_label())
             return this->error;
          return "";
       }

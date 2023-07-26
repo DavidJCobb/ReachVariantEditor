@@ -104,8 +104,9 @@ namespace Megalo {
             }
          }
          if (index == -1) {
-            QString lit = cobb::string_scanner::escape(str, '"');
-            return arg_compile_result::failure(QString("The specified string literal (\"%1\") does not match any defined Forge label.").arg(lit));
+            return arg_compile_result::unresolved_label(str);
+            //QString lit = cobb::string_scanner::escape(str, '"');
+            //return arg_compile_result::failure(QString("The specified string literal (\"%1\") does not match any defined Forge label.").arg(lit));
          }
          this->value = &list[index];
          return arg_compile_result::success();

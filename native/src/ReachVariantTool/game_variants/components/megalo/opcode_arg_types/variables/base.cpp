@@ -352,7 +352,11 @@ namespace Megalo {
             if (top.namespace_member.which) {
                this->which = top.namespace_member.which->as_integer(); // if we're accessing a variable nested under a NamespaceMember
             } else {
-               this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
+               if (top.is_temporary) {
+                  this->which = Variable::_temporary_index_to_which(*top.type, top.index);
+               } else {
+                  this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
+               }
             }
             this->index = res.nested.index;
             if (!this->_update_object_pointer_from_index(compiler))
@@ -374,9 +378,7 @@ namespace Megalo {
                this->which = top.namespace_member.which->as_integer();
             else {
                if (top.is_temporary) {
-                  auto& typeinfo = *top.type;
-                  assert(typeinfo.first_temporary);
-                  this->which = typeinfo.first_temporary->as_integer() + top.index;
+                  this->which = Variable::_temporary_index_to_which(*top.type, top.index);
                } else {
                   this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static); // if we're accessing a property on a static or global variable
                }
