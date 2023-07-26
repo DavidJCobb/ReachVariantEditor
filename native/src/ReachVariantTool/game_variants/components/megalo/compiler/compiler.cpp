@@ -2225,8 +2225,26 @@ namespace Megalo {
                   if (!result.error.isEmpty())
                      error += result.error;
                   this->raise_error(error);
-               } else
+               } else {
                   assert(!result.is_unresolved_string() && "The righthand side of a comparison statement thinks it's an unresolved string reference.");
+
+                  if (!lhs->is_invalid) {
+                     auto* l_type = lhs->get_type();
+                     auto* r_type = rhs->get_type();
+                     if (l_type != r_type) {
+                        bool l_numeric = l_type == &OpcodeArgValueScalar::typeinfo || l_type == &OpcodeArgValueTimer::typeinfo;
+                        bool r_numeric = r_type == &OpcodeArgValueScalar::typeinfo || l_type == &OpcodeArgValueTimer::typeinfo;
+
+                        if (!l_numeric || !r_numeric) {
+                           this->raise_error(
+                              QString("Type mismatch (comparing %1 to %2).")
+                                 .arg(l_type->internal_name.c_str())
+                                 .arg(r_type->internal_name.c_str())
+                           );
+                        }
+                     }
+                  }
+               }
             }
             auto op_string = string_scanner(op);
             auto result    = opcode->arguments[2]->compile(*this, op_string, 0);
