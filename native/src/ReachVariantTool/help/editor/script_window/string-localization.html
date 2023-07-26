@@ -3,7 +3,7 @@
    <head>
       <meta charset="UTF-8" />
       
-      <title>String Localization | ReachVariantTool Documentation</title>
+      <title>String Editing and Localization | ReachVariantTool Documentation</title>
       <base href="../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
@@ -91,7 +91,7 @@
                   <li>
                      <a href="editor/script_window/string-table.html">All Other Strings</a>
                      <ul>
-                        <li><a href="editor/script_window/string-localization.html">Localization</a></li>
+                        <li><a href="editor/script_window/string-localization.html">Editing and Localization</a></li>
                      </ul>
                   </li>
                   <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
@@ -186,7 +186,7 @@
          </ul>
       </nav>
       <main>
-         <h1>String Localization</h1>
+         <h1>String Editing and Localization</h1>
       <p>
          When editing strings in a game variant, it is usually possible to provide
          translations into multiple languages. (In some cases, this feature is not
@@ -197,6 +197,41 @@
          map files.
       </p>
       <img src="editor/script_window/string-editor.png">
+      
+      <h2>Round card preview</h2>
+      <p>
+         Many gametypes show an instructional "card" at the start of every round. The 
+         text shown can be controlled <a href="script/api/player/actions/set_objective_text.html">through scripting</a>. 
+         However, the text is truncated to a relatively short length, and it isn't 
+         automatically word wrapped, so you have to insert line breaks manually.
+      </p>
+      <p>
+         If you have the <a href="https://c20.reclaimers.net/hr/hr-ek/" target="_blank">Halo: Reach Editing Kit</a> 
+         installed through Steam, and if you've properly extracted the bundled assets, 
+         then you'll have a copy of Halo: Reach's main fonts on hand. ReachVariantTool 
+         will detect this and allow you to open a preview window for the instructional 
+         "card," by checking the "Show round card preview" checkbox.
+      </p>
+      <img src="editor/script_window/string-editor-round-card-preview.png">
+      <p>
+         Because this preview uses the game's own font files, it should support every 
+         character set that the fonts themselves support. The game's font for body 
+         text, in particular, supports a fairly wide variety of Unicode symbols:
+      </p>
+      <img src="editor/script_window/string-editor-round-card-preview-unicode.png">
+      <p>
+         However, <a href="script/string-special-chars.html">the game's special icon characters</a> 
+         are not supported at this time. They aren't part of the normal font files; 
+         they get baked in via some alternate system.
+      </p>
+      <p>
+         Please also be aware that due to fundamental differences in how typical Windows 
+         programs render text, versus how Halo: Reach renders text, this is not an exact 
+         preview. It should be accurate enough if you don't try to press your text right 
+         up against the round card's right-side border.
+      </p>
+      
+      <h2>Localized string library</h2>
       <p>
          The string library is shown below.
       </p>
