@@ -3229,7 +3229,16 @@ namespace Megalo {
          if (!existing->target)
             continue;
 
-         uint32_t mask = 1 << existing->target->resolved.top_level.index;
+         uint32_t index;
+         if (request_type.context_type_info)
+            index = existing->target->resolved.nested.index;
+         else
+            index = existing->target->resolved.top_level.index;
+
+         uint32_t mask = 1 << index;
+         if (seen_indices_mask & mask) // fast early-out
+            continue;
+
          if (request_type.existing_alias_matches(*existing)) {
             seen_indices_mask |= mask;
          }
@@ -3259,9 +3268,14 @@ namespace Megalo {
             if (!existing->target)
                continue;
 
-            // fast early-out
-            uint32_t mask = 1 << existing->target->resolved.top_level.index;
-            if (seen_indices_mask & mask)
+            uint32_t index;
+            if (request_type.context_type_info)
+               index = existing->target->resolved.nested.index;
+            else
+               index = existing->target->resolved.top_level.index;
+
+            uint32_t mask = 1 << index;
+            if (seen_indices_mask & mask) // fast early-out
                continue;
 
             if (request_type.existing_alias_matches(*existing)) {
