@@ -242,6 +242,11 @@ namespace Megalo {
       assert(base);
       return base->as_integer() + index;
    }
+   /*static*/ uint32_t Variable::_temporary_index_to_which(const OpcodeArgTypeinfo& typeinfo, uint32_t index) noexcept {
+      const VariableScopeWhichValue* base = typeinfo.first_temporary;
+      assert(base);
+      return base->as_integer() + index;
+   }
    bool Variable::_update_object_pointer_from_index(Compiler& compiler) noexcept {
       this->object = nullptr;
       auto scope = this->scope;

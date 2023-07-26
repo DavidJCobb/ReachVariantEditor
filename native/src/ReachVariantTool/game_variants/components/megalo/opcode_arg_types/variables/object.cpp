@@ -105,8 +105,12 @@ namespace Megalo {
                this->scope = &variable_scope_indicators::object::player_biped;
                if (top.namespace_member.which)
                   this->which = top.namespace_member.which->as_integer();
-               else
-                  this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
+               else {
+                  if (top.is_temporary)
+                     this->which = Variable::_temporary_index_to_which(*top.type, top.index);
+                  else
+                     this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
+               }
                return arg_compile_result::success();
             }
          }

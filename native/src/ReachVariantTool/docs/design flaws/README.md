@@ -1,0 +1,4 @@
+
+I've gotten significantly better at working with C++ since I made ReachVariantTool. Coming back to it with more experience &mdash; particularly with metaprogramming &mdash; I can see that while it was very good for what it was, and for the level of experience I had at the time, it is by my current standards relatively messy and a challenge to maintain. Fixing its design flaws would in many cases require a total rewrite of the program, and leaving them as is means that new features built around them are similarly flawed.
+
+It seems worth documenting some of the problems. This folder is not an exhaustive list; there are other flaws that I am aware of, but haven't been able to organize and document as of yet.

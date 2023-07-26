@@ -160,7 +160,7 @@
             with objects, players, and teams.
          </p>
          <p>
-            <dfn>Explicit handle references</dfn> are single values &mdash; enums, which specify 
+            <dfn>Explicit handle references</dfn> are single values &mdash; enums, which indicate 
             specific, globally-accessible handles; for example, <code>current_object</code>, 
             <code>local_player</code>, and all global and temporary handle variables in Megalo.
          </p>

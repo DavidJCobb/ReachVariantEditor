@@ -559,6 +559,10 @@
     <Text Include="Resources\localized_string_library\vip.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="docs\design flaws\df001 - representation of megalo references.md" />
+    <None Include="docs\design flaws\df002 - mapping between script identifiers and compiled references.md" />
+    <None Include="docs\design flaws\df003 - handling of variant string IDs.md" />
+    <None Include="docs\design flaws\README.md" />
     <None Include="docs\working - help docs\script\api\object\actions\face_toward\calculator.js" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.cpp.bak" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.h.bak" />

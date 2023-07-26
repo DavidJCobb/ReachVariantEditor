@@ -1263,7 +1263,146 @@
                </p>
             </description>
             <example>
-               global.object[0].copy_rotation_from(global.object[1], true)
+               -- make all WATCHING_YOU objects face toward the nearest player
+               for each object with label "watching_you" do
+                  alias nearest_player   = allocate temporary player
+                  alias nearest_distance = allocate temporary number
+                  nearest_player   = no_player
+                  nearest_distance = 30000
+   
+                  for each player do
+                     if current_player.biped != no_object then
+                        alias current_vehicle  = allocate temporary object
+                        alias current_distance = allocate temporary number
+         
+                        current_vehicle = no_object
+                        current_vehicle = current_player.try_get_vehicle()
+                        if current_vehicle != current_object then
+                           --
+                           -- We don't want to apply this effect to vehicles the player is in, as it 
+                           -- will turn those vehicles into inoperable beyblades.
+                           
+                           current_distance = current_object.get_distance_to(current_player.biped)
+                           if current_distance &lt; nearest_distance then
+                              nearest_distance = current_distance
+                              nearest_player   = current_player
+                           end
+                        end
+                     end
+                  end
+   
+                  if nearest_player != no_player then
+                     current_object.face_toward(nearest_player.biped, 0, 0, 0)
+                  end
+               end
+
+               -- make all SPIN_YAW objects rotate on the yaw axis by one degree every frame
+               -- (60deg per second)
+               for each object with label "spin_yaw" do
+                  current_object.face_toward(current_object, 115, -2, 0)
+               end
+
+               -- make all SPIN_ROLL objects rotate on the roll axis by one degree every frame
+               -- (60deg per second)
+               --
+               -- This one is harder because we need to use object attachment and invisible Hill 
+               -- Markers to compose the rotations we want. The naive approach would be to spawn 
+               -- disposable Hill Markers, rotate them as needed, and then immediately delete 
+               -- them all. However, if we try that, then it seems like they get deleted *before* 
+               -- the rotations actually take effect, and there seem to be negative effects on 
+               -- game stability as well (as if the map is overloaded). Instead, we need to 
+               -- keep our Hill Markers around and reuse them.
+               --
+               alias roll_global_basis      = allocate global.object
+               alias unrotated_global_basis = allocate global.object
+               if roll_global_basis == no_object then
+                  --
+                  -- There are two rotation values that we really need:
+                  --
+                  --  - An object that isn't rotated
+                  --
+                  --  - An object that is nose-down, but otherwise not rotated
+                  --
+                  -- The former is the default rotation for any newly-created objects. The latter 
+                  -- can be accomplished by exploiting some jank in `object.place_between_me_and`: 
+                  -- it happens if you spawn something between an object and itself. We'll create 
+                  -- two objects with these rotations, then, and keep them around so that our 
+                  -- other Hill Markers can `copy_rotation_from` them.
+                  --
+                  for each object do
+                     if roll_global_basis == no_object then
+                        roll_global_basis      = current_object.place_between_me_and(current_object, hill_marker, 0)
+                        unrotated_global_basis = current_object.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+                     end
+                  end
+               end
+               --
+               for each object with label "spin_roll" do
+                  alias my_roll_marker = allocate object.object
+                  alias my_yaw_adjust  = allocate object.object
+                  alias my_yaw_to_roll = allocate object.object
+   
+                  alias roll_marker = current_object.my_roll_marker
+                  alias yaw_adjust  = current_object.my_yaw_adjust
+                  alias yaw_to_roll = current_object.my_yaw_to_roll
+                  if roll_marker == no_object then
+                     roll_marker = current_object.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+                     yaw_adjust  = current_object.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+                     yaw_to_roll = current_object.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+                  end
+   
+                  --
+                  -- First, we exploit some jank with `object.place_between_me_and`. It's possible 
+                  -- to spawn an object that's pointing nose-down but otherwise not rotated. We've 
+                  -- already created that kind of object, so let's now copy its rotation.
+                  --
+                  roll_marker.copy_rotation_from(roll_global_basis, true)
+   
+                  --
+                  -- We can exploit `face_toward` jank to rotate objects about their local yaw 
+                  -- axis. We'll use another marker for that; let's first reset its rotation.
+                  --
+                  yaw_adjust.copy_rotation_from(unrotated_global_basis, true)
+   
+                  --
+                  -- We attach our nose-down object to our yaw-adjustment marker. Then, we adjust 
+                  -- the latter's yaw-rotation. From the point of view of our nose-down object, 
+                  -- this is a roll rotation.
+                  --
+                  -- Imagine taking a Warthog, turning it nose-down, and placing it on top of a 
+                  -- turntable. Now imagine you're in the driver's seat. As the turntable rotates, 
+                  -- from your point of view, you're doing a barrel roll... a barrel ROLL. Get it?
+                  --
+                  roll_marker.attach_to(yaw_adjust, 0, 0, 0, relative)
+                  yaw_adjust.face_toward(yaw_adjust, 115, -2, 0)
+                  roll_marker.detach()
+   
+                  --
+                  -- Now, we've got to match our roll marker to the current_object's rotation, 
+                  -- but without losing the roll adjustment we just made. To do that, we'll 
+                  -- use another nose-down object, called `yaw_to_roll`.
+                  --
+                  yaw_to_roll.copy_rotation_from(roll_global_basis, true)
+   
+                  --
+                  -- There's only a slight difference between the rotation of roll_marker and 
+                  -- the rotation of yaw_to_roll. If we attach roll_marker to yaw_to_roll, and 
+                  -- then have yaw_to_roll copy current_object's rotation, then there will only 
+                  -- be that *same* slight difference between the rotation of roll_marker and 
+                  -- the rotation of current_object. That difference, of course, is the roll 
+                  -- adjustment we want to perform.
+                  --
+                  roll_marker.attach_to(yaw_to_roll, 0, 0, 0, relative)
+                  yaw_to_roll.copy_rotation_from(current_object, true)
+                  roll_marker.detach()
+   
+                  -- Move `roll_marker` to the current object.
+                  roll_marker.attach_to(current_object, 0, 0, 0, relative)
+                  roll_marker.detach()
+   
+                  -- Rotate the current object to match `roll_marker`.
+                  current_object.copy_rotation_from(roll_marker, true)
+               end
             </example>
             <note>
                <p>
@@ -1319,6 +1458,13 @@
                   <p>Wait, no, you can't. You need JavaScript for this. (Sorry.)</p>
                </noscript>
                <!-- end calculator -->
+            </note>
+            <note>
+               You can face an object toward itself to adjust its yaw-axis rotation. You can 
+               also use clever tricks with <a href="place_between_me_and">object.place_between_me_and</a> 
+               to spawn an object nose-down, such that its up-vector points laterally. If you 
+               combine these two tricks, using object attachment, you can adjust any object's 
+               roll-axis rotation. The code example demonstrates the trick.
             </note>
             <category id="positioning" />
          </method>

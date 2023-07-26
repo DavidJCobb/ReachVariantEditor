@@ -111,6 +111,7 @@ namespace Megalo {
          extern VariableScopeWhichValue hud_target;
          extern VariableScopeWhichValue killed;
          extern VariableScopeWhichValue killer;
+         extern VariableScopeWhichValue unknown_21;
          extern VariableScopeWhichValue temporary_0;
          extern VariableScopeWhichValue temporary_1;
          extern VariableScopeWhichValue temporary_2;

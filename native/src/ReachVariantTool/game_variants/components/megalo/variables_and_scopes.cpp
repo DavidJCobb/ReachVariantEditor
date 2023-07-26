@@ -40,6 +40,7 @@ namespace Megalo {
          extern VariableScopeWhichValue hud_target = VariableScopeWhichValue("hud_target_object", flags::is_read_only);
          extern VariableScopeWhichValue killed     = VariableScopeWhichValue("killed_object", flags::is_read_only | flags::is_transient);
          extern VariableScopeWhichValue killer     = VariableScopeWhichValue("killer_object", flags::is_read_only | flags::is_transient);
+         extern VariableScopeWhichValue unknown_21 = VariableScopeWhichValue("unknown_object_21", flags::is_read_only); // non-networked, too
          extern VariableScopeWhichValue temporary_0 = VariableScopeWhichValue("temporaries.object[0]", flags::is_transient);
          extern VariableScopeWhichValue temporary_1 = VariableScopeWhichValue("temporaries.object[1]", flags::is_transient);
          extern VariableScopeWhichValue temporary_2 = VariableScopeWhichValue("temporaries.object[2]", flags::is_transient);
@@ -71,6 +72,7 @@ namespace Megalo {
             &hud_target,
             &killed,
             &killer,
+            &unknown_21,
             &temporary_0,
             &temporary_1,
             &temporary_2,
