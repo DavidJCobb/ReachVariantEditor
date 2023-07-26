@@ -39,6 +39,12 @@
          are not supported at this time. They aren't part of the normal font files; 
          they get baked in via some alternate system.
       </p>
+      <p>
+         Please also be aware that due to fundamental differences in how typical Windows 
+         programs render text, versus how Halo: Reach renders text, this is not an exact 
+         preview. It should be accurate enough if you don't try to press your text right 
+         up against the round card's right-side border.
+      </p>
       
       <h2>Localized string library</h2>
       <p>
