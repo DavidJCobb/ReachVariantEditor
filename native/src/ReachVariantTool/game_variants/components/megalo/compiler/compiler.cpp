@@ -2229,19 +2229,70 @@ namespace Megalo {
                   assert(!result.is_unresolved_string() && "The righthand side of a comparison statement thinks it's an unresolved string reference.");
 
                   if (!lhs->is_invalid) {
-                     auto* l_type = lhs->get_type();
-                     auto* r_type = rhs->get_type();
-                     if (l_type != r_type) {
-                        bool l_numeric = l_type == &OpcodeArgValueScalar::typeinfo || l_type == &OpcodeArgValueTimer::typeinfo;
-                        bool r_numeric = r_type == &OpcodeArgValueScalar::typeinfo || l_type == &OpcodeArgValueTimer::typeinfo;
+                     auto l_vt = getVariableTypeForTypeinfo(lhs->get_type());
+                     auto r_vt = getVariableTypeForTypeinfo(rhs->get_type());
 
-                        if (!l_numeric || !r_numeric) {
-                           this->raise_error(
-                              QString("Type mismatch (comparing %1 to %2).")
-                                 .arg(l_type->internal_name.c_str())
-                                 .arg(r_type->internal_name.c_str())
-                           );
+                     // Validity check reverse-engineered from MegaloEdit.
+                     bool type_match = false;
+                     if (r_vt == l_vt) {
+                        type_match = true;
+                     } else {
+                        switch (l_vt) {
+                           case variable_type::timer:
+                              if (r_vt == variable_type::scalar)
+                                 type_match = true;
+                              break;
+                           case variable_type::scalar:
+                              if (r_vt == variable_type::timer && op == "==")
+                                 type_match = true;
+                              break;
                         }
+                     }
+
+                     bool operator_match = true;
+                     if (op != "==" && op != "!=") {
+                        //
+                        // If it's a numeric comparison, disallow it on handles:
+                        //
+                        switch (l_vt) {
+                           case variable_type::object:
+                           case variable_type::player:
+                           case variable_type::team:
+                              operator_match = false;
+                              break;
+                        }
+                        switch (r_vt) {
+                           case variable_type::object:
+                           case variable_type::player:
+                           case variable_type::team:
+                              operator_match = false;
+                              break;
+                        }
+                        //
+                        // MegaloEdit also only allows > and < for timers, i.e. no equality comparisons, but 
+                        // I don't know if we want to mimic that; I feel like I must be misunderstanding the 
+                        // decomp...
+                        //
+                     }
+
+                     if (!type_match) {
+                        QString format = "Type mismatch (comparing %1 to %2).";
+                        if (l_vt == variable_type::scalar && r_vt == variable_type::timer)
+                           format = "Type mismatch (comparing %1 to %2; only equality comparisons are allowed here).";
+                        this->raise_error(
+                           QString(format)
+                              .arg(lhs->get_type()->internal_name.c_str())
+                              .arg(rhs->get_type()->internal_name.c_str())
+                        );
+                     }
+                     if (!operator_match) {
+                        QString format = "Cannot perform numeric comparisons on non-numeric values (comparing %1 to %2 with operator %3).";
+                        this->raise_error(
+                           QString(format)
+                              .arg(lhs->get_type()->internal_name.c_str())
+                              .arg(rhs->get_type()->internal_name.c_str())
+                              .arg(op)
+                        );
                      }
                   }
                }
