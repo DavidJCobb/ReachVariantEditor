@@ -3229,11 +3229,7 @@ namespace Megalo {
          if (!existing->target)
             continue;
 
-         // fast early-out
          uint32_t mask = 1 << existing->target->resolved.top_level.index;
-         if (seen_indices_mask & mask)
-            continue;
-
          if (request_type.existing_alias_matches(*existing)) {
             seen_indices_mask |= mask;
          }
