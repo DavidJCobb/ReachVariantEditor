@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <article>
-   <title>String Localization</title>
+   <title>String Editing and Localization</title>
    <body>
       <p>
          When editing strings in a game variant, it is usually possible to provide
@@ -12,6 +12,35 @@
          map files.
       </p>
       <img src="string-editor.png" />
+      
+      <h2>Round card preview</h2>
+      <p>
+         Many gametypes show an instructional "card" at the start of every round. The 
+         text shown can be controlled <a href="script/api/player/actions/set_objective_text">through scripting</a>. 
+         However, the text is truncated to a relatively short length, and it isn't 
+         automatically word wrapped, so you have to insert line breaks manually.
+      </p>
+      <p>
+         If you have the <a href="https://c20.reclaimers.net/hr/hr-ek/" target="_blank">Halo: Reach Editing Kit</a> 
+         installed through Steam, and if you've properly extracted the bundled assets, 
+         then you'll have a copy of Halo: Reach's main fonts on hand. ReachVariantTool 
+         will detect this and allow you to open a preview window for the instructional 
+         "card," by checking the "Show round card preview" checkbox.
+      </p>
+      <img src="string-editor-round-card-preview.png" />
+      <p>
+         Because this preview uses the game's own font files, it should support every 
+         character set that the fonts themselves support. The game's font for body 
+         text, in particular, supports a fairly wide variety of Unicode symbols:
+      </p>
+      <img src="string-editor-round-card-preview-unicode.png" />
+      <p>
+         However, <a href="script/string-special-chars">the game's special icon characters</a> 
+         are not supported at this time. They aren't part of the normal font files; 
+         they get baked in via some alternate system.
+      </p>
+      
+      <h2>Localized string library</h2>
       <p>
          The string library is shown below.
       </p>

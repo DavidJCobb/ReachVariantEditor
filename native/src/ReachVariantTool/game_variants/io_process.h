@@ -13,6 +13,7 @@ class GameVariantSaveProcess {
             //
             uses_xrvt_scripts = 0x0000000000000001,
             uses_xrvt_strings = 0x0000000000000002,
+            save_bare_mglo    = 0x0000000000000004,
          };
       };
       using flags_t = std::underlying_type_t<flag::type>;

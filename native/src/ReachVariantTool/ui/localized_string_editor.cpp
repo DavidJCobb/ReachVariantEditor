@@ -177,6 +177,12 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
                   break;
                }
             }
+
+            // Handle close button: uncheck the box
+            QObject::connect(dialog, &QDialog::rejected, this, [this]() {
+               const auto blocker = QSignalBlocker(this->ui.togglePreviewRoundCard);
+               this->ui.togglePreviewRoundCard->setChecked(false);
+            });
          }
          if (checked)
             this->_roundCardPreview.dialog->show();

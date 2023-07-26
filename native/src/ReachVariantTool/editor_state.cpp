@@ -145,15 +145,24 @@ bool ReachEditorState::saveVariant(QWidget* parent, bool saveAs) {
       QMessageBox::information(parent, tr("No game variant is open"), tr("Can't save a file if there's no actual file open... Wait, what? Why did we even let you try this?"));
       return false;
    }
+   bool is_megalo = editor.variant()->multiplayer.type == ReachGameEngine::multiplayer;
+
    QString fileName;
    if (saveAs) {
+      QString allowed_formats;
+      if (is_megalo) {
+         allowed_formats = tr("Game Variant (*.bin);;Raw Compiled Megalo File (*.mglo);;All Files (*)");
+      } else {
+         allowed_formats = tr("Game Variant (*.bin);;All Files (*)");
+      }
+
       QString defaultSave;
       this->getDefaultSaveDirectory(defaultSave);
       fileName = QFileDialog::getSaveFileName(
          parent,
          tr("Save Game Variant"), // window title
          defaultSave, // working directory and optionally default-selected file
-         tr("Game Variant (*.bin);;All Files (*)") // filetype filters
+         allowed_formats // filetype filters
       );
       if (fileName.isEmpty())
          return false;
@@ -167,8 +176,30 @@ bool ReachEditorState::saveVariant(QWidget* parent, bool saveAs) {
    }
    //
    GameVariantSaveProcess save_process;
+   if (is_megalo && fileName.endsWith(".mglo", Qt::CaseInsensitive)) {
+      save_process.set_flag(GameVariantSaveProcess::flag::save_bare_mglo);
+   }
    editor.variant()->write(save_process);
    if (save_process.variant_is_editor_only()) {
+
+      if (save_process.has_flag(GameVariantSaveProcess::flag::save_bare_mglo)) {
+         QMessageBox::StandardButton result = QMessageBox::critical(
+            parent,
+            tr("Error; file not saved"),
+            tr(
+               "Your game variant exceeds the limits of Halo: Reach's game variant file format. "
+               "When saving a normal file, ReachVariantTool can embed non-standard data into the "
+               "end of the file, so that you can still save and later load your file and fix "
+               "things. This is not possible when saving a bare *.mglo file.\n\n"
+               "<b><i>Your file has not been saved.</i></b>\n\n"
+               "If you don't have time to get your game variant under the limits right now, then "
+               "you should save a normal file (*.bin) so you can come back to it later."
+            )
+         );
+         file.cancelWriting();
+         return false;
+      }
+
       auto text = tr("Your game variant exceeds the limits of Halo: Reach's game variant file format. As such, the following data will have to be embedded in a non-standard way to avoid data loss:\n\n");
       if (save_process.has_flag(GameVariantSaveProcess::flag::uses_xrvt_scripts))
          text += tr(" - All script code\n");

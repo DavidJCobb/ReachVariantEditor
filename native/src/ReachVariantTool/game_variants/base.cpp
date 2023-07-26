@@ -416,6 +416,13 @@ bool GameVariant::read_mglo(const void* data, size_t size) {
    return true;
 }
 void GameVariant::write(GameVariantSaveProcess& save_process) noexcept {
+   if (save_process.has_flag(GameVariantSaveProcess::flag::save_bare_mglo)) {
+      auto* mp = this->multiplayer.data->as_multiplayer();
+      assert(mp != nullptr && "Why was GameVariantSaveProcess::flag::save_bare_mglo set when this isn't a multiplayer variant?");
+      mp->write(save_process);
+      return;
+   }
+
    auto& writer = save_process.writer;
    //
    this->blamHeader.write(writer.bytes);
