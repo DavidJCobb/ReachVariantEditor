@@ -3365,6 +3365,10 @@ namespace Megalo {
             continue;
          if (nt.resolved.top_level.index != et->resolved.top_level.index)
             continue;
+         if (et->resolved.nested.type) {
+            if (nt.resolved.nested.type != et->resolved.nested.type)
+               continue;
+         }
          if (nt.resolved.nested.type == et->resolved.nested.type && nt.resolved.nested.index == et->resolved.nested.index) {
             if (nt.resolution_involved_aliases.nested) {
                continue;
