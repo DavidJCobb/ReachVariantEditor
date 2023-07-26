@@ -125,6 +125,7 @@ class ReachBlockMPVR {
       } writeData;
       //
       bool read(reach_block_stream&);
+      bool read_mglo(const void* data, size_t size); // UNTESTED
       void write(GameVariantSaveProcess&) noexcept;
       void write_last_minute_fixup(GameVariantSaveProcess&) const noexcept; // call after all file content has been written; writes variant header's file length, SHA-1 hash, etc.
       void cloneTo(ReachBlockMPVR&) const noexcept; // deep copy, accounting for pointers
@@ -140,6 +141,7 @@ class GameVariant {
       std::vector<ReachFileBlockUnknown> unknownBlocks;
       //
       bool read(const void* data, size_t size);
+      bool read_mglo(const void* data, size_t size); // UNTESTED
       void write(GameVariantSaveProcess&) noexcept;
       //
       void synch_chdr_to_mpvr() noexcept;

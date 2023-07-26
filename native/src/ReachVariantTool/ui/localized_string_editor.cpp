@@ -168,6 +168,15 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
             const auto* variant = ReachEditorState::get().multiplayerData();
             if (variant)
                widget->setVariantName(QString::fromUtf16(variant->variantHeader.title));
+
+            // Default to showing the first non-blank text value.
+            for (auto* field : this->languageFields) {
+               auto text = field->toPlainText();
+               if (!text.isEmpty()) {
+                  widget->setObjective(text);
+                  break;
+               }
+            }
          }
          if (checked)
             this->_roundCardPreview.dialog->show();
@@ -175,6 +184,7 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
             this->_roundCardPreview.dialog->hide();
       });
 
+      // Show the most recently edited text value in the preview.
       for (auto* field : this->languageFields) {
          QObject::connect(field, &QPlainTextEdit::textChanged, this, [this, field]() {
             if (!this->_roundCardPreview.preview)

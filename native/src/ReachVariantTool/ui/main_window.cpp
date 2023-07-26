@@ -310,7 +310,7 @@ void ReachVariantTool::openFile() {
    QString targetDir = this->lastFileDirectory;
    if (targetDir.isEmpty())
       ReachEditorState::get().getDefaultLoadDirectory(targetDir);
-   QString fileName = QFileDialog::getOpenFileName(this, tr("Open Game Variant"), targetDir, tr("Game Variant (*.bin);;All Files (*)"));
+   QString fileName = QFileDialog::getOpenFileName(this, tr("Open Game Variant"), targetDir, tr("Game Variant (*.bin);;Raw Compiled Megalo File (*.mglo);;All Files (*)"));
    if (!fileName.isEmpty()) {
       QDir dir;
       this->lastFileDirectory = dir.absoluteFilePath(fileName);
@@ -331,7 +331,15 @@ void ReachVariantTool::openFile(QString fileName) {
    }
    auto variant = new GameVariant();
    auto buffer  = file.readAll();
-   if (!variant->read(buffer.data(), buffer.size())) {
+
+   bool success;
+   if (fileName.endsWith(".mglo", Qt::CaseInsensitive)) {
+      success = variant->read_mglo(buffer.data(), buffer.size());
+   } else {
+      success = variant->read(buffer.data(), buffer.size());
+   }
+
+   if (!success) {
       auto& error_report = GameEngineVariantLoadError::get();
       if (error_report.state == GameEngineVariantLoadError::load_state::failure) {
          QMessageBox::information(this, tr("Unable to open file"), error_report.to_qstring());

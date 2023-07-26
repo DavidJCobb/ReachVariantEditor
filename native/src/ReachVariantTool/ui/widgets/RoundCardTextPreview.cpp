@@ -4,6 +4,11 @@
 #include <QPainterPath>
 #include "../../editor_state.h"
 
+// prefs
+namespace {
+   constexpr const bool kill_cleartype = false;
+}
+
 namespace {
    // The game truncates strings that are too long. Including the null terminator, they used 
    // a 117-character buffer. Cute.
@@ -40,11 +45,18 @@ namespace {
    constexpr const int font_height       = font_ascent - font_descent;
    constexpr const int font_cap_height   = 1366; // measured 'D' and 'N', which don't dip below baseline
 
-   void shift_qrect_from_baseline_to_text_top(QRect& rect, const QFont& font) {
+   static void shift_qrect_from_baseline_to_text_top(QRect& rect, const QFont& font) {
       auto pixel_size = font.pixelSize();
 
       auto ascent = pixel_size * ((float)font_ascent / (float)font_units_per_em);
       rect.translate(0, -ascent);
+   }
+
+   static int baseline_y_to_top_y(size_t baseline_y, const QFont& font) {
+      auto pixel_size = font.pixelSize();
+
+      auto ascent = pixel_size * ((float)font_ascent / (float)font_units_per_em);
+      return (int)baseline_y - ascent;
    }
 }
 
@@ -79,11 +91,14 @@ RoundCardTextPreview::RoundCardTextPreview(QWidget* parent) : QWidget(parent) {
       //    for the player allegiance, the text is centered rather than left-aligned, the icon is 
       //    positioned all wrong, multiple non-Megalo flags are pulled from game state...
       // 
-      //  - Therefore, there's no way to know the true intended font size, nor what font settings 
+      //    Therefore, there's no way to know the true intended font size, nor what font settings 
       //    Bungie may have used (e.g. stretch/condense).
       // 
-      //  - Additionally, the game just straight-up renders fonts its own way. Even if you get the 
-      //    EM height exactly right, some letters may be rendered wider, for example.
+      //  - Additionally, the game's font renderer is just fundamentally different, and this affects 
+      //    glyph positioning. With ClearType rendering, we position and space glyphs out a bit more 
+      //    accurately than the game, resulting in inconsistent line lengths. If we use hacks to 
+      //    disable ClearType (i.e. render all of the text mirrored so that ClearType can't work; 
+      //    then un-mirror it), then the positioning and sizing get completely wrecked by Qt.
       // 
       // OBSERVATIONS:
       // 
@@ -101,22 +116,19 @@ RoundCardTextPreview::RoundCardTextPreview(QWidget* parent) : QWidget(parent) {
       //    despite having more characters in it. Accuracy, then, varies based on which characters 
       //    are actually present.
       // 
+      //  - "MMMMMMMMMM" is 173px in-game on a 1920x1080px monitor, and 166px with a 98% stretch; 177px no stretch.
+      //  - "IIIIIIIIII" is  56px in-game on a 1920x1080px monitor, and  56px with a 98% stretch;  58px no stretch.
+      //  - "kkkkkkkkkk" is 104px in-game on a 1920x1080px monitor. and  98px with a 98% stretch; 110px no stretch.
+      // 
       // CONCLUSION:
       // 
-      //  - Condense text to match the game somewhat better, but pessimize: condense by 2%.
+      //  - Condense text to match the game somewhat better, but pessimize: condense by 1%. This 
+      //    should strike a middle ground between the last three test-cases, while being somewhat 
+      //    too pessimistic for real-world text.
       //
       base.setPixelSize(29);
-      base.setStretch(98);
+      base.setStretch(99);
       this->_state.font_body = base;
-      //
-      // FURTHER OBSERVATIONS:
-      // 
-      //  - "MMMMMMMMMM" is 173px in-game on a 1920x1080px monitor, and 166px with a 98% stretch.
-      //  - "IIIIIIIIII" is  56px in-game on a 1920x1080px monitor, and  56px with a 98% stretch.
-      //  - "kkkkkkkkkk" is 104px in-game on a 1920x1080px monitor. and  98px with a 98% stretch.
-      // 
-      // Actually... What if it's ClearType?...
-      //
    }
 }
 
@@ -193,11 +205,19 @@ void RoundCardTextPreview::paintEvent(QPaintEvent* event) {
    QPainter painter(this);
    const auto rect      = this->rect();
    const auto base_size = this->sizeHint();
-
+   //
    float scale = (float)rect.width() / (float)base_size.width();
    painter.scale(scale, scale);
 
-   painter.setPen(this->boxLine());
+   QImage text_only;
+   if constexpr (kill_cleartype) {
+      text_only = QImage(rect.width(), rect.height(), QImage::Format::Format_ARGB32);
+      text_only.fill(Qt::GlobalColor::transparent);
+   }
+   QPainter text_painter_no_cleartype(&text_only);
+   if constexpr (kill_cleartype) {
+      text_painter_no_cleartype.scale(-scale, scale);
+   }
 
    QPainterPath path_main;
    path_main.addRoundedRect(
@@ -220,6 +240,21 @@ void RoundCardTextPreview::paintEvent(QPaintEvent* event) {
       painter.setClipPath(prior);
       painter.setClipping(use_prior);
    };
+
+   auto draw_text = [&rect, &painter, &text_painter_no_cleartype](const QString& text, size_t x, size_t baseline_y, QPen pen, QFont font, int flags = 0, size_t override_width = 0) {
+      size_t width = override_width ? override_width : rect.width();
+      if constexpr (kill_cleartype) {
+         QRect text_rect = { -(int)width + (int)x, baseline_y_to_top_y(baseline_y, font), (int)width, rect.height()};
+         text_painter_no_cleartype.setPen(pen);
+         text_painter_no_cleartype.setFont(font);
+         text_painter_no_cleartype.drawText(text_rect, flags, text);
+      } else {
+         QRect text_rect = { (int)x, baseline_y_to_top_y(baseline_y, font), (int)width, rect.height() };
+         painter.setPen(pen);
+         painter.setFont(font);
+         painter.drawText(text_rect, flags, text);
+      }
+   };
    
    if (!this->_fields.allegiance.isEmpty()) {
       QPainterPath path_allegiance;
@@ -229,34 +264,46 @@ void RoundCardTextPreview::paintEvent(QPaintEvent* event) {
          box_corner_h
       );
       draw_with_inner_stroke(path_allegiance, this->_fields.box_line, this->_fields.box_fill);
+      
+      draw_text(
+         this->_fields.allegiance,
+         0,
+         allegiance_text_offset_baseline_y,
+         this->textTitlePen(),
+         this->_state.font_body,
+         Qt::AlignHCenter,
+         allegiance_box_w
+      );
 
-      // Qt positions the "top of the text" at the top of the rect. Stack Overflow 
-      // answers suggest that they're referring to the top of the line box or the 
-      // top of the ascent region.
-      QRect text_rect{ 0, 0, allegiance_box_w, allegiance_box_h };
-      text_rect.translate(0, allegiance_text_offset_baseline_y);
-      shift_qrect_from_baseline_to_text_top(text_rect, this->_state.font_body);
-      painter.setPen(this->textTitlePen());
-      painter.setFont(this->_state.font_body);
-      painter.drawText(text_rect, Qt::AlignHCenter, this->_fields.allegiance);
-
+      if constexpr (kill_cleartype) {
+         text_painter_no_cleartype.translate(0, allegiance_box_w + box_gap);
+      }
       painter.translate(allegiance_box_w + box_gap, 0);
       painter.setPen(this->boxLine());
    }
 
    draw_with_inner_stroke(path_main, this->_fields.box_line, this->_fields.box_fill);
    
-   QRect variant_name_text_rect = rect.translated(variant_name_text_offset_x, variant_name_text_offset_baseline_y);
-   shift_qrect_from_baseline_to_text_top(variant_name_text_rect, this->_state.font_title);
-   //
-   painter.setFont(this->_state.font_title);
-   painter.setPen(this->textTitlePen());
-   painter.drawText(variant_name_text_rect, Qt::AlignLeft, this->_fields.variant_name);
+   draw_text(
+      this->_fields.variant_name,
+      variant_name_text_offset_x,
+      variant_name_text_offset_baseline_y,
+      this->textTitlePen(),
+      this->_state.font_title,
+      Qt::AlignLeft
+   );
+   draw_text(
+      this->_fields.objective,
+      objective_text_offset_x,
+      objective_text_offset_baseline_y,
+      this->textBodyPen(),
+      this->_state.font_body,
+      Qt::AlignLeft
+   );
 
-   QRect objective_text_rect = rect.translated(objective_text_offset_x, objective_text_offset_baseline_y);
-   shift_qrect_from_baseline_to_text_top(objective_text_rect, this->_state.font_body);
-   //
-   painter.setFont(this->_state.font_body);
-   painter.setPen(this->textBodyPen());
-   painter.drawText(objective_text_rect, Qt::AlignLeft, this->_fields.objective);
+   if constexpr (kill_cleartype) {
+      painter.scale(-scale, scale);
+      painter.drawImage(QPoint{ -rect.width(), 0}, text_only);
+      //painter.drawImage(QPoint{ 0, 0 }, text_only);
+   }
 }

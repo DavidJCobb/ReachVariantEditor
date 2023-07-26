@@ -162,6 +162,26 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
    //
    return true;
 }
+bool ReachBlockMPVR::read_mglo(const void* data, size_t size) {
+   auto& error_report = GameEngineVariantLoadError::get();
+   //
+   auto  reader = cobb::reader((const uint8_t*)data, size);
+   auto& stream = reader.bits;
+   this->data = new GameVariantDataMultiplayer(false);
+   if (!this->data->read(reader)) {
+      error_report.state = GameEngineVariantLoadError::load_state::failure;
+      return false;
+   }
+   if (!reader.is_at_end()) {
+      if (!reader.is_in_bounds()) {
+         error_report.state  = GameEngineVariantLoadError::load_state::failure;
+         error_report.reason = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
+         return false;
+      }
+      this->remainingData.read(stream, this->header.end());
+   }
+   return true;
+}
 void ReachBlockMPVR::write(GameVariantSaveProcess& save_process) noexcept {
    auto& writer = save_process.writer;
    auto& bytes  = writer.bytes;
@@ -370,6 +390,28 @@ bool GameVariant::read(const void* data, size_t size) {
       if (error_report.state == GameEngineVariantLoadError::load_state::failure) {
          return false;
       }
+   }
+   return true;
+}
+bool GameVariant::read_mglo(const void* data, size_t size) {
+   auto& error_report = GameEngineVariantLoadError::get();
+   auto& warnings     = GameEngineVariantLoadWarningLog::get();
+   error_report.reset();
+   warnings.clear();
+   //
+   if (!this->multiplayer.read_mglo(data, size)) {
+      error_report.state = GameEngineVariantLoadError::load_state::failure;
+      return false;
+   }
+   this->blamHeader.header.found = this->blamHeader.header.expected;
+   this->blamHeader.header.found.version = 1;
+   this->blamHeader.header.found.flags   = 2;
+   this->blamHeader.data.unk0C = 0xFFFE;
+   if (auto mp = this->get_multiplayer_data()) {
+      if (error_report.state == GameEngineVariantLoadError::load_state::failure) {
+         return false;
+      }
+      this->synch_chdr_to_mpvr();
    }
    return true;
 }
