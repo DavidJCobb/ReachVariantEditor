@@ -73,7 +73,25 @@ namespace Megalo::Script {
                break;
          }
       }
-      
+
+      constexpr variable_usage_set operator|(const variable_usage_set& other) {
+         return variable_usage_set(*this) |= other;
+      }
+      constexpr variable_usage_set operator&(const variable_usage_set& other) {
+         return variable_usage_set(*this) &= other;
+      }
+      constexpr variable_usage_set& operator|=(const variable_usage_set& other) {
+         this->global.numbers |= other.global.numbers;
+         this->global.objects |= other.global.objects;
+         this->global.players |= other.global.players;
+         this->global.teams   |= other.global.teams;
+         this->global.timers  |= other.global.timers;
+         this->temporary.numbers |= other.temporary.numbers;
+         this->temporary.objects |= other.temporary.objects;
+         this->temporary.players |= other.temporary.players;
+         this->temporary.teams   |= other.temporary.teams;
+         return *this;
+      }
       constexpr variable_usage_set& operator&=(const variable_usage_set& other) {
          this->global.numbers &= other.global.numbers;
          this->global.objects &= other.global.objects;

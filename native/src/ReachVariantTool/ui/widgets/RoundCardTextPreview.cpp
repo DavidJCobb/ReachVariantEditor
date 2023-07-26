@@ -191,14 +191,14 @@ QString RoundCardTextPreview::objective() const {
    return this->_fields.objective;
 }
 void RoundCardTextPreview::setObjective(const QString& v) {
-   this->_fields.objective = v.left(max_string_length);
+   this->_fields.objective = QString(v).replace("\n", "\r\n").left(max_string_length);
 }
 
 QString RoundCardTextPreview::allegiance() {
    return this->_fields.allegiance;
 }
 void RoundCardTextPreview::setAllegiance(const QString& v) {
-   this->_fields.allegiance = v.left(max_string_length); // TODO: see if this has a smaller maxlength
+   this->_fields.allegiance = QString(v).replace("\n", "\r\n").left(max_string_length); // TODO: see if this has a smaller maxlength
 }
 
 void RoundCardTextPreview::paintEvent(QPaintEvent* event) {

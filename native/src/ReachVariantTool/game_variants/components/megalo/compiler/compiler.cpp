@@ -1615,10 +1615,12 @@ namespace Megalo {
       }
 
       Script::variable_usage_set used;
+      Script::variable_usage_set initialized;
       for (size_t i = 0; i < action->arguments.size() && i < action_base->arguments.size(); ++i) {
          auto* operand      = action->arguments[i];
          auto& operand_base = action_base->arguments[i];
          if (operand_base.is_out_variable && !also_initialize_out_var) {
+            operand->mark_used_variables(initialized);
             continue;
          }
          operand->mark_used_variables(used);
@@ -1665,6 +1667,12 @@ namespace Megalo {
 
       const auto& tas_allocated   = this->temporary_allocated_state.is_allocated.temporary;
       auto&       tas_initialized = this->temporary_allocated_state.is_initialized.temporary;
+      
+      this->temporary_allocated_state.is_initialized |= (
+         initialized
+         &
+         this->temporary_allocated_state.is_allocated
+      );
 
       for (size_t i = 0; i < tas_allocated.numbers.size(); ++i) {
          if (!tas_allocated.numbers.test(i))
