@@ -3,7 +3,6 @@ name: Build and Upload Artifact
 on:
   push:
     branches:
-      - master  # Adjust this to the branch you want to trigger the build on
       - dev
 
 jobs:
@@ -27,20 +26,6 @@ jobs:
           dir:          ${{ runner.temp }}
           setup-python: false
       
-      - name: Generate Visual Studio project files
-        run: |
-          cd ${{ github.workspace }}\native\src\ReachVariantTool
-          qmake -project
-          qmake ReachVariantTool.pro
-          cd ${{ github.workspace }}\native\src\zlib
-          qmake -project
-          qmake zlib.pro
-          cd ${{ github.workspace }}\native\src\RVTDocumentationProcessor
-          qmake -project
-          qmake RVTDocumentationProcessor.pro
-          cd ${{ github.workspace }}\native\src\RVTDocRenderer
-          qmake -project
-          qmake RVTDocRenderer.pro
       - name: Build the solution
         run: 
           msbuild ${{ github.workspace }}\native\src\ReachVariantTool.sln /p:Configuration=Debug /p:Platform=x64
