@@ -1,74 +1,41 @@
-name: CMake
+name: Build and Upload Artifact
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+    branches:
+      - main  # Adjust this to the branch you want to trigger the build on
 
 jobs:
   build:
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
-    # You can convert this to a matrix build if you need cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: windows-latest
+    runs-on: windows-latest  # We use Windows runner as MSBuild is used
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install Qt
-      # Installs the Qt SDK
-      uses: jurplel/install-qt-action@v2
-      with:
-        version: '5.15.2'
-        host: 'windows'
-        target: 'desktop'
-        dir: ${{ runner.temp }}
-        arch: 'win64_msvc2019_64'
-        setup-python: true
-      
-    - name: Download JOM
-      uses: suisei-cn/actions-download-file@v1
-      with:
-          url:    http://download.qt.io/official_releases/jom/jom.zip
-          target: ${{ runner.temp }}\
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.0.2  # Set up MSBuild on the Windows runner
 
-    - name: Unzip JOM
-      working-directory: ${{ runner.temp }}
-      run:  |
-            7z x jom.zip -ojom
+      - name: Restore NuGet packages (if needed)
+        run: nuget restore ReachVariantTool.sln  # Replace with the correct solution file name
 
-    - name: Create build directory
-      run:  mkdir ${{ runner.temp }}\build
+      - name: Build the solution
+        run: msbuild ReachVariantTool.sln /p:Configuration=Debug /p:Platform=x64
 
-    - name: Set up Visual Studio shell
-      uses: egor-tensin/vs-shell@v2
-      with:
-        arch: x64
+      - name: Create artifact directory
+        run: mkdir artifact
 
-    - name: Build
-      working-directory: ${{ runner.temp }}\build
-      run:  |
-            qmake -r ${{ github.workspace }}\native\src\ReachVariantTool
-              ${{ runner.temp }}\jom\jom -j2
-              cd release
-              windeployqt --qmldir ${{ github.workspace }}\native\src\ReachVariantTool ReachVariantTool.exe --pdb --release --compiler-runtime
-              copy C:\Windows\System32\concrt140.dll . 
-              copy C:\Windows\System32\vccorlib140.dll .
-              copy C:\Windows\System32\msvcp140.dll .
-              copy C:\Windows\System32\vcruntime140.dll .
-  
-    - name: Zip build
-      working-directory: ${{ runner.temp }}
-      run:  |
-            7z a ReachVariantTool.zip ${{ runner.temp }}\build\* -r
-  
-    - name: Save build artifact
-      uses: actions/upload-artifact@master
-      with:
-        name: ReachVariantTool.zip
-        path: ${{ runner.temp }}\ReachVariantTool.zip
+      - name: Copy built files to artifact directory
+        run: |
+          robocopy x64\Debug artifact /E
+
+      - name: Zip artifact directory
+        run: |
+          $zipPath = $env:GITHUB_WORKSPACE + '\artifact.zip'
+          Compress-Archive -Path $env:GITHUB_WORKSPACE\artifact -DestinationPath $zipPath
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: project-artifact
+          path: artifact.zip
