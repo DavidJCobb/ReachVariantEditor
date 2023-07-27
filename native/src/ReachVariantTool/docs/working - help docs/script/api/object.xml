@@ -147,8 +147,17 @@
                own line: "Calling this function without assigning its return 
                value to a variable is a compile error."
             -->
+            <verification>
+               <call-on-none
+                  safe="true"
+                  returns-none="true"
+               />
+            </verification>
             <args>
-               <arg name="type"  type="object-type" />
+               <arg name="type"  type="object-type">
+                  The type of object to create. If this is not a valid object type, then the return 
+                  value is <var>no_object</var>.
+               </arg>
                <arg name="label" type="forge-label" />
                <arg name="flags">
                   <p>
@@ -157,11 +166,28 @@
                   </p>
                   <dl>
                      <dt>never_garbage_collect</dt>
-                     <dd>Prevents the created object from being garbage-collected.</dd>
+                        <dd>Prevents the created object from being garbage-collected.</dd>
                      <dt>suppress_effect</dt>
-                     <dd>Unknown.</dd>
+                        <dd>Unknown.</dd>
                      <dt>absolute_orientation</dt>
-                     <dd>Unknown.</dd>
+                        <dd>
+                           <p>
+                              By default, the position offset you provide will be applied in 
+                              coordinates relative to the <var>basis</var> object's heading 
+                              (yaw rotation) only. This means that the effects of <var>x</var> 
+                              and <var>y</var> will depend on which way the object is facing, 
+                              while <var>z</var> will always be the world up/down axis. If 
+                              the <var>basis</var> object is exactly or almost exactly facing 
+                              nose-up or nose-down, then the position offset is applied as if 
+                              the <var>basis</var> object's local forward vector were (1, 0, 0).
+                           </p>
+                           <p>
+                              If this flag is set, then your offset will take the <var>basis</var> 
+                              object's roll and pitch rotation into account as well. The offset 
+                              will always be relative to the <var>basis</var> object's rotation, 
+                              even if that object is facing nose-up or nose-down.
+                           </p>
+                        </dd>
                   </dl>
                </arg>
                <arg name="x" type="vector3:x">
@@ -196,9 +222,18 @@
                <a href="script/api/object/actions/detach">detach</a>
                it.
             </note>
+            <note>
+               If the context object doesn't exist (i.e. is <var>no_object</var>), then no object 
+               will be created, and the return value will be <var>no_object</var>.
+            </note>
             <category id="object-lifetime" />
          </method>
          <method name="delete" id="3">
+            <verification>
+               <call-on-none
+                  safe="true"
+               />
+            </verification>
             <blurb>Delete this object from the game world.</blurb>
             <example>
                for each object with label "team_only" do
@@ -213,6 +248,11 @@
                end
             </example>
             <note>
+               If the context object doesn't exist, then this function does nothing. It's 
+               safe to call this function without checking whether the object variable 
+               you're using is <var>no_object</var>.
+            </note>
+            <note>
                Deleting a player's current biped will cause them to instantaneously respawn,
                without deducting from their pool of lives in limited-life game variants.
                Continuously deleting their biped over a span of time will cause the screen
@@ -226,6 +266,11 @@
             <category id="object-lifetime" />
          </method>
          <method name="set_waypoint_visibility" id="4">
+            <verification>
+               <call-on-none
+                  safe="true"
+               />
+            </verification>
             <args>
                <arg name="who" type="player-set" />
             </args>
@@ -236,12 +281,22 @@
                end
             </example>
             <note>
+               If the context object doesn't exist, then this function does nothing. It's 
+               safe to call this function without checking whether the object variable 
+               you're using is <var>no_object</var>.
+            </note>
+            <note>
                Testing suggests that weapons cannot show waypoints if they are being carried
                by bipeds.
             </note>
             <category id="object-waypoint" />
          </method>
          <method name="set_waypoint_icon" id="5">
+            <verification>
+               <call-on-none
+                  safe="true"
+               />
+            </verification>
             <args>
                <arg name="icon" type="waypoint-icon" />
             </args>
@@ -251,9 +306,19 @@
                   current_object.set_waypoint_icon(defend)
                end
             </example>
+            <note>
+               If the context object doesn't exist, then this function does nothing. It's 
+               safe to call this function without checking whether the object variable 
+               you're using is <var>no_object</var>.
+            </note>
             <category id="object-waypoint" />
          </method>
          <method name="set_waypoint_priority" id="6">
+            <verification>
+               <call-on-none
+                  safe="true"
+               />
+            </verification>
             <args>
                <arg name="priority">
                   <p>Any of the following values:</p>
@@ -275,9 +340,19 @@
                   current_object.set_waypoint_priority(low)
                end
             </example>
+            <note>
+               If the context object doesn't exist, then this function does nothing. It's 
+               safe to call this function without checking whether the object variable 
+               you're using is <var>no_object</var>.
+            </note>
             <category id="object-waypoint" />
          </method>
          <method name="set_waypoint_timer" id="7">
+            <verification>
+               <call-on-none
+                  safe="true"
+               />
+            </verification>
             <args>
                <arg name="timer">
                   The word <var>none</var>, or an integer constant indicating the index of an
@@ -300,19 +375,31 @@
                   current_object.set_waypoint_timer(none)
                end
             </example>
+            <note>
+               If the context object doesn't exist, then this function does nothing. It's 
+               safe to call this function without checking whether the object variable 
+               you're using is <var>no_object</var>.
+            </note>
             <category id="object-waypoint" />
          </method>
          <method name="set_waypoint_range" id="8">
+            <verification>
+               <call-on-none
+                  safe="true"
+               />
+            </verification>
             <args>
                <arg name="min" type="number">
-                  A number between -1 and 100, inclusive. A value of 1 represents one Forge
-                  unit. The player will not be able to see the waypoint unless they are
-                  further away than this distance.
+                  The minimum distance at which the player is able to see the waypoint: they 
+                  cannot see it if they get any closer. Positive values are limited to 100. 
+                  All values below zero are treated as a sentinel value.
+                  <!-- likely either "no limit" or "default," but not sure which -->
                </arg>
                <arg name="max" type="number">
-                  A number between -1 and 100, inclusive. A value of 1 represents one Forge
-                  unit. The player will not be able to see the waypoint unless they are
-                  closer than this distance.
+                  The maximum distance at which the player is able to see the waypoint: they 
+                  cannot see it if they're any further away. Positive values are limited to 100. 
+                  All values below zero are treated as a sentinel value.
+                  <!-- likely either "no limit" or "default," but not sure which -->
                </arg>
             </args>
             <blurb>Change the distances at which waypoints are visible.</blurb>
@@ -322,6 +409,11 @@
                end
             </example>
             <note>
+               If the context object doesn't exist, then this function does nothing. It's 
+               safe to call this function without checking whether the object variable 
+               you're using is <var>no_object</var>.
+            </note>
+            <note>
                Most Megalo functions that work with distances use a value of 1 to represent
                <em>one tenth</em> of a Forge unit. However, this function uses a value of 1
                to represent <em>one entire</em> Forge unit. Be mindful of the difference
@@ -330,6 +422,9 @@
             <category id="object-waypoint" />
          </method>
          <method name="set_shape" name2="set_boundary" id="10">
+            <verification>
+               <call-on-none safe="true" />
+            </verification>
             <args>
                <arg name="type">
                   <p>Any of the following values:</p>
@@ -346,8 +441,9 @@
                </arg>
                <arg name="dimensions..." type="number">
                   Zero or more dimensions for the shape, as appropriate for the given type.
-                  A value of 10 represents one Forge unit. <!-- All values are clamped to the 
-                  range [0, 200]. --><!-- TODO: CONFIRM by testing -->
+                  A value of 10 represents one Forge unit. All dimensions are validated by 
+                  the game engine: negative numbers are forced to zero, and values are capped 
+                  to a maximum of 2000 (or 200 Forge units).
                </arg>
             </args>
             <blurb>Change an object's shape boundary.</blurb>
@@ -373,9 +469,17 @@
                   current_object.set_shape(box, 10, 10, 10, 10)
                end
             </example>
+            <note>
+               If the context object doesn't exist, then this function does nothing. It's 
+               safe to call this function without checking whether the object variable 
+               you're using is <var>no_object</var>.
+            </note>
             <category id="object-shape" />
          </method>
          <method name="set_pickup_permissions" id="12">
+            <verification>
+               <call-on-none safe="true" />
+            </verification>
             <args>
                <arg name="who" type="player-set" />
             </args>
@@ -412,6 +516,9 @@
             <category id="weapons" />
          </method>
          <method name="set_spawn_location_permissions" name2="set_respawn_filter" id="13">
+            <verification>
+               <call-on-none safe="true" />
+            </verification>
             <args>
                <arg name="who" type="player-set" />
             </args>
@@ -440,6 +547,9 @@
             <category id="spawning" />
          </method>
          <method name="set_spawn_location_fireteams" name2="set_fireteam_respawn_filter" id="14">
+            <verification>
+               <call-on-none safe="true" />
+            </verification>
             <args>
                The word <var>none</var>, the word <var>all</var>, or a comma-separated
                list of fireteam indices (starting at 0) that should be able to use this
@@ -465,6 +575,9 @@
             <category id="spawning" />
          </method>
          <method name="set_progress_bar" id="15">
+            <verification>
+               <call-on-none safe="true" />
+            </verification>
             <args>
                <arg name="timer">
                   The word <var>none</var>, or an integer constant indicating the index of an
@@ -493,6 +606,12 @@
             <category id="object-ui" />
          </method>
          <method name="try_get_carrier" name2="get_carrier" id="19" returns="player">
+            <verification>
+               <call-on-none
+                  safe="true"
+                  returns-none="true"
+               />
+            </verification>
             <blurb>Identify the player carrying a weapon or Armor Ability.</blurb>
             <description>
                <p>
@@ -521,6 +640,9 @@
             <category id="weapons" />
          </method>
          <method name="set_shape_visibility" id="22">
+            <verification>
+               <call-on-none safe="true" />
+            </verification>
             <args>
                <arg name="who" type="player-set" />
             </args>
@@ -539,6 +661,9 @@
             <category id="object-ui" />
          </method>
          <method name="kill" id="23">
+            <verification>
+               <call-on-none safe="true" />
+            </verification>
             <args>
                <arg name="silent" type="bool">
                   Controls whether the object's death counts toward any statistics.
@@ -558,6 +683,9 @@
             <category id="object-stats" />
          </method>
          <method name="set_invincibility" id="24">
+            <verification>
+               <call-on-none safe="true" />
+            </verification>
             <args>
                <arg name="state" type="number">
                   If this value is non-zero, the object is made invincible.
@@ -581,6 +709,11 @@
             <category id="object-stats" />
          </method>
          <method name="get_orientation" id="29" returns="number">
+            <!--
+               TODO: Reverse-engineering suggests that this function does nothing, doesn't 
+               even modify the destination register, if called on a none object. We should 
+               confirm this experimentally.
+            -->
             <blurb>Returns a number representing the object's overall rotation.</blurb>
             <description>
                <p>
@@ -611,6 +744,11 @@
             <category id="physics" />
          </method>
          <method name="get_speed" id="30" returns="number">
+            <!--
+               TODO: Reverse-engineering suggests that this function does nothing, doesn't 
+               even modify the destination register, if called on a none object. We should 
+               confirm this experimentally.
+            -->
             <blurb>Returns the object's speed in feet per second.</blurb>
             <description>
                <p>
@@ -733,6 +871,10 @@
                   attached, the maneuver will end instantly; no such maneuvers can be
                   performed once the vehicle is attached.
                </p>
+            </note>
+            <note>
+               If either of the context or <var>basis</var> objects are <var>no_object</var>, 
+               or if both are the same object, then this function does nothing.
             </note>
             <note>
                Armor Abilities equipped by other players are an exception to normal
@@ -1332,7 +1474,7 @@
                   for each object do
                      if roll_global_basis == no_object then
                         roll_global_basis      = current_object.place_between_me_and(current_object, hill_marker, 0)
-                        unrotated_global_basis = current_object.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+                        unrotated_global_basis = roll_global_basis.place_at_me(hill_marker, none, none, 0, 0, 0, none)
                      end
                   end
                end

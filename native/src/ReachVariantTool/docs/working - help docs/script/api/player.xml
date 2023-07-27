@@ -184,6 +184,9 @@
       </conditions>
       <actions>
          <method name="apply_traits" id="11">
+            <verification>
+               <call-on-none safe="true" />
+            </verification>
             <args>
                <arg name="traits" type="traits">The player traits to apply.</arg>
             </args>

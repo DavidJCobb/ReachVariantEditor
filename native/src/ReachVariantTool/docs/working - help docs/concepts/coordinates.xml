@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<article>
+   <title>Coordinates</title>
+   <body>
+      <p>
+         Different video games (and 3D graphics engines generally) have different conventions 
+         for how rotations are stored, what Euler angles actually mean, and what the different 
+         3D axes actually mean. For example, in Skyrim, an object's local Y-axis is its forward 
+         axis, but in Halo: Reach, an object's local X-axis is its forward axis.
+      </p>
+      
+      <ul>
+         <li>
+            The X-axis represents "forward" and the Z-axis represents "up."
+         </li>
+         <li>
+            
+         </li>
+      </ul>
+   </body>
+</article>
