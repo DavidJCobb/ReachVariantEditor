@@ -3,7 +3,8 @@ name: Build and Upload Artifact
 on:
   push:
     branches:
-      - main  # Adjust this to the branch you want to trigger the build on
+      - master  # Adjust this to the branch you want to trigger the build on
+      - dev
 
 jobs:
   build:
