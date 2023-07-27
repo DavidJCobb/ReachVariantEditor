@@ -19,8 +19,7 @@ jobs:
 
       - name: Build the solution
         run: 
-          cd ${{ github.workspace }}/native/src
-          msbuild ReachVariantTool.sln /p:Configuration=Debug /p:Platform=x64
+          msbuild ${{ github.workspace }}\native\src\ReachVariantTool.sln /p:Configuration=Debug /p:Platform=x64
 
       - name: Create artifact directory
         run: mkdir artifact
