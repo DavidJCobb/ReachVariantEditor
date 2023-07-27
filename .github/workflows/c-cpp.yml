@@ -17,9 +17,6 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2  # Set up MSBuild on the Windows runner
 
-      - name: Restore NuGet packages (if needed)
-        run: nuget restore ReachVariantTool.sln  # Replace with the correct solution file name
-
       - name: Build the solution
         run: msbuild ReachVariantTool.sln /p:Configuration=Debug /p:Platform=x64
 
