@@ -402,8 +402,6 @@ namespace Megalo {
          statement_side_t _extract_statement_side(QString& out_str, int32_t& out_int);
          //
          static keyword_handler_t __get_handler_for_keyword(QString) noexcept;
-
-         void __after_compiled_statement(const Script::Statement&);
          
          Script::VariableReference* __parseActionRHS(QString& op, const pos& prior, Script::VariableReference* lhs, bool allow_abs_hack);
          void _parseAction();

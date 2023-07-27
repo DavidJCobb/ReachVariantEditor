@@ -1564,158 +1564,6 @@ namespace Megalo {
       return nullptr;
    }
 
-   void Compiler::__after_compiled_statement(const Script::Statement& statement) {
-
-      //
-      // In MegaloEdit, when you declare a temporary variable, an assignment to zero-or-none is 
-      // immediately compiled in. For ReachVariantTool, we want to be a bit more nuanced: if you 
-      // allocate a temporary variable to an alias, then we want to initialize the temporary 
-      // variable the first time it is read, if it hasn't been set before.
-      // 
-      // A variable is "read" if it is used in an opcode and either is not the opcode's destination 
-      // operand, or is modified rather than overwritten (e.g. a `+=` assignment statement).
-      // 
-      // The goal is to avoid a redundant initialize-to-zero for the following code:
-      // 
-      //    for each player do
-      //       alias test = allocate temporary number
-      // 
-      //       test = current_player.score
-      //    end
-      //
-
-      auto* action = dynamic_cast<Action*>(statement.opcode);
-      if (!action)
-         return;
-      const auto* action_base = (const ActionFunction*)action->function;
-      if (!action_base)
-         return;
-
-      auto* block = dynamic_cast<Script::Block*>(statement.parent);
-      if (!block)
-         return;
-
-      auto insert_statements_before = block->index_of_item(&statement);
-      if (insert_statements_before < 0)
-         return;
-
-      bool also_initialize_out_var = false; // needed if `statement` is a += action, etc..
-      {
-         const auto& mapping = action_base->mapping;
-         if (mapping.arg_operator >= 0) {
-            auto* assign_operator = dynamic_cast<OpcodeArgValueMathOperatorEnum*>(action->arguments[mapping.arg_operator]);
-            if (assign_operator) {
-               auto index_set = assign_operator->base.lookup("=");
-               auto index_abs = assign_operator->base.lookup("__abs_assign");
-               if (assign_operator->value != index_set && assign_operator->value != index_abs) {
-                  also_initialize_out_var = true;
-               }
-            }
-         }
-      }
-
-      Script::variable_usage_set used;
-      Script::variable_usage_set initialized;
-      for (size_t i = 0; i < action->arguments.size() && i < action_base->arguments.size(); ++i) {
-         auto* operand      = action->arguments[i];
-         auto& operand_base = action_base->arguments[i];
-         if (operand_base.is_out_variable && !also_initialize_out_var) {
-            operand->mark_used_variables(initialized);
-            continue;
-         }
-         operand->mark_used_variables(used);
-      }
-
-      auto insert_initialization = [this, insert_statements_before](const char* type, size_t index) {
-         cobb::string_scanner assign_to(QString("temporaries.%2[%1]").arg(index).arg(type));
-
-         auto base = &_get_assignment_opcode();
-         auto blank = new Action;
-         blank->function = base;
-         blank->arguments.resize(3);
-         blank->arguments[0] = (base->arguments[0].typeinfo.factory)(); // lhs
-         auto result = blank->arguments[0]->compile(*this, assign_to, 0);
-         if (result.is_failure()) {
-            delete blank;
-            return;
-         }
-         //
-         auto lhs = dynamic_cast<OpcodeArgValueAnyVariable*>(blank->arguments[0]);
-         assert(lhs && "Each side of the assignment opcode should be an OpcodeArgValueAnyVariable. If for any reason this has changed, update the compiler code.");
-         auto rhs = blank->arguments[1] = lhs->create_zero_or_none(); // rhs
-         if (!rhs) {
-            delete blank;
-            return;
-         }
-         //
-         auto op_string = string_scanner("=");
-         blank->arguments[2] = (base->arguments[2].typeinfo.factory)(); // operator
-         result = blank->arguments[2]->compile(*this, op_string, 0);
-         if (result.is_failure()) {
-            delete blank;
-            return;
-         }
-         //
-         auto statement = new Script::Statement;
-         statement->set_start(this->state);
-         statement->set_end(this->state);
-         statement->opcode = blank;
-
-         statement->parent = this->block;
-         this->block->items.insert(this->block->items.begin() + insert_statements_before, statement);
-      };
-
-      const auto& tas_allocated   = this->temporary_allocated_state.is_allocated.temporary;
-      auto&       tas_initialized = this->temporary_allocated_state.is_initialized.temporary;
-      
-      this->temporary_allocated_state.is_initialized |= (
-         initialized
-         &
-         this->temporary_allocated_state.is_allocated
-      );
-
-      for (size_t i = 0; i < tas_allocated.numbers.size(); ++i) {
-         if (!tas_allocated.numbers.test(i))
-            continue;
-         if (tas_initialized.numbers.test(i)) // if variable is already initialized, ignore it
-            continue;
-         if (used.temporary.numbers.test(i)) {
-            insert_initialization("number", i);
-            tas_initialized.numbers.set(i);
-         }
-      }
-      for (size_t i = 0; i < tas_allocated.objects.size(); ++i) {
-         if (!tas_allocated.objects.test(i))
-            continue;
-         if (tas_initialized.objects.test(i)) // if variable is already initialized, ignore it
-            continue;
-         if (used.temporary.objects.test(i)) {
-            insert_initialization("object", i);
-            tas_initialized.objects.set(i);
-         }
-      }
-      for (size_t i = 0; i < tas_allocated.players.size(); ++i) {
-         if (!tas_allocated.players.test(i))
-            continue;
-         if (tas_initialized.players.test(i)) // if variable is already initialized, ignore it
-            continue;
-         if (used.temporary.players.test(i)) {
-            insert_initialization("player", i);
-            tas_initialized.players.set(i);
-         }
-      }
-      for (size_t i = 0; i < tas_allocated.teams.size(); ++i) {
-         if (!tas_allocated.teams.test(i))
-            continue;
-         if (tas_initialized.teams.test(i)) // if variable is already initialized, ignore it
-            continue;
-         if (used.temporary.teams.test(i)) {
-            insert_initialization("team", i);
-            tas_initialized.teams.set(i);
-         }
-      }
-   }
-
    Script::VariableReference* Compiler::__parseActionRHS(QString& op, const pos& prior, Script::VariableReference* lhs, bool allow_abs_hack) {
       QString word;
       int32_t integer;
@@ -2072,7 +1920,6 @@ namespace Megalo {
          }
       }
       statement->opcode = opcode.release();
-      this->__after_compiled_statement(*statement);
    }
    bool Compiler::_parseCondition() {
       Script::VariableReference* lhs = nullptr;
@@ -2988,7 +2835,6 @@ namespace Megalo {
          this->block->insert_condition(cnd);
       } else {
          this->block->insert_item(statement);
-         this->__after_compiled_statement(*statement);
       }
       this->_commit_unresolved_strings(unresolved_strings);
       if (!unresolved_labels.labels.empty()) {
