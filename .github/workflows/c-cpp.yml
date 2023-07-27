@@ -18,7 +18,9 @@ jobs:
         uses: microsoft/setup-msbuild@v1.0.2  # Set up MSBuild on the Windows runner
 
       - name: Build the solution
-        run: msbuild ReachVariantTool.sln /p:Configuration=Debug /p:Platform=x64
+        run: 
+          cd ${{ github.workspace }}/native/src
+          msbuild ReachVariantTool.sln /p:Configuration=Debug /p:Platform=x64
 
       - name: Create artifact directory
         run: mkdir artifact
