@@ -1,160 +1,234 @@
 <!doctype html>
 <html lang="en">
-   <head>
-      <meta charset="UTF-8" />
-      <title>object.face_toward | ReachVariantTool Documentation</title>
-      <base href="../../../../" />
-      <link rel="stylesheet" href="resources/main.css" />
-      <noscript>
-         <link rel="stylesheet" href="resources/noscript.css" />
-      </noscript>
-      <script src="resources/head.js"></script>
-   </head>
-   <body>
-      <nav id="sidebar">
-         <ul>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>object.face_toward | ReachVariantTool Documentation</title>
+    <base href="../../../../" />
+    <link rel="stylesheet" href="resources/main.css" />
+    <noscript>
+        <link rel="stylesheet" href="resources/noscript.css" />
+    </noscript>
+    <script src="resources/head.js"></script>
+    <script>
+        function sincos_int(deg) {
+            let rad = deg * Math.PI / 180;
+            //
+            let list = [];
+            for (let i = 1; i <= 127; ++i) {
+                list.push({
+                    mult: i,
+                    x: Math.cos(rad) * i,
+                    y: Math.sin(rad) * i,
+                });
+            }
+            //
+            let least_error = 999999;
+            let least_error_item = list[1 - 1];
+            console.assert(least_error_item.mult == 1);
+            for (let item of list) {
+                const USE_AVG = false;
+                //
+                let error = Math.abs(Math.round(item.x) - item.x) + Math.abs(Math.round(item.y) - item.y);
+                if (USE_AVG)
+                    error /= 2;
+                if (error < least_error) {
+                    least_error = error;
+                    least_error_item = item;
+                }
+            }
+            return `Raw cos/sin: ${Math.cos(rad)}, ${Math.sin(rad)}
+
+Multiplier with least error: ${least_error_item.mult}
+Multiplied cos/sin:     ${least_error_item.x}, ${least_error_item.y}
+Multiplied int cos/sin: ${Math.round(least_error_item.x)}, ${Math.round(least_error_item.y)}`;
+        }
+    </script>
+</head>
+
+<body>
+    <nav id="sidebar">
+        <ul>
             <li><a href="index.html">Index</a></li>
             <li><a href="script/api/index.html">Script API reference</a></li>
             <hr />
             <li data-disallow-collapse>
-               <a href="script/api/object.html">Object</a>
-               <ul>
-                  <li data-delete-if-empty data-dont-default-collapse>
-                     <a>Properties</a>
-                     <ul>
-                        <li><a href="script/api/object/properties/spawn_sequence.html">spawn_sequence</a></li>
-<li><a href="script/api/object/properties/team.html">team</a></li>
+                <a href="script/api/object.html">Object</a>
+                <ul>
+                    <li data-delete-if-empty data-dont-default-collapse>
+                        <a>Properties</a>
+                        <ul>
+                            <li><a href="script/api/object/properties/spawn_sequence.html">spawn_sequence</a></li>
+                            <li><a href="script/api/object/properties/team.html">team</a></li>
 
-                     </ul>
-                  </li>
-                  <li data-delete-if-empty data-dont-default-collapse>
-                     <a>Accessors</a>
-                     <ul>
-                        <li><a href="script/api/object/accessors/health.html">health</a></li>
-<li><a href="script/api/object/accessors/max_health.html">max_health</a></li>
-<li><a href="script/api/object/accessors/max_shields.html">max_shields</a></li>
-<li><a href="script/api/object/accessors/shields.html">shields</a></li>
+                        </ul>
+                    </li>
+                    <li data-delete-if-empty data-dont-default-collapse>
+                        <a>Accessors</a>
+                        <ul>
+                            <li><a href="script/api/object/accessors/health.html">health</a></li>
+                            <li><a href="script/api/object/accessors/max_health.html">max_health</a></li>
+                            <li><a href="script/api/object/accessors/max_shields.html">max_shields</a></li>
+                            <li><a href="script/api/object/accessors/shields.html">shields</a></li>
 
-                     </ul>
-                  </li>
-                  <li data-delete-if-empty data-dont-default-collapse>
-                     <a>Member conditions</a>
-                     <ul>
-                        <li><a href="script/api/object/conditions/has_forge_label.html">has_forge_label</a></li>
-<li><a href="script/api/object/conditions/is_in_use.html">is_in_use</a></li>
-<li><a href="script/api/object/conditions/is_of_type.html">is_of_type</a></li>
-<li><a href="script/api/object/conditions/is_out_of_bounds.html">is_out_of_bounds</a></li>
-<li><a href="script/api/object/conditions/shape_contains.html">shape_contains</a></li>
+                        </ul>
+                    </li>
+                    <li data-delete-if-empty data-dont-default-collapse>
+                        <a>Member conditions</a>
+                        <ul>
+                            <li><a href="script/api/object/conditions/has_forge_label.html">has_forge_label</a></li>
+                            <li><a href="script/api/object/conditions/is_in_use.html">is_in_use</a></li>
+                            <li><a href="script/api/object/conditions/is_of_type.html">is_of_type</a></li>
+                            <li><a href="script/api/object/conditions/is_out_of_bounds.html">is_out_of_bounds</a></li>
+                            <li><a href="script/api/object/conditions/shape_contains.html">shape_contains</a></li>
 
-                     </ul>
-                  </li>
-                  <li data-delete-if-empty data-dont-default-collapse>
-                     <a>Member actions</a>
-                     <ul>
-                        <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
-<li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
-<li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
-<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
-<li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
-<li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
-<li><a href="script/api/object/actions/delete.html">delete</a></li>
-<li><a href="script/api/object/actions/detach.html">detach</a></li>
-<li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
-<li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
-<li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
-<li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
-<li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
-<li><a href="script/api/object/actions/get_orientation.html">get_orientation</a></li>
-<li><a href="script/api/object/actions/get_speed.html">get_speed</a></li>
-<li><a href="script/api/object/actions/kill.html">kill</a></li>
-<li><a href="script/api/object/actions/place_at_me.html">place_at_me</a></li>
-<li><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></li>
-<li><a href="script/api/object/actions/push_upward.html">push_upward</a></li>
-<li><a href="script/api/object/actions/remove_weapon.html">remove_weapon</a></li>
-<li><a href="script/api/object/actions/set_device_actual_position.html">set_device_actual_position</a></li>
-<li><a href="script/api/object/actions/set_device_animation_position.html">set_device_animation_position</a></li>
-<li><a href="script/api/object/actions/set_device_position.html">set_device_position</a></li>
-<li><a href="script/api/object/actions/set_device_power.html">set_device_power</a></li>
-<li><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></li>
-<li><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></li>
-<li><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></li>
-<li><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></li>
-<li><a href="script/api/object/actions/set_scale.html">set_scale</a></li>
-<li><a href="script/api/object/actions/set_shape.html">set_shape</a></li>
-<li><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></li>
-<li><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_spawn_location_fireteams</a></li>
-<li><a href="script/api/object/actions/set_spawn_location_permissions.html">set_spawn_location_permissions</a></li>
-<li><a href="script/api/object/actions/set_waypoint_icon.html">set_waypoint_icon</a></li>
-<li><a href="script/api/object/actions/set_waypoint_priority.html">set_waypoint_priority</a></li>
-<li><a href="script/api/object/actions/set_waypoint_range.html">set_waypoint_range</a></li>
-<li><a href="script/api/object/actions/set_waypoint_text.html">set_waypoint_text</a></li>
-<li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
-<li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
-<li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+                        </ul>
+                    </li>
+                    <li data-delete-if-empty data-dont-default-collapse>
+                        <a>Member actions</a>
+                        <ul>
+                            <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
+                            <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
+                            <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
+                            <li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
+                            <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
+                            <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
+                            <li><a href="script/api/object/actions/delete.html">delete</a></li>
+                            <li><a href="script/api/object/actions/detach.html">detach</a></li>
+                            <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
+                            <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
+                            <li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+                            <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
+                            <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
+                            <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
+                            <li><a href="script/api/object/actions/get_orientation.html">get_orientation</a></li>
+                            <li><a href="script/api/object/actions/get_speed.html">get_speed</a></li>
+                            <li><a href="script/api/object/actions/kill.html">kill</a></li>
+                            <li><a href="script/api/object/actions/place_at_me.html">place_at_me</a></li>
+                            <li><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></li>
+                            <li><a href="script/api/object/actions/push_upward.html">push_upward</a></li>
+                            <li><a href="script/api/object/actions/remove_weapon.html">remove_weapon</a></li>
+                            <li><a href="script/api/object/actions/set_device_actual_position.html">set_device_actual_position</a></li>
+                            <li><a href="script/api/object/actions/set_device_animation_position.html">set_device_animation_position</a></li>
+                            <li><a href="script/api/object/actions/set_device_position.html">set_device_position</a></li>
+                            <li><a href="script/api/object/actions/set_device_power.html">set_device_power</a></li>
+                            <li><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></li>
+                            <li><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></li>
+                            <li><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></li>
+                            <li><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></li>
+                            <li><a href="script/api/object/actions/set_scale.html">set_scale</a></li>
+                            <li><a href="script/api/object/actions/set_shape.html">set_shape</a></li>
+                            <li><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></li>
+                            <li><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_spawn_location_fireteams</a></li>
+                            <li><a href="script/api/object/actions/set_spawn_location_permissions.html">set_spawn_location_permissions</a></li>
+                            <li><a href="script/api/object/actions/set_waypoint_icon.html">set_waypoint_icon</a></li>
+                            <li><a href="script/api/object/actions/set_waypoint_priority.html">set_waypoint_priority</a></li>
+                            <li><a href="script/api/object/actions/set_waypoint_range.html">set_waypoint_range</a></li>
+                            <li><a href="script/api/object/actions/set_waypoint_text.html">set_waypoint_text</a></li>
+                            <li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
+                            <li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
+                            <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
+                            <li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
 
-                     </ul>
-                  </li>
-               </ul>
+                        </ul>
+                    </li>
+                </ul>
             </li>
-         </ul>
-      </nav>
-      <main>
-         <header><h1>object.face_toward</h1></header>
+        </ul>
+    </nav>
+    <main>
+        <header>
+            <h1>object.face_toward</h1>
+        </header>
 
-               <p>
-                  This function can be used to make one object face toward another. It only 
-                  affects the object's heading (yaw), not its pitch or roll rotations.
-               </p>
-            
-<h2>Arguments</h2>
-<dl>
-   <dt><a href="script/api/object.html">other</a></dt>
-      <dd><p>
-                  The object whose rotation should be copied.
-               </p></dd>
-   <dt>x</dt>
-      <dd><p>
-                  The X-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive, where 10 is equal to 
-                  one Forge unit.
-               </p></dd>
-   <dt>y</dt>
-      <dd><p>
-                  The Y-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive, where 10 is equal to 
-                  one Forge unit.
-               </p></dd>
-   <dt>z</dt>
-      <dd><p>
-                  The Z-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive, where 10 is equal to 
-                  one Forge unit.
-               </p></dd>
-</dl>
-<h2>Example</h2>
-<pre>
-global.object[0].copy_rotation_from(global.object[1], true)</pre>
-<h2>Notes</h2>
-<ul>
-   <li><p>
-               If you face an object toward itself, you can use the position offset to rotate it.
-            </p></li>
-</ul><h2>See also</h2>
-<ul>
-   <li><a href="script/api/object/actions/attach_to.html">object.attach_to</a></li>
-   <li><a href="script/api/object/actions/copy_rotation_from.html">object.copy_rotation_from</a></li>
-   <li><a href="script/api/object/actions/get_distance_to.html">object.get_distance_to</a></li>
-   <li><a href="script/api/object/actions/get_orientation.html">object.get_orientation</a></li>
-   <li><a href="script/api/object/actions/get_speed.html">object.get_speed</a></li>
-</ul>
+        <p>
+            This function can be used to make one object face toward another. It only affects the object's heading </span>(yaw), not its pitch or roll rotations.
+        </p>
 
-      </main>
-      <script src="resources/sidebar.js"></script>
-      <script src="resources/header-links.js"></script>
-   </body>
+        <h2>Arguments</h2>
+        <dl>
+            <dt><a href="script/api/object.html">other</a></dt>
+            <dd>
+                <p>
+                    The object whose rotation should be copied.
+                </p>
+            </dd>
+            <dt>x</dt>
+            <dd>
+                <p>
+                    The X-coordinate of an <span class="variable">offset</span>-position. The object will rotate to face
+                    <var>other</var>'s position plus the <span class="variable">offset</span> position. Allowed values are integer constants between -128 and 127, inclusive, where 10 is equal to one Forge unit.
+                </p>
+            </dd>
+            <dt>y</dt>
+            <dd>
+                <p>
+                    The Y-coordinate of an <span class="variable">offset</span>-position. The object will rotate to face
+                    <var>other</var>'s position plus the <span class="variable">offset</span> position. Allowed values are integer constants between -128 and 127, inclusive, where 10 is equal to one Forge unit.
+                </p>
+            </dd>
+            <dt>z</dt>
+            <dd>
+                <p>
+                    The Z-coordinate of an <span class="variable">offset</span>-position. The object will rotate to face
+                    <var>other</var>'s position plus the <span class="variable">offset</span> position. Allowed values are integer constants between -128 and 127, inclusive, where 10 is equal to one Forge unit.
+                </p>
+            </dd>
+        </dl>
+        <h2>Example</h2>
+        <div id="result"></div>
+        <input id="conversionBox" type="number" onchange="document.querySelector('#result').innerHTML = sincos_int(this.value)">
+        <pre>
+<span class="namespace">global</span>.<span class="variable">object</span>[0].<span class="function">copy_rotation_from</span>(<span class="namespace">global</span>.<span class="variable">object</span>[1]<span class="variable">, true</span>)</pre>
+        <h2>Notes</h2>
+        <ul>
+            <li>
+                <p>
+                    If you face an object toward itself, you can use the position offset to rotate it.
+                </p>
+            </li>
+            <li>
+                <p>
+                    The object.face_toward function only affects the heading (yaw) by default, however you can adjust the pitch and roll of an object using clever placements and attachments. The following code will roll a warthog 45 degrees:
+                </p>
+                <pre>
+
+<span class="keyword">alias</span> <span class="variable">adjust</span> <span class="operator"> =</span> <span class="iterator">current_object</span>.<span class="variable">object</span>[0]
+<span class="keyword">alias</span> <span class="variable">offset</span> <span class="operator"> =</span> <span class="iterator">current_object</span>.<span class="variable">object</span>[1]
+<span class="keyword">alias</span> <span class="variable">base</span> <span class="operator"> =</span> <span class="iterator">current_object</span>.<span class="variable">object</span>[2]
+
+<span class="keyword">for</span> <span class="subkeyword">each object do</span>
+    <span class="keyword">if</span> <span class="iterator">current_object</span><span class="function">.is_of_type</span>(<span class="variable">warthog</span>) <span class="keyword">then</span>
+        <span class="keyword">if</span> <span class="variable">adjust</span> <span class="operator">==</span> <span class="variable">no_object</span> <span class="keyword">then</span>
+            <span class="variable">offset</span> <span class="operator">=</span> <span class="iterator">current_object</span><span class="function">.place_between_me_and</span>(<span class="iterator">current_object</span><span class="variable">, hill_marker, 0</span>)
+            <span class="variable">adjust</span> <span class="operator">=</span> <span class="iterator">current_object</span><span class="function">.place_at_me</span>(<span class="variable">hill_marker, none, none, 0, 0, 0, none</span>)
+            <span class="variable">base</span> <span class="operator">=</span> <span class="iterator">current_object</span><span class="function">.place_between_me_and</span>(<span class="iterator">current_object</span><span class="variable">, hill_marker, 0</span>)
+            <span class="variable">offset</span>.<span class="function">attach_to</span>(<span class="variable">adjust</span><span class="variable">, 0, 0, 0, relative</span>)
+            <span class="variable">adjust</span>.<span class="function">face_toward</span>(<span class="variable">adjust</span><span class="variable">, -1, -1, 0</span>)
+            <span class="variable">offset</span>.<span class="function">detach</span>()
+            <span class="variable">offset</span>.<span class="function">attach_to</span>(<span class="variable">base</span><span class="variable">, 0, 0, 0, relative</span>)
+            <span class="variable">base</span>.<span class="function">copy_rotation_from</span>(<span class="iterator">current_object</span><span class="variable">, true</span>)
+            <span class="variable">offset</span>.<span class="function">detach</span>()
+            <span class="variable">offset</span>.<span class="function">attach_to</span>(<span class="variable">current_object</span><span class="variable">, 0, 0, 0, relative</span>)
+        <span class="keyword">end</span>
+        <span class="iterator">current_object</span><span class="function">.copy_rotation_from</span>(<span class="variable">offset</span><span class="variable">, true</span>)
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre>
+            </li>
+        </ul>
+        <h2>See also</h2>
+        <ul>
+            <li><a href="script/api/object/actions/attach_to.html">object.attach_to</a></li>
+            <li><a href="script/api/object/actions/copy_rotation_from.html">object.copy_rotation_from</a></li>
+            <li><a href="script/api/object/actions/get_distance_to.html">object.get_distance_to</a></li>
+            <li><a href="script/api/object/actions/get_orientation.html">object.get_orientation</a></li>
+            <li><a href="script/api/object/actions/get_speed.html">object.get_speed</a></li>
+        </ul>
+
+    </main>
+    <script src="resources/sidebar.js"></script>
+    <script src="resources/header-links.js"></script>
+</body>
+
 </html>

@@ -1,0 +1,57 @@
+name: Build and Upload Artifact
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: windows-latest  # We use Windows runner as MSBuild is used
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.0.2  # Set up MSBuild on the Windows runner
+      
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version:      5.15.2
+          host:         windows
+          target:       desktop
+          arch:         win64_msvc2019_64
+          dir:          ${{ runner.temp }}
+          setup-python: false
+          
+      - name: Prepare Qt environment
+        run: |
+          # Set Qt related environment variables
+          echo "QTDIR=${{ runner.temp }}/Qt/5.15.2/msvc2019_64" >> $GITHUB_ENV
+          echo "QTDIR/bin" >> $GITHUB_PATH
+          echo "QTDIR/lib" >> $GITHUB_PATH
+          echo "QTDIR/plugins" >> $GITHUB_PATH
+      
+      - name: Build the solution
+        run: 
+          msbuild ${{ github.workspace }}\native\src\ReachVariantTool.sln /p:Configuration=Debug /p:Platform=x64
+
+      - name: Create artifact directory
+        run: mkdir artifact
+
+      - name: Copy built files to artifact directory
+        run: |
+          robocopy x64\Debug artifact /E
+
+      - name: Zip artifact directory
+        run: |
+          $zipPath = $env:GITHUB_WORKSPACE + '\artifact.zip'
+          Compress-Archive -Path $env:GITHUB_WORKSPACE\artifact -DestinationPath $zipPath
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: project-artifact
+          path: artifact.zip
