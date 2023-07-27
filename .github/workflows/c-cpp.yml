@@ -30,16 +30,16 @@ jobs:
       - name: Generate Visual Studio project files
         run: |
           cd ${{ github.workspace }}\native\src\ReachVariantTool
-          qmake -tp vc
+          qmake -project
           qmake ReachVariantTool.pro
           cd ${{ github.workspace }}\native\src\zlib
-          qmake -tp vc
+          qmake -project
           qmake zlib.pro
           cd ${{ github.workspace }}\native\src\RVTDocumentationProcessor
-          qmake -tp vc
+          qmake -project
           qmake RVTDocumentationProcessor.pro
           cd ${{ github.workspace }}\native\src\RVTDocRenderer
-          qmake -tp vc
+          qmake -project
           qmake RVTDocRenderer.pro
       - name: Build the solution
         run: 
