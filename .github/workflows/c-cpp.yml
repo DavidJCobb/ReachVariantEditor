@@ -25,6 +25,14 @@ jobs:
           arch:         win64_msvc2019_64
           dir:          ${{ runner.temp }}
           setup-python: false
+          
+      - name: Prepare Qt environment
+        run: |
+          # Set Qt related environment variables
+          echo "QTDIR=${{ runner.temp }}/Qt/5.15.2/msvc2019_64" >> $GITHUB_ENV
+          echo "QTDIR/bin" >> $GITHUB_PATH
+          echo "QTDIR/lib" >> $GITHUB_PATH
+          echo "QTDIR/plugins" >> $GITHUB_PATH
       
       - name: Build the solution
         run: 
