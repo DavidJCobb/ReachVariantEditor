@@ -17,10 +17,15 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2  # Set up MSBuild on the Windows runner
       
-      - name: Install Qt and Generate Project Files
-        uses: jason0125/setup-qt@v2
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
         with:
-          qt-version: '5.15.2'
+          version:      5.15.2
+          host:         windows
+          target:       desktop
+          arch:         win64_msvc2019_64
+          dir:          ${{ runner.temp }}
+          setup-python: false
       
       - name: Generate Visual Studio project files
         run: |
