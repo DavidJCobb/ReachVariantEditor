@@ -82,6 +82,9 @@
                end
             </example>
             <note>
+               If the context object does not exist, then this condition returns false.
+            </note>
+            <note>
                Holograms do not test as being of type <var>spartan</var> or <var>elite</var>.
             </note>
          </method>
@@ -104,6 +107,9 @@
                   end
                end
             </example>
+            <note>
+               If the context object does not exist, then this condition returns false.
+            </note>
          </method>
          <method name="has_forge_label" id="11">
             <blurb>Check whether this object has a given Forge label.</blurb>
@@ -605,7 +611,7 @@
             </example>
             <category id="object-ui" />
          </method>
-         <method name="try_get_carrier" name2="get_carrier" id="19" returns="player">
+         <method name="get_carrier" name2="try_get_carrier" id="19" returns="player">
             <verification>
                <call-on-none
                   safe="true"
@@ -620,11 +626,10 @@
                </p>
                <p>
                   When Bungie and 343i use this function, they often manually clear
-                  the player variable they are assigning to before calling the function.
-                  That functionality is automated in this Megalo dialect: calling the
-                  function with the name <code>get_carrier</code> will compile in an
-                  assignment to <var>no_player</var> before the call, while calling
-                  the function with the name <code>try_get_carrier</code> will not.
+                  the player variable they are assigning to before calling the function. 
+                  However, reverse-engineering of the game engine suggests that this is 
+                  not actually necessary; the game will always properly return a value 
+                  when this function is called.
                </p>
             </description>
             <example>
@@ -635,6 +640,17 @@
                   end
                end
             </example>
+            <note>
+               If the context object doesn't exist, then this function returns <var>no_player</var>. 
+               It's safe to call this function without checking whether the object variable 
+               you're using is <var>no_object</var>.
+            </note>
+            <note>
+               The alternate name for this function, <code>try_get_carrier</code>, is deprecated 
+               and originates from the oldest versions of ReachVariantTool. In older versions, 
+               the two names existed as part of a precaution that reverse-engineering has established 
+               was not actually necessary.
+            </note>
             <category id="armor-abilities" />
             <category id="biped-equipment" />
             <category id="weapons" />
@@ -649,7 +665,7 @@
             <blurb>Adjust which players can see an object's shape boundary.</blurb>
             <example>
                for each object with label "territory" do
-               current_object.set_shape_visibility(everyone)
+                  current_object.set_shape_visibility(everyone)
                end
             </example>
             <note>
@@ -1153,7 +1169,7 @@
                current_object.set_waypoint_text("VIP #%n", current_object.number[0])
             </example>
             <note>
-               The text will be truncated to about 15 characters.
+               The text will be truncated to 15 characters.
             </note>
          </method>
          <method name="get_distance_to" id="66" returns="number">
@@ -1341,7 +1357,9 @@
                If the same object is used as both basis objects &mdash; that is, if the object
                that you call this function on is the same object that you pass as an argument
                &mdash; then the created object will be rotated. Its rotation will be equivalent
-               to -90 pitch, 0 yaw, and 180 roll as shown in Forge.
+               to -90 pitch, 0 yaw, and 180 roll as shown in Forge. Another way to describe this 
+               is that the created object's local up-vector will match the world forward vector 
+               (i.e. the positive world X-axis).
             </note>
             <category id="object-lifetime" />
          </method>

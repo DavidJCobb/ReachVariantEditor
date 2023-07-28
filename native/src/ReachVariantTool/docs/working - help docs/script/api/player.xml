@@ -80,7 +80,8 @@
             <description>
                <p>
                   According to kornman00's findings, this function was meant to check if a player 
-                  is the "leader" of their fireteam. However, it apparently always returns false.
+                  is the "leader" of their fireteam. However, reverse-engineering confirms that 
+                  it always returns false.
                </p>
             </description>
             <category id="fireteams" />
@@ -216,17 +217,36 @@
             <blurb>Identify the player who killed this player.</blurb>
             <description>
                <p>
-                  When called on a player who is dead, this function returns the player 
-                  that killed them, if any.
+                  When called on a player on the exact frame that that player died, this 
+                  function returns the identity of their killer, if any. If the player 
+                  died by their own hand, then they themselves are the return value.
                </p>
                <p>
-                  When Bungie and 343i use this function, they often manually clear 
-                  the player variable they are assigning to before calling the function. 
-                  That functionality is automated in this Megalo dialect: calling the 
-                  function with the name <code>get_killer</code> will compile in an 
-                  assignment to <var>no_player</var> before the call, while calling 
-                  the function with the name <code>try_get_killer</code> will not.
+                  When called on any other frame, <em>even while the player is dead</em>, 
+                  this function does not return a value:
                </p>
+               <ul>
+                  <li>
+                     If you call <code>get_killer</code>, ReachVariantTool will silently 
+                     compile in an assignment to <var>no_player</var> before the call. 
+                     (Bungie and 343i do the same thing by hand.) This ensures that if you 
+                     call the function at the wrong time, the variable you assign its return 
+                     value to will be set to <var>no_player</var>.
+                  </li>
+                  <li>
+                     If you call <code>try_get_killer</code>, then ReachVariantTool does not 
+                     compile in this failsafe. If you call <code>try_get_killer</code> at the 
+                     wrong time, then the function will not return a value: the variable that 
+                     you attempt to assign it to will remain unchanged.
+                     <!--
+                        This appeared to be the case when reverse-engineering Halo: Reach, 
+                        but I wasn't 100% sure; the outcome would've depended on data that 
+                        I didn't and don't understand. However, I've confirmed this through 
+                        testing, including by setting breakpoints on the relevant code and 
+                        stepping through it.
+                     -->
+                  </li>
+               </ul>
             </description>
             <example>
                for each player do
@@ -245,21 +265,37 @@
             <blurb>Identify the type of damage that killed this player.</blurb>
             <description>
                <p>
-                  When called on a player who is dead, this function returns a number 
-                  representing their cause of death. This number can represent any 
-                  cause of death that can be listed in a Post-Game Carnage Report,
-                  including weapons and vehicles. The potential values are listed and 
+                  When called on a player on the exact frame that that player died, this 
+                  function returns a number representing their cause of death. This number 
+                  can represent any cause of death that can be listed in a Post-Game Carnage 
+                  Report, including weapons and vehicles. The potential values are listed and 
                   named in the <a href="script/api/ns_enums/damage_reporting_type">damage 
                   reporting type enum</a>.
                </p>
                <p>
-                  When Bungie and 343i use this function, they often manually clear 
-                  the number variable they are assigning to before calling the function. 
-                  That functionality is automated in this Megalo dialect: calling the 
-                  function with the name <code>get_death_damage_type</code> will compile in an 
-                  assignment to <var>0</var> before the call, while calling 
-                  the function with the name <code>try_get_death_damage_type</code> will not.
+                  When called on any other frame, <em>even while the player is dead</em>, 
+                  this function does not return a value:
                </p>
+               <ul>
+                  <li>
+                     If you call <code>get_death_damage_type</code>, ReachVariantTool will 
+                     silently compile in an assignment to <var>0</var> before the call. 
+                     (Bungie and 343i do the same thing by hand.) This ensures that if you 
+                     call the function at the wrong time, the variable you assign its return 
+                     value to will be set to <var>0</var>.
+                  </li>
+                  <li>
+                     If you call <code>try_get_death_damage_type</code>, then ReachVariantTool 
+                     does not compile in this failsafe. If you call <code>try_get_death_damage_type</code> 
+                     at the wrong time, then the function will not return a value: the variable 
+                     that you attempt to assign it to will remain unchanged.
+                     <!--
+                        This works the same way as player.get_killer. The code is essentially 
+                        identical, looking up the same data structures in the same way and 
+                        just accessing different fields.
+                     -->
+                  </li>
+               </ul>
             </description>
             <example>
                --
@@ -284,21 +320,38 @@
             <blurb>Identify the modifier for the damage that killed this player.</blurb>
             <description>
                <p>
-                  When called on a player who is dead, this function returns a number 
-                  representing a modifier for their cause of death. This number 
-                  complements the "damage reporting types" that can be listed in a 
-                  Post-Game Carnage Report. The potential values are listed and 
-                  named in the <a href="script/api/ns_enums/damage_reporting_mod">damage 
-                  reporting modifier enum</a>.
+                  When called on a player on the exact frame that that player died, this 
+                  function returns a number representing a modifier for their cause of 
+                  death. This number complements the 
+                  "<a href="script/api/ns_enums/damage_reporting_type">damage reporting types</a>"
+                  that can be listed in a Post-Game Carnage Report. The potential values 
+                  are listed and named in the 
+                  <a href="script/api/ns_enums/damage_reporting_mod">damage reporting modifier enum</a>.
                </p>
                <p>
-                  When Bungie and 343i use this function, they often manually clear 
-                  the number variable they are assigning to before calling the function. 
-                  That functionality is automated in this Megalo dialect: calling the 
-                  function with the name <code>get_death_damage_mod</code> will compile in an 
-                  assignment to <var>0</var> before the call, while calling 
-                  the function with the name <code>try_get_death_damage_mod</code> will not.
+                  When called on any other frame, <em>even while the player is dead</em>, 
+                  this function does not return a value:
                </p>
+               <ul>
+                  <li>
+                     If you call <code>get_death_damage_mod</code>, ReachVariantTool will 
+                     silently compile in an assignment to <var>0</var> before the call. 
+                     (Bungie and 343i do the same thing by hand.) This ensures that if you 
+                     call the function at the wrong time, the variable you assign its return 
+                     value to will be set to <var>0</var>.
+                  </li>
+                  <li>
+                     If you call <code>try_get_death_damage_mod</code>, then ReachVariantTool 
+                     does not compile in this failsafe. If you call <code>try_get_death_damage_mod</code> 
+                     at the wrong time, then the function will not return a value: the variable 
+                     that you attempt to assign it to will remain unchanged.
+                     <!--
+                        This works the same way as player.get_killer. The code is essentially 
+                        identical, looking up the same data structures in the same way and 
+                        just accessing different fields.
+                     -->
+                  </li>
+               </ul>
             </description>
             <example>
                --
@@ -426,7 +479,13 @@
             </example>
             <category id="player-money" />
          </method>
-         <method name="try_get_vehicle" name2="get_vehicle" id="40" returns="object">
+         <method name="get_vehicle" name2="try_get_vehicle" id="40" returns="object">
+            <verification>
+               <call-on-none
+                  safe="true"
+                  returns-none="true"
+               />
+            </verification>
             <blurb>Identify the vehicle that a player is in.</blurb>
             <description>
                <p>
@@ -436,10 +495,9 @@
                <p>
                   When Bungie and 343i use this function, they often manually clear 
                   the object variable they are assigning to before calling the function. 
-                  That functionality is automated in this Megalo dialect: calling the 
-                  function with the name <code>get_vehicle</code> will compile in an 
-                  assignment to <var>no_object</var> before the call, while calling 
-                  the function with the name <code>try_get_vehicle</code> will not.
+                  However, reverse-engineering of the game engine suggests that this is 
+                  not actually necessary; the game will always properly return a value 
+                  when this function is called.
                </p>
             </description>
             <example>
@@ -469,6 +527,12 @@
                is hijacking or boarding a vehicle. Vehicles can have multiple seats defined for 
                them in the game data, and boarding relies on special "seats" that are flagged as 
                being exclusively for boarding.
+            </note>
+            <note>
+               The alternate name for this function, <code>try_get_vehicle</code>, is deprecated 
+               and originates from the oldest versions of ReachVariantTool. In older versions, 
+               the two names existed as part of a precaution that reverse-engineering has established 
+               was not actually necessary.
             </note>
             <category id="vehicles" />
          </method>
@@ -926,7 +990,7 @@
                end
             </example>
          </method>
-         <method name="try_get_weapon" name2="get_weapon" id="83" returns="object">
+         <method name="get_weapon" name2="try_get_weapon" id="83" returns="object">
             <args>
                <arg name="which">
                   <p>Any one of the following values</p>
@@ -947,10 +1011,9 @@
                <p>
                   When Bungie and 343i use this function, they often manually clear 
                   the object variable they are assigning to before calling the function. 
-                  That functionality is automated in this Megalo dialect: calling the 
-                  function with the name <code>get_weapon</code> will compile in an 
-                  assignment to <var>no_object</var> before the call, while calling 
-                  the function with the name <code>try_get_weapon</code> will not.
+                  However, reverse-engineering of the game engine suggests that this is 
+                  not actually necessary; the game will always properly return a value 
+                  when this function is called.
                </p>
             </description>
             <example>
@@ -968,10 +1031,16 @@
                   end
                end
             </example>
+            <note>
+               The alternate name for this function, <code>try_get_weapon</code>, is deprecated 
+               and originates from the oldest versions of ReachVariantTool. In older versions, 
+               the two names existed as part of a precaution that reverse-engineering has established 
+               was not actually necessary.
+            </note>
             <category id="biped-equipment" />
             <category id="weapons" />
          </method>
-         <method name="try_get_armor_ability" name2="get_armor_ability" id="84" returns="object">
+         <method name="get_armor_ability" name2="try_get_armor_ability" id="84" returns="object">
             <blurb>Identify the player's current Armor Ability.</blurb>
             <description>
                <p>
@@ -981,10 +1050,9 @@
                <p>
                   When Bungie and 343i use this function, they often manually clear 
                   the object variable they are assigning to before calling the function. 
-                  That functionality is automated in this Megalo dialect: calling the 
-                  function with the name <code>get_armor_ability</code> will compile in an 
-                  assignment to <var>no_object</var> before the call, while calling 
-                  the function with the name <code>try_get_armor_ability</code> will not.
+                  However, reverse-engineering of the game engine suggests that this is 
+                  not actually necessary; the game will always properly return a value 
+                  when this function is called.
                </p>
             </description>
             <example>
@@ -999,6 +1067,12 @@
                   end
                end
             </example>
+            <note>
+               The alternate name for this function, <code>try_get_armor_ability</code>, is deprecated 
+               and originates from the oldest versions of ReachVariantTool. In older versions, 
+               the two names existed as part of a precaution that reverse-engineering has established 
+               was not actually necessary.
+            </note>
             <category id="armor-abilities" />
             <category id="biped-equipment" />
          </method>

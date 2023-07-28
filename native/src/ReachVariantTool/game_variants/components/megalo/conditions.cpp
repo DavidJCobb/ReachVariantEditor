@@ -31,6 +31,9 @@ namespace Megalo {
             OpcodeArgBase("operator", OpcodeArgValueCompareOperatorEnum::typeinfo)
          },
          OpcodeFuncToScriptMapping::make_intrinsic_comparison({0, 1}, 2)
+         //
+         // WARNING: DOES NOT VERIFY ARGUMENTS' TYPES; TYPE MISMATCHES MAY LEAD TO DATA CORRUPTION AND CRASHES
+         //
       ),
       ConditionFunction( // 2
          "Object In Boundary",
@@ -105,7 +108,7 @@ namespace Megalo {
       ),
       ConditionFunction( // 9
          "Player Is Fireteam Leader",
-         "This condition always returns false.",
+         "This function is a no-op and always returns false.",
          "%1 %v the leader of their fireteam.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),

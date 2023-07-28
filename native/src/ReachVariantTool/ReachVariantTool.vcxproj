@@ -572,12 +572,17 @@
     <None Include="Resources\gametype_files\blank_ff.bin" />
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="docs\working - help docs\concepts\coordinates.xml" />
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player.xml" />
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player_team.xml" />
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_target_player_team.xml" />
+    <Xml Include="docs\working - help docs\script\api\object\actions\try_get_carrier.xml" />
     <Xml Include="docs\working - help docs\script\api\player\actions\set_round_card_icon.xml" />
     <Xml Include="docs\working - help docs\script\api\player\actions\set_round_card_text.xml" />
     <Xml Include="docs\working - help docs\script\api\player\actions\set_round_card_title.xml" />
+    <Xml Include="docs\working - help docs\script\api\player\actions\try_get_armor_ability.xml" />
+    <Xml Include="docs\working - help docs\script\api\player\actions\try_get_vehicle.xml" />
+    <Xml Include="docs\working - help docs\script\api\player\actions\try_get_weapon.xml" />
     <Xml Include="docs\working - help docs\script\api\player\properties\unknown_09.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

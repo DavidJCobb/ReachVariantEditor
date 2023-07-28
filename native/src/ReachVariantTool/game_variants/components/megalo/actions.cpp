@@ -115,6 +115,9 @@ namespace Megalo {
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_intrinsic_assignment(2)
+         //
+         // WARNING: DOES NOT VERIFY ARGUMENTS' TYPES; TYPE MISMATCHES MAY LEAD TO DATA CORRUPTION AND CRASHES
+         //
       ),
       ActionFunction( // 10
          "Set Object Shape",
@@ -215,7 +218,7 @@ namespace Megalo {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("try_get_carrier", "get_carrier", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
+         OpcodeFuncToScriptMapping::make_function("get_carrier", "try_get_carrier", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_name_is_deprecated)
       ),
       ActionFunction( // 20
          "Run Nested Trigger",
@@ -309,6 +312,10 @@ namespace Megalo {
             OpcodeArgBase("killer", OpcodeArgValuePlayer::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_killer", "get_killer", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
+         //
+         // This function does not write to its destination operand if called on no_player or if 
+         // called at the wrong time!
+         //
       ),
       ActionFunction( // 30
          "Get Death Damage Type",
@@ -319,6 +326,10 @@ namespace Megalo {
             OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_death_damage_type", "get_death_damage_type", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
+         //
+         // This function does not write to its destination operand if called on no_player or if 
+         // called at the wrong time!
+         //
       ),
       ActionFunction( // 31
          "Get Death Damage Modifier",
@@ -329,6 +340,10 @@ namespace Megalo {
             OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_death_damage_mod", "get_death_damage_mod", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
+         //
+         // This function does not write to its destination operand if called on no_player or if 
+         // called at the wrong time!
+         //
       ),
       ActionFunction( // 32
          "Debugging: Enable Tracing",
@@ -419,7 +434,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("try_get_vehicle", "get_vehicle", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
+         OpcodeFuncToScriptMapping::make_function("get_vehicle", "try_get_vehicle", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_name_is_deprecated)
       ),
       ActionFunction( // 41
          "Force Player Into Vehicle",
@@ -579,7 +594,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueFormatStringPersistent::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_objective_text", "set_round_card_title", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_objective_text", "set_round_card_title", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_name_is_deprecated)
       ),
       ActionFunction( // 57
          "Set Objective Icon Caption for Player",
@@ -589,7 +604,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueFormatStringPersistent::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_objective_allegiance_name", "set_round_card_text", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_objective_allegiance_name", "set_round_card_text", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_name_is_deprecated)
       ),
       ActionFunction( // 58
          "Set Objective Icon for Player",
@@ -599,7 +614,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("icon",   OpcodeArgValueEngineIcon::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_objective_allegiance_icon", "set_round_card_icon", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_objective_allegiance_icon", "set_round_card_icon", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_name_is_deprecated)
       ),
       ActionFunction( // 59
          "Enable/Disable Co-Op Spawning",
@@ -864,7 +879,7 @@ namespace Megalo {
             OpcodeArgBase("which",  OpcodeArgValueWeaponSlotEnum::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("try_get_weapon", "get_weapon", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
+         OpcodeFuncToScriptMapping::make_function("get_weapon", "try_get_weapon", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_name_is_deprecated)
       ),
       ActionFunction( // 84
          "Get Player Armor Ability",
@@ -874,7 +889,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("try_get_armor_ability", "get_armor_ability", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
+         OpcodeFuncToScriptMapping::make_function("get_armor_ability", "try_get_armor_ability", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_name_is_deprecated)
       ),
       ActionFunction( // 85
          "Enable/Disable Object Garbage Collection",

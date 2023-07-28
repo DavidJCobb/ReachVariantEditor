@@ -9,6 +9,31 @@
          axis, but in Halo: Reach, an object's local X-axis is its forward axis.
       </p>
       
+      <h2>Working with rotations</h2>
+      <p>
+         There is a way to spawn an object that is completely unrotated.
+      </p>
+      <p>
+         If you use <a href="script/api/object/actions/place_between_me_and">object.place_between_me_and</a> 
+         to spawn something between an object and itself, then the newly-spawned object will be 
+         rotated so that its local up-vector matches the world X-axis; the object will point 
+         exactly nose-down, with no rotation otherwise.
+      </p>
+      <p>
+         (This happens because the game tries to adjust the spawned object based on the rotations 
+         of what it's spawning between: it takes the two other objects' local axes and performs a 
+         cross product on them. The cross product of a vector with itself is a zero-length vector, 
+         and the game's fallback case for that is the world X-axis.)
+      </p>
+      <p>
+         Once you have a nose-down object, you can use <a href="script/api/object/actions/place_at_me">object.place_at_me</a> 
+         to spawn another object at it. As long as you don't use the <var>absolute_orientation</var> 
+         flag, the newly-spawned object will have a perfect (0, 0, 0) rotation.
+      </p>
+      <p>
+         (This happens because without 
+      </p>
+      
       <ul>
          <li>
             The X-axis represents "forward" and the Z-axis represents "up."
