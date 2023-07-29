@@ -3789,7 +3789,7 @@ namespace Megalo {
                   return;
                }
                if (!this->extract_word("priority")) {
-                  this->raise_fatal("Expected the word \"network\".");
+                  this->raise_fatal("Expected the word \"priority\".");
                   return;
                }
                //
