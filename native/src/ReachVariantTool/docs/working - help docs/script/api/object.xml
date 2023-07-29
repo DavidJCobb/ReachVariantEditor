@@ -177,22 +177,10 @@
                         <dd>Unknown.</dd>
                      <dt>absolute_orientation</dt>
                         <dd>
-                           <p>
-                              By default, the position offset you provide will be applied in 
-                              coordinates relative to the <var>basis</var> object's heading 
-                              (yaw rotation) only. This means that the effects of <var>x</var> 
-                              and <var>y</var> will depend on which way the object is facing, 
-                              while <var>z</var> will always be the world up/down axis. If 
-                              the <var>basis</var> object is exactly or almost exactly facing 
-                              nose-up or nose-down, then the position offset is applied as if 
-                              the <var>basis</var> object's local forward vector were (1, 0, 0).
-                           </p>
-                           <p>
-                              If this flag is set, then your offset will take the <var>basis</var> 
-                              object's roll and pitch rotation into account as well. The offset 
-                              will always be relative to the <var>basis</var> object's rotation, 
-                              even if that object is facing nose-up or nose-down.
-                           </p>
+                           By default, new objects are created with the same yaw rotation as the 
+                           context object, and the offset is applied relative to the context 
+                           object's yaw rotation. This flag forces the context object's roll and 
+                           pitch rotations to be taken into account as well.
                         </dd>
                   </dl>
                </arg>
@@ -213,12 +201,36 @@
                </arg>
             </args>
             <blurb>Spawn a new object at this object.</blurb>
+            <description>
+               <p>
+                  This function spawns a new object as close to the context object (the one you 
+                  call the function on) as possible. The new object will face in the same general 
+                  direction as the context object. (It will have the same yaw rotation by default; 
+                  if you pass the <var>absolute_orientation</var> flag, then the new object will 
+                  also copy the context object's roll and pitch rotations.)
+               </p>
+               <p>
+                  You can optionally create the new object at a position offset from the context 
+                  object's location. The offset you specify is applied relative to the general 
+                  direction that the context object is facing in. By default, the offset only 
+                  takes the context object's yaw rotation into account; if you pass the <var>absolute_orientation</var> 
+                  flag, then the full rotation is accounted for. In this system, the X-offset 
+                  represents "forward" and th Z-offset represents "upward."
+               </p>
+            </description>
             <example>
                --
                -- Spawn a Spartan with Kat's armor:
                --
                global.object[0] = global.object[1].place_at_me(spartan, none, never_garbage_collect, 0, 0, 0, kat)
             </example>
+            <note>
+               If the context object is facing almost exactly nose-up or nose-down, and you don't 
+               use the <var>absolute_orientation</var> flag, then the game engine will position 
+               and rotate the new object as though the context object were completely un-rotated: 
+               the new object's local forward vector will exactly match the world X-axis, and the 
+               position offsets you specify will act as world-relative X-, Y-, and Z-coordinates.
+            </note>
             <note>
                The new object will be created as close to the context object as possible. It may
                not be created exactly at the context object, even if one or both of the objects
@@ -1046,6 +1058,11 @@
             <category id="attachment" />
          </method>
          <method name="set_weapon_pickup_priority" id="44">
+            <verification>
+               <call-on-none
+                  safe="true"
+               />
+            </verification>
             <args>
                <arg name="priority">
                   <p>One of the following values:</p>
@@ -1062,7 +1079,7 @@
                         </p>
                         <p>
                            In versions of ReachVariantTool before 2.1.7, this value was
-                           called <code>hold_action</code>.
+                           incorrectly named <code>hold_action</code>.
                         </p>
                      </dd>
                      <dt>automatic</dt>
@@ -1076,11 +1093,12 @@
             <blurb>Set how a weapon is picked up.</blurb>
             <description>
                <p>
-                  If this function is called on a weapon, then it modifies how players
-                  pick up the weapon: you can require that players hold a button down
-                  to pick up the weapon (as is normal for most playable weapons), or
-                  make them pick the weapon up automatically when they come into contact
-                  with it.
+                  This function modifies how a weapon is picked up. A weapon can be 
+                  configured so that players automatically pick it up when they come 
+                  into contact with it. Additionally, weapons can be marked as high-priority: 
+                  if the player holds the "weapon pickup" button while standing over 
+                  a pile of weapons, you can make sure that the game preferentially 
+                  has the player pick up a specific weapon in that pile.
                </p>
                <p>
                   This function does nothing when called on something that isn't a
@@ -1173,6 +1191,11 @@
             </note>
          </method>
          <method name="get_distance_to" id="66" returns="number">
+            <verification>
+               <call-on-none
+                  safe="true"
+               />
+            </verification>
             <args>
                <arg name="other" type="object" />
             </args>
@@ -1193,6 +1216,11 @@
                   --
                end
             </example>
+            <note>
+               If this function is called on a non-existent object, or passed a non-existent 
+               object as an argument, then it returns zero. In all other cases, the value it 
+               returns will be at least 1, because it rounds up.
+            </note>
             <category id="positioning" />
          </method>
          <method name="set_device_power" id="70">

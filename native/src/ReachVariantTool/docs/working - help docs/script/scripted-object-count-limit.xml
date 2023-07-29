@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<article>
+   <title>Scripted object count limit</title>
+   <body>
+      <p>
+         Objects are capable of having variables attached to them &mdash; numbers, timers, and 
+         references to teams, players, and other objects. However, the game needs someplace to 
+         actually store the values of these variables.
+      </p>
+      <p>
+         In practice, the game only makes enough room for 256 objects' worth of <dfn>scripted 
+         object data</dfn>. This data includes nested variables, but also includes a variety 
+         of properties and options that can be set on objects via scripts. If there already 
+         exist 256 objects with scripted object data, any attempt to set any of this data on 
+         a 257th object will silently fail.
+      </p>
+      <p>
+         The following operations may create scripted object data for an object, depending on 
+         what objects they're called on. This list is based on reverse-engineering of the game 
+         executable, and should be considered best-effort, not definitive.
+      </p>
+      <ul>
+         <li>Setting any nested variable on an object</li>
+         <li>
+            Checking the <a href="script/api/timer/conditions/is_zero">timer.is_zero</a> 
+            condition on an <var>object.timer</var> variable, unless the timer variable's 
+            <a href="declare">initial value</a> is a negative number.
+         </li>
+         <li>
+            <a href="script/api/player/actions/set_primary_respawn_object">player.set_primary_respawn_object</a>, 
+            for whatever is used as the respawn object
+         </li>
+         <li>
+            <a href="script/api/team/actions/set_primary_respawn_object">team.set_primary_respawn_object</a>, 
+            for whatever is used as the respawn object
+         </li>
+         <li>
+            object.<a href="script/api/timer/actions/reset">timer.reset</a>
+         </li>
+         <li>
+            object.<a href="script/api/timer/actions/set_rate">timer.set_rate</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/apply_shape_color_from_player_member">object.apply_shape_color_from_player_member</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_pickup_permissions">object.set_pickup_permissions</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_progress_bar">object.set_progress_bar</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_shape_visibility">object.set_shape_visibility</a>, though 
+            this doesn't appear to occur if the object in question is any player's <a href="script/api/player/properties/biped">biped</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_spawn_location_fireteams">object.spawn_location_fireteams</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_spawn_location_permissions">object.spawn_location_permissions</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_waypoint_icon">object.set_waypoint_icon</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_waypoint_priority">object.set_waypoint_priority</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_waypoint_range">object.set_waypoint_range</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_waypoint_text">object.set_waypoint_text</a>, though 
+            this doesn't appear to occur if the object in question is any player's <a href="script/api/player/properties/biped">biped</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_waypoint_timer">object.set_waypoint_timer</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_waypoint_visibility">object.set_waypoint_visibility</a>
+         </li>
+         <li>
+            <a href="script/api/object/actions/set_weapon_pickup_priority">object.set_weapon_pickup_priority</a>, 
+            but only if the priority used is <var>automatic</var>
+         </li>
+      </ul>
+   </body>
+</article>

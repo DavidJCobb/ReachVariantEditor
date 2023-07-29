@@ -9,6 +9,18 @@
          axis, but in Halo: Reach, an object's local X-axis is its forward axis.
       </p>
       
+      <h2>Axis conventions</h2>
+      <ul>
+         <li>
+            Although Forge uses Euler angles in its UI, the game engine typically uses local axis 
+            vectors instead. Generally, the local forward vector and local up vector are used; the 
+            local side vector can be computed as the cross product of those.
+         </li>
+         <li>
+            The X-axis is "world forward" and the Z-axis is "world up."
+         </li>
+      </ul>
+      
       <h2>Working with rotations</h2>
       <p>
          There is a way to spawn an object that is completely unrotated.
@@ -31,16 +43,11 @@
          flag, the newly-spawned object will have a perfect (0, 0, 0) rotation.
       </p>
       <p>
-         (This happens because without 
+         (This happens because without the <var>absolute_orientation</var> flag, the created object 
+         takes on the yaw-rotation of the basis object. If the basis object is almost exactly nose-up 
+         or nose-down, however, then that fails, and the game falls back to using a local forward 
+         vector aligned with the world X-axis.)
       </p>
       
-      <ul>
-         <li>
-            The X-axis represents "forward" and the Z-axis represents "up."
-         </li>
-         <li>
-            
-         </li>
-      </ul>
    </body>
 </article>
