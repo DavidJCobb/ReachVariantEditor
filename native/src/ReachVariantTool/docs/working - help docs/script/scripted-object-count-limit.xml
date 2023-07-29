@@ -8,11 +8,11 @@
          actually store the values of these variables.
       </p>
       <p>
-         In practice, the game only makes enough room for 256 objects' worth of <dfn>scripted 
-         object data</dfn>. This data includes nested variables, but also includes a variety 
-         of properties and options that can be set on objects via scripts. If there already 
-         exist 256 objects with scripted object data, any attempt to set any of this data on 
-         a 257th object will silently fail.
+         In practice, the game only makes enough room for 512 objects' worth of <dfn>scripted 
+         object data</dfn> (256 on Xbox 360). This data includes nested variables, but also 
+         includes a variety of properties and options that can be set on objects via scripts. 
+         If there already exist 512 objects (256 on Xbox 360) with scripted object data, any 
+         attempt to set any of this data on a 512th object (257th on Xbox 360) will silently fail.
       </p>
       <p>
          The following operations may create scripted object data for an object, depending on 
