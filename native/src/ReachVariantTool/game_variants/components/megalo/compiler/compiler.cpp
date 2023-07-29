@@ -1616,53 +1616,54 @@ namespace Megalo {
 
          auto l_vt = getVariableTypeForTypeinfo(lhs.get_type());
          auto r_vt = getVariableTypeForTypeinfo(rhs.get_type());
-
-         // Operator checks
-         switch (l_vt) {
-            case variable_type::object:
-            case variable_type::player:
-            case variable_type::team:
-               if (op != "=") {
-                  operator_match = false;
-               }
-               break;
-         }
-         switch (l_vt) {
-            case variable_type::scalar:
-            case variable_type::timer:
-               switch (r_vt) {
-                  case variable_type::scalar:
-                  case variable_type::timer:
-                     break;
-                  default:
+         if (l_vt != variable_type::not_a_variable && r_vt != variable_type::not_a_variable) {
+            // Operator checks
+            switch (l_vt) {
+               case variable_type::object:
+               case variable_type::player:
+               case variable_type::team:
+                  if (op != "=") {
+                     operator_match = false;
+                  }
+                  break;
+            }
+            switch (l_vt) {
+               case variable_type::scalar:
+               case variable_type::timer:
+                  switch (r_vt) {
+                     case variable_type::scalar:
+                     case variable_type::timer:
+                        break;
+                     default:
+                        type_match = false;
+                        break;
+                  }
+                  break;
+               case variable_type::object:
+               case variable_type::player:
+               case variable_type::team:
+                  if (l_vt != r_vt)
                      type_match = false;
-                     break;
-               }
-               break;
-            case variable_type::object:
-            case variable_type::player:
-            case variable_type::team:
-               if (l_vt != r_vt)
-                  type_match = false;
-               break;
-         }
+                  break;
+            }
 
-         if (!type_match) {
-            QString format = "Type mismatch (assigning %2 to %1).";
-            this->raise_error(
-               QString(format)
-                  .arg(lhs.get_type()->internal_name.c_str())
-                  .arg(rhs.get_type()->internal_name.c_str())
-            );
-         }
-         if (!operator_match) {
-            QString format = "Cannot perform numeric assignment operations on non-numeric values (destination type was %1; operator was %3).";
-            this->raise_error(
-               QString(format)
-                  .arg(lhs.get_type()->internal_name.c_str())
-                  .arg(rhs.get_type()->internal_name.c_str())
-                  .arg(op)
-            );
+            if (!type_match) {
+               QString format = "Type mismatch (assigning %2 to %1).";
+               this->raise_error(
+                  QString(format)
+                     .arg(lhs.get_type()->internal_name.c_str())
+                     .arg(rhs.get_type()->internal_name.c_str())
+               );
+            }
+            if (!operator_match) {
+               QString format = "Cannot perform numeric assignment operations on non-numeric values (destination type was %1; operator was %3).";
+               this->raise_error(
+                  QString(format)
+                     .arg(lhs.get_type()->internal_name.c_str())
+                     .arg(rhs.get_type()->internal_name.c_str())
+                     .arg(op)
+               );
+            }
          }
 
       } else {
