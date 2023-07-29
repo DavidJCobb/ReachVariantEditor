@@ -305,7 +305,7 @@ namespace Megalo::Script {
          if (part.has_index()) {
             result += '[';
             if (part.index_is_numeric)
-               result += part.index;
+               result += QString::number(part.index);
             else
                result += part.index_str;
             result += ']';
