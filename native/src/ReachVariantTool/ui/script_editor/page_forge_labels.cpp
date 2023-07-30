@@ -18,16 +18,18 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
    });
    //
    QObject::connect(this->ui.buttonAdd, &QPushButton::clicked, [this]() {
-      auto  mp = ReachEditorState::get().multiplayerData();
+      auto* mp = ReachEditorState::get().multiplayerData();
       if (!mp)
          return;
-      auto& list  = mp->scriptContent.forgeLabels;
+      auto& list = mp->scriptContent.forgeLabels;
       if (list.size() >= list.max_count)
          return;
       auto& label = *list.emplace_back();
       label.is_defined = true;
-      this->updateListFromVariant(ReachEditorState::get().variant());
+      auto& editor = ReachEditorState::get();
+      this->updateListFromVariant(editor.variant());
       this->selectLabel(label.index);
+      emit editor.forgeLabelCountChanged();
    });
    QObject::connect(this->ui.buttonMoveUp, &QPushButton::clicked, [this]() {
       auto index = this->currentForgeLabel;
@@ -71,7 +73,8 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
          QMessageBox::information(this, tr("Cannot remove Forge label"), tr("This Forge label is still in use by the gametype script. It cannot be removed at this time."));
          return;
       }
-      auto mp = ReachEditorState::get().multiplayerData();
+      auto& editor = ReachEditorState::get();
+      auto* mp     = editor.multiplayerData();
       if (!mp)
          return;
       auto& list  = mp->scriptContent.forgeLabels;
@@ -88,6 +91,7 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
          this->selectLabel(-1);
       }
       this->updateListFromVariant();
+      emit editor.forgeLabelCountChanged();
    });
    //
    QObject::connect(this->ui.reqFlagTeam, &QCheckBox::stateChanged, [this](int state) {

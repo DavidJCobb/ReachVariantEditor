@@ -1,17 +1,107 @@
 #include "bottom_bar.h"
+#include <QFontMetrics>
+#include <QGridLayout>
+#include <QLabel>
+#include <QProgressBar>
 #include "../../helpers/bitwise.h"
 #include "../../game_variants/base.h"
 #include "../../game_variants/types/multiplayer.h"
+#include "../generic/FlowLayout.h"
+
+#pragma region MetricWidget
+ScriptEditorBottomPane::MetricWidget::MetricWidget(QWidget* parent) : QWidget(parent) {
+   auto* layout = new QGridLayout(this);
+   this->setLayout(layout);
+   this->setContentsMargins(0, 0, 0, 0);
+   layout->setContentsMargins(0, 0, 0, 0);
+   layout->setHorizontalSpacing(8);
+   layout->setVerticalSpacing(1);
+   layout->setColumnStretch(0, 1);
+   layout->setColumnStretch(1, 1);
+
+   auto* label = this->_label = new QLabel(this);
+   label->setTextFormat(Qt::TextFormat::PlainText);
+   layout->addWidget(label, 0, 0, Qt::AlignLeft | Qt::AlignBaseline);
+
+   label = this->_value = new QLabel(this);
+   label->setTextFormat(Qt::TextFormat::PlainText);
+   layout->addWidget(label, 0, 1, Qt::AlignRight | Qt::AlignBaseline);
+
+   auto* progress = this->_progress = new QProgressBar(this);
+   progress->setFormat("");
+   progress->setTextVisible(false);
+   progress->setMinimum(0);
+   progress->setValue(0);
+   progress->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Maximum);
+   layout->addWidget(progress, 1, 0, 1, 2);
+
+   {
+      auto metrics = QFontMetrics(this->_label->font());
+      auto ch = metrics.capHeight();
+      progress->setFixedHeight(std::min((int)(ch / 2), 8));
+      progress->setMinimumWidth(72);
+   }
+
+   this->_update();
+}
+ScriptEditorBottomPane::MetricWidget::MetricWidget(QString label, int maximum, QWidget* parent) : MetricWidget(parent) {
+   this->_label->setText(label);
+   this->_progress->setMaximum(maximum);
+   this->_update();
+}
+
+void ScriptEditorBottomPane::MetricWidget::_update() {
+   this->_value->setText(
+      QString("%1 / %2")
+         .arg(this->value())
+         .arg(this->maximum())
+   );
+}
+
+QString ScriptEditorBottomPane::MetricWidget::label() const {
+   return this->_label->text();
+}
+void ScriptEditorBottomPane::MetricWidget::setLabel(const QString& v) {
+   this->_label->setText(v);
+}
+
+int ScriptEditorBottomPane::MetricWidget::maximum() const {
+   return this->_progress->maximum();
+}
+void ScriptEditorBottomPane::MetricWidget::setMaximum(int v) {
+   this->_progress->setMaximum(v);
+   this->_update();
+}
+
+int ScriptEditorBottomPane::MetricWidget::value() const {
+   return this->_progress->value();
+}
+void ScriptEditorBottomPane::MetricWidget::setValue(int v) {
+   this->_progress->setValue(v);
+   this->_update();
+}
+#pragma endregion
 
 ScriptEditorBottomPane::ScriptEditorBottomPane(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
-   //
+   
    auto& editor = ReachEditorState::get();
    //
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ScriptEditorBottomPane::updateFromVariant);
    QObject::connect(&editor, &ReachEditorState::variantRecompiled, this, &ScriptEditorBottomPane::updateFromVariant);
    //
-   auto  widget  = this->ui.meter;
+   {
+      auto _update = [this]() { this->updateFromVariant(); };
+      QObject::connect(&editor, &ReachEditorState::scriptOptionsModified, this, _update);
+      QObject::connect(&editor, &ReachEditorState::scriptTraitsModified, this, [this](ReachMegaloPlayerTraits*) { this->updateFromVariant(); });
+      QObject::connect(&editor, &ReachEditorState::stringTableModified, this, _update);
+      QObject::connect(&editor, &ReachEditorState::scriptStatCountChanged, this, _update);
+      QObject::connect(&editor, &ReachEditorState::scriptWidgetCountChanged, this, _update);
+      QObject::connect(&editor, &ReachEditorState::forgeLabelCountChanged, this, _update);
+   }
+   
+   #pragma region Meter segments
+   auto* widget  = this->ui.meter;
    auto& indices = this->indices;
    widget->setMaximum(this->sizeData.bits.maximum);
    //
@@ -132,7 +222,55 @@ ScriptEditorBottomPane::ScriptEditorBottomPane(QWidget* parent) : QWidget(parent
       QColor(100, 75, 120),
       88 // bits // not conditional; we always upgrade the version to TU1 before saving
    );
-   //
+   #pragma endregion
+
+   this->ui.countsContainer->setVisible(false);
+   this->ui.showHideDetails->setCheckable(true);
+   QObject::connect(this->ui.showHideDetails, &QPushButton::clicked, this, [this](bool checked) {
+      this->ui.countsContainer->setVisible(checked);
+   });
+   this->setStyleSheet(R"--(
+QProgressBar {
+   border:     1px solid #444;
+   background: transparent;
+   border-top-right-radius:    32px;
+   border-bottom-right-radius: 32px;
+}
+QProgressBar::chunk {
+   background-color: #229944;
+   border-top-right-radius:    32px;
+   border-bottom-right-radius: 32px;
+}
+)--");
+   {  // Set up display
+      auto* container = this->ui.countsContainer;
+      auto* layout    = new FlowLayout(container);
+      container->setLayout(layout);
+      container->setContentsMargins(0, 0, 0, 0);
+      layout->setContentsMargins(0, 0, 0, 0);
+      layout->setHorizontalSpacing(48);
+
+      this->_metric_widgets.by_name.actions = new MetricWidget(tr("Actions"), Megalo::Limits::max_actions, this);
+      this->_metric_widgets.by_name.conditions = new MetricWidget(tr("Conditions"), Megalo::Limits::max_conditions, this);
+      this->_metric_widgets.by_name.forge_labels = new MetricWidget(tr("Forge Labels"), Megalo::Limits::max_script_labels, this);
+      this->_metric_widgets.by_name.options = new MetricWidget(tr("Options"), Megalo::Limits::max_script_options, this);
+      this->_metric_widgets.by_name.stats = new MetricWidget(tr("Stats"), Megalo::Limits::max_script_stats, this);
+      this->_metric_widgets.by_name.strings = new MetricWidget(tr("Strings"), Megalo::Limits::max_variant_strings, this);
+      this->_metric_widgets.by_name.traits = new MetricWidget(tr("Traits"), Megalo::Limits::max_script_traits, this);
+      this->_metric_widgets.by_name.triggers = new MetricWidget(tr("Triggers"), Megalo::Limits::max_triggers, this);
+      this->_metric_widgets.by_name.widgets = new MetricWidget(tr("Widgets"), Megalo::Limits::max_script_widgets, this);
+
+      layout->addWidget(this->_metric_widgets.by_name.triggers);   // only changes on recompile
+      layout->addWidget(this->_metric_widgets.by_name.conditions); // only changes on recompile
+      layout->addWidget(this->_metric_widgets.by_name.actions);    // only changes on recompile
+      layout->addWidget(this->_metric_widgets.by_name.strings);
+      layout->addWidget(this->_metric_widgets.by_name.forge_labels);
+      layout->addWidget(this->_metric_widgets.by_name.options);
+      layout->addWidget(this->_metric_widgets.by_name.traits);
+      layout->addWidget(this->_metric_widgets.by_name.stats);
+      layout->addWidget(this->_metric_widgets.by_name.widgets);
+   }
+   
    this->updateFixedLengthAreas();
    this->updateFromVariant(nullptr);
 }
@@ -169,6 +307,16 @@ void ScriptEditorBottomPane::updateFromVariant(GameVariant* variant) {
       sum = (sum % 8) ? (sum / 8) + 1 : (sum / 8);
       this->ui.title->setText(QString("Space usage: %1 / %2 bytes (%3%)").arg(sum).arg(max).arg(percentage, 0, 'f', 2));
    }
+
+   this->_metric_widgets.by_name.actions->setValue(data.counts.actions);
+   this->_metric_widgets.by_name.conditions->setValue(data.counts.conditions);
+   this->_metric_widgets.by_name.forge_labels->setValue(data.counts.forge_labels);
+   this->_metric_widgets.by_name.options->setValue(data.counts.script_options);
+   this->_metric_widgets.by_name.stats->setValue(data.counts.script_stats);
+   this->_metric_widgets.by_name.strings->setValue(data.counts.strings);
+   this->_metric_widgets.by_name.traits->setValue(data.counts.script_traits);
+   this->_metric_widgets.by_name.triggers->setValue(data.counts.triggers);
+   this->_metric_widgets.by_name.widgets->setValue(data.counts.script_widgets);
 }
 void ScriptEditorBottomPane::updateFixedLengthAreas() {
    auto  widget  = this->ui.meter;

@@ -32,7 +32,7 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
       this->updateStatsListFromVariant();
    });
    QObject::connect(&editor, &ReachEditorState::stringModified, [this](uint32_t index) { // Handle stat name changes from outside
-      auto mp = ReachEditorState::get().multiplayerData();
+      auto* mp = ReachEditorState::get().multiplayerData();
       if (!mp)
          return;
       auto str = mp->scriptData.strings.get_entry(index);
@@ -74,7 +74,7 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
             return;
          this->target->groupByTeam = state == Qt::Checked;
       });
-      //
+      
       QObject::connect(this->ui.buttonNew, &QPushButton::clicked, [this]() {
          auto& editor = ReachEditorState::get();
          auto  mp     = editor.multiplayerData();
@@ -93,6 +93,7 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
             this->target->name = str;
          this->updateStatFromVariant();
          this->updateStatsListFromVariant();
+         emit editor.scriptStatCountChanged();
       });
       QObject::connect(this->ui.buttonMoveUp, &QPushButton::clicked, [this]() {
          if (!this->target)
@@ -152,6 +153,7 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
             this->target = nullptr;
          this->updateStatFromVariant();
          this->updateStatsListFromVariant();
+         emit editor.scriptStatCountChanged();
       });
    }
    //

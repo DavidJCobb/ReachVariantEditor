@@ -92,7 +92,14 @@ void ReachMPSizeData::update_from(GameVariantDataMultiplayer& mp) {
    #pragma endregion
    this->bits.script_strings = mp.scriptData.strings.get_size_to_save();
    this->bits.map_perms      = mp.mapPermissions.bitcount();
-   //
+
+   this->counts.forge_labels   = mp.scriptContent.forgeLabels.size();
+   this->counts.script_options = mp.scriptData.options.size();
+   this->counts.script_stats   = mp.scriptContent.stats.size();
+   this->counts.script_traits  = mp.scriptData.traits.size();
+   this->counts.script_widgets = mp.scriptContent.widgets.size();
+   this->counts.strings        = mp.scriptData.strings.size();
+   
    this->update_script_from(mp);
 }
 void ReachMPSizeData::update_script_from(GameVariantDataMultiplayer& mp) {
@@ -225,7 +232,7 @@ bool GameVariantDataMultiplayer::_read_script_code(cobb::ibitreader& stream) noe
    }
    if (count >= Megalo::Limits::max_actions) {
       error_report.state         = GameEngineVariantLoadError::load_state::failure;
-      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_conditions;
+      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_actions;
       error_report.detail        = GameEngineVariantLoadError::load_failure_detail::too_many_opcodes;
       return false;
    }

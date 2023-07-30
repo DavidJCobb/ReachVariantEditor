@@ -64,6 +64,7 @@ ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidge
          this->target->is_defined = true;
          this->updateWidgetFromVariant();
          this->updateWidgetsListFromVariant();
+         emit editor.scriptStatCountChanged();
       });
       QObject::connect(this->ui.buttonMoveUp, &QPushButton::clicked, [this]() {
          if (!this->target)
@@ -123,6 +124,7 @@ ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidge
             this->target = nullptr;
          this->updateWidgetFromVariant();
          this->updateWidgetsListFromVariant();
+         emit editor.scriptStatCountChanged();
       });
    }
    //

@@ -63,7 +63,11 @@ class ReachEditorState : public QObject {
       void stringModified(uint32_t index); // a single string has changed (does not include reordering, creation, or deletion)
       void stringTableModified(); // strings have been reordered, created, or deleted
       void teamColorModified(ReachTeamData*); // exists to help with team editing UI, i.e. it's fired from outside, not from inside
-      //
+      
+      void forgeLabelCountChanged();
+      void scriptStatCountChanged();
+      void scriptWidgetCountChanged();
+      
    public slots:
       void abandonVariant() noexcept;
       void setCurrentFFWaveTraits(ReachFirefightWaveTraits* traits) noexcept;

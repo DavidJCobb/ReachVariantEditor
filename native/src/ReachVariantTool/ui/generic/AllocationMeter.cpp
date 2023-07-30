@@ -42,6 +42,10 @@ uint32_t AllocationMeter::total() const noexcept {
    return sum;
 }
 
+void AllocationMeter::setUnit(const QString& v) {
+   this->_unit = v;
+}
+
 bool AllocationMeter::event(QEvent* event) {
    if (event->type() == QEvent::ToolTip) {
       QHelpEvent* helpEvent = static_cast<QHelpEvent*>(event);
@@ -49,7 +53,12 @@ bool AllocationMeter::event(QEvent* event) {
       if (index != -1) {
          //QToolTip::showText(helpEvent->globalPos(), this->_segments[index].tooltip);
          auto& seg = this->_segments[index];
-         QString full = QString("<span style='white-space:pre'><b>%1 (%2 / %3 bits)</b></span><br/>%4").arg(seg.name).arg(seg.quantity).arg(this->_maximum).arg(seg.tooltip);
+         QString full = QString("<span style='white-space:pre'><b>%1 (%2 / %3 %4)</b></span><br/>%5")
+            .arg(seg.name)
+            .arg(seg.quantity)
+            .arg(this->_maximum)
+            .arg(this->_unit)
+            .arg(seg.tooltip);
          QToolTip::showText(helpEvent->globalPos(), full);
       } else {
          QToolTip::hideText();
