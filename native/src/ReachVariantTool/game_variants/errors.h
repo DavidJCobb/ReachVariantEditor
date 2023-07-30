@@ -52,6 +52,7 @@ struct GameEngineVariantLoadError {
       too_many_forge_labels,   // extra[0] is the number the file claims to have; extra[1] is the number allowed
       too_many_script_traits,  // extra[0] is the number the file claims to have; extra[1] is the number allowed
       too_many_script_options, // extra[0] is the number the file claims to have; extra[1] is the number allowed
+      too_many_opcodes,
    };
 
    load_state          state            = load_state::incomplete;

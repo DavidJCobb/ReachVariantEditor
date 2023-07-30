@@ -201,6 +201,12 @@ bool GameVariantDataMultiplayer::_read_script_code(cobb::ibitreader& stream) noe
          return false;
       }
    }
+   if (count >= Megalo::Limits::max_conditions) {
+      error_report.state         = GameEngineVariantLoadError::load_state::failure;
+      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_conditions;
+      error_report.detail        = GameEngineVariantLoadError::load_failure_detail::too_many_opcodes;
+      return false;
+   }
    //
    count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
    actions.resize(count);
@@ -216,6 +222,12 @@ bool GameVariantDataMultiplayer::_read_script_code(cobb::ibitreader& stream) noe
          error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
          return false;
       }
+   }
+   if (count >= Megalo::Limits::max_actions) {
+      error_report.state         = GameEngineVariantLoadError::load_state::failure;
+      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_conditions;
+      error_report.detail        = GameEngineVariantLoadError::load_failure_detail::too_many_opcodes;
+      return false;
    }
    //
    count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_triggers));
@@ -331,7 +343,8 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       m.hidden.read(stream);
    }
    {  // Megalo
-      this->_read_script_code(stream);
+      if (!this->_read_script_code(stream))
+         return false;
       //
       int count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
       if (!_error_check_count(count, Megalo::Limits::max_script_stats, GameEngineVariantLoadError::load_failure_detail::too_many_script_stats))

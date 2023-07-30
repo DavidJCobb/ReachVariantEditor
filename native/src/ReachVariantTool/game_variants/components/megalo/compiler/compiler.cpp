@@ -1341,9 +1341,9 @@ namespace Megalo {
             }
          }
          {  // Ensure that we're under the count limits for triggers, conditions, and actions.
-            size_t tc = this->results.triggers.size();
-            size_t cc = 0;
-            size_t ac = 0;
+            size_t  tc = this->results.triggers.size();
+            size_t  cc = 0;
+            size_t  ac = 0;
             Opcode* incomplete    = nullptr;
             size_t  incomplete_ai = 0;
             bool    for_missing_label = false;
@@ -1353,19 +1353,24 @@ namespace Megalo {
                   for (auto opcode : trigger->opcodes) {
                      if (!opcode->function) {
                         incomplete = opcode;
-                        break;
-                     }
-                     auto&  list = opcode->arguments;
-                     size_t size = list.size();
-                     for (size_t i = 0; i < size; ++i) {
-                        if (!list[i]) {
-                           incomplete    = opcode;
-                           incomplete_ai = i;
-                           break;
+                     } else if (opcode->function == &actionFunction_runInlineTrigger) {
+                        if (opcode->arguments.size() > 0) {
+                           const auto* scope = dynamic_cast<const OpcodeArgValueMegaloScope*>(opcode->arguments[0]);
+                           if (scope)
+                              scope->data.count_contents(cc, ac);
                         }
                      }
-                     if (incomplete)
-                        break;
+                     if (!incomplete) {
+                        auto&  list = opcode->arguments;
+                        size_t size = list.size();
+                        for (size_t i = 0; i < size; ++i) {
+                           if (!list[i]) {
+                              incomplete    = opcode;
+                              incomplete_ai = i;
+                              break;
+                           }
+                        }
+                     }
                   }
                }
             }

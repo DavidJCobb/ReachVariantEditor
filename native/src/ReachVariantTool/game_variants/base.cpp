@@ -170,6 +170,8 @@ bool ReachBlockMPVR::read_mglo(const void* data, size_t size) {
    this->data = new GameVariantDataMultiplayer(false);
    if (!this->data->read(reader)) {
       error_report.state = GameEngineVariantLoadError::load_state::failure;
+      if (error_report.reason == GameEngineVariantLoadError::load_failure_reason::none)
+         error_report.reason == GameEngineVariantLoadError::load_failure_reason::invalid_mpvr_data;
       return false;
    }
    if (!reader.is_at_end()) {
