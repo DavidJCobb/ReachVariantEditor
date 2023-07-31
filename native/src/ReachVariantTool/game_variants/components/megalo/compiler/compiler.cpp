@@ -14,17 +14,11 @@
 #include "../helpers/format_strings.h"
 #include "../../../../editor_state.h"
 
-//
-// Attempt to emulate quirks in Bungie's compiler:
-//
-//  - Else(if) blocks don't merge into the parent trigger even if they are the last 
-//    block in their containing block, even though they can, and even though if-blocks 
-//    do (confirmed)
-//
-//  - Comparisons that are reproduced and negated in else(if) blocks are negated by 
-//    changing the operator rather than using the "negated" flag (speculated)
-//
-#define MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS 1
+#include "../../../../services/ini.h"
+
+namespace {
+   constexpr const bool else_inverts_operator_rather_than_using_not = true;
+}
 
 namespace {
    constexpr const char* ce_assignment_operator = "=";
@@ -316,10 +310,8 @@ namespace Megalo {
       bool Block::_is_if_block() const noexcept {
          switch (this->type) {
             case Type::if_block:
-            #if MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS != 1
-            case Type::altif_block: // Bungie/343i don't collapse terminating alt(if) blocks into their parent trigger?
+            case Type::altif_block:
             case Type::alt_block:
-            #endif
                return true;
          }
          return false;
@@ -577,8 +569,17 @@ namespace Megalo {
             if (block) {
                auto child_is_inline = block->is_inline_trigger();
                if (!child_is_inline) {
-                  if (is_last && !block->is_event_trigger() && block->_is_if_block())
-                     block->trigger = this->trigger;
+                  if (block->_is_if_block() && !block->is_event_trigger()) {
+                     if (is_last)
+                        block->trigger = this->trigger;
+                     else {
+
+                        if (ReachINI::Compiler::bInlineIfs.current.b) {
+                           child_is_inline = block->has_inline_specifier = true;
+                        }
+
+                     }
+                  }
                }
 
                block->compile(compiler);
@@ -690,18 +691,15 @@ namespace Megalo {
          if (auto opcode = this->opcode) {
             auto cnd = dynamic_cast<Condition*>(opcode);
             if (cnd) {
-               #if MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS
-               if (cnd->function == &_get_comparison_opcode()) {
-                  //
-                  // I think for comparisons, Bungie flips the operator rather'n using the (inverted) flag.
-                  //
-                  auto arg = dynamic_cast<OpcodeArgValueCompareOperatorEnum*>(cnd->arguments[2]);
-                  if (arg) {
-                     arg->invert();
-                     return;
+               if constexpr (else_inverts_operator_rather_than_using_not) {
+                  if (cnd->function == &_get_comparison_opcode()) {
+                     auto arg = dynamic_cast<OpcodeArgValueCompareOperatorEnum*>(cnd->arguments[2]);
+                     if (arg) {
+                        arg->invert();
+                        return;
+                     }
                   }
                }
-               #endif
                cnd->inverted = !cnd->inverted;
             }
          }

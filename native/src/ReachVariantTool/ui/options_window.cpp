@@ -196,6 +196,11 @@ ProgramOptionsDialog::ProgramOptionsDialog(QWidget* parent) : QDialog(parent) {
          });
       }
       #pragma endregion
+      #pragma region Compiler
+      QObject::connect(this->ui.compilerEnableInlineIfs, &QCheckBox::stateChanged, [](int state) {
+         ReachINI::Compiler::bInlineIfs.pending.b = state == Qt::CheckState::Checked;
+      });
+      #pragma endregion
    #pragma endregion
 }
 
@@ -239,6 +244,10 @@ void ProgramOptionsDialog::close() {
 }
 void ProgramOptionsDialog::refreshWidgetsFromINI() {
    using default_dir_type = ReachINI::DefaultPathType;
+   {  // Compiler
+      const QSignalBlocker blocker0(this->ui.compilerEnableInlineIfs);
+      this->ui.compilerEnableInlineIfs->setChecked(ReachINI::Compiler::bInlineIfs.current.b);
+   }
    {  // Editing
       const QSignalBlocker blocker0(this->ui.hideFirefightNoOps);
       this->ui.hideFirefightNoOps->setChecked(ReachINI::Editing::bHideFirefightNoOps.current.b);

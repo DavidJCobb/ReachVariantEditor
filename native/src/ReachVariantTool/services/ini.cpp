@@ -32,6 +32,9 @@ namespace ReachINI {
       REACHTOOL_MAKE_INI_SETTING(sFormatStringSimple, "CodeEditor", "rgb(140, 140, 140)");
       REACHTOOL_MAKE_INI_SETTING(sFormatStringBlock,  "CodeEditor", "rgb(160,   0,  80)");
    }
+   namespace Compiler {
+      REACHTOOL_MAKE_INI_SETTING(bInlineIfs, "Compiler", true);
+   }
    namespace DefaultLoadPath {
       REACHTOOL_MAKE_INI_SETTING(uPathType,   "DefaultLoadPath", (uint32_t)DefaultPathType::mcc_matchmaking_content);
       REACHTOOL_MAKE_INI_SETTING(sCustomPath, "DefaultLoadPath", "");

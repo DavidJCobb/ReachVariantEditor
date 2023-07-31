@@ -77,12 +77,19 @@ namespace Megalo {
          assert(raw.actionStart < actions.size() && "Bad trigger first-action-index."); // TODO: fail with an error in-app instead of asserting
          if (raw.actionStart >= 0) {
             size_t end = raw.actionStart + raw.actionCount;
-            if (end <= actions.size()) // TODO: if (end) is too high, fail with an error
+            if (end <= actions.size()) { // TODO: if (end) is too high, fail with an error
                for (size_t i = raw.actionStart; i < end; i++) {
-                  auto instance = new Action(actions[i]);
+                  auto* instance = new Action(actions[i]);
                   this->opcodes.push_back(instance);
                   temp.push_back(instance);
+
+                  if (instance->function == &actionFunction_runInlineTrigger) {
+                     auto* casted = dynamic_cast<OpcodeArgValueMegaloScope*>(instance->arguments[0]);
+                     assert(casted);
+                     casted->data.postprocess_opcodes(conditions, actions);
+                  }
                }
+            }
          }
       }
       if (raw.conditionCount > 0) {
