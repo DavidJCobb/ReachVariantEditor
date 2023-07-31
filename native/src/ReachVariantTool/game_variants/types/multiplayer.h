@@ -49,8 +49,8 @@ struct ReachMPSizeData {
       uint32_t title_update_1 = 0;
    } bits;
    struct {
-      uint32_t conditions     = 0;
-      uint32_t actions        = 0;
+      size_t   conditions     = 0;
+      size_t   actions        = 0;
       uint32_t triggers       = 0;
       uint32_t forge_labels   = 0;
       uint32_t strings        = 0;

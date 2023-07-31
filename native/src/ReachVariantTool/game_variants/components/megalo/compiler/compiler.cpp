@@ -1347,31 +1347,35 @@ namespace Megalo {
             Opcode* incomplete    = nullptr;
             size_t  incomplete_ai = 0;
             bool    for_missing_label = false;
-            for (auto trigger : this->results.triggers) {
+            for (auto* trigger : this->results.triggers) {
                trigger->count_contents(cc, ac);
-               if (!incomplete) {
-                  for (auto opcode : trigger->opcodes) {
+
+               auto _find_incomplete = [&incomplete, &incomplete_ai](this auto&& self, const CodeBlock& block) -> void {
+                  for (auto* opcode : block.opcodes) {
                      if (!opcode->function) {
                         incomplete = opcode;
                      } else if (opcode->function == &actionFunction_runInlineTrigger) {
                         if (opcode->arguments.size() > 0) {
                            const auto* scope = dynamic_cast<const OpcodeArgValueMegaloScope*>(opcode->arguments[0]);
                            if (scope)
-                              scope->data.count_contents(cc, ac);
+                              self(scope->data);
                         }
                      }
-                     if (!incomplete) {
-                        auto&  list = opcode->arguments;
-                        size_t size = list.size();
-                        for (size_t i = 0; i < size; ++i) {
-                           if (!list[i]) {
-                              incomplete    = opcode;
-                              incomplete_ai = i;
-                              break;
-                           }
+                     if (incomplete)
+                        break;
+                     const auto&  list = opcode->arguments;
+                     const size_t size = list.size();
+                     for (size_t i = 0; i < size; ++i) {
+                        if (!list[i]) {
+                           incomplete = opcode;
+                           incomplete_ai = i;
+                           break;
                         }
                      }
                   }
+               };
+               if (!incomplete) {
+                  _find_incomplete(*trigger);
                }
             }
             if (incomplete) {

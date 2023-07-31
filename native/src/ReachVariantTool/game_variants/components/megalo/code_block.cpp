@@ -363,8 +363,16 @@ namespace Megalo {
       for (auto& opcode : this->opcodes) {
          if (dynamic_cast<const Condition*>(opcode))
             ++conditions;
-         else if (dynamic_cast<const Action*>(opcode))
+         else if (dynamic_cast<const Action*>(opcode)) {
             ++actions;
+            if (opcode->function == &actionFunction_runInlineTrigger) {
+               if (opcode->arguments.size() > 0) {
+                  const auto* scope = dynamic_cast<const OpcodeArgValueMegaloScope*>(opcode->arguments[0]);
+                  if (scope)
+                     scope->data.count_contents(conditions, actions);
+               }
+            }
+         }
       }
    }
 }

@@ -5,6 +5,7 @@
 #include "../components/megalo/actions.h"
 #include "../components/megalo/conditions.h"
 #include "../components/megalo/limits.h"
+#include "../components/megalo/opcode_arg_types/megalo_scope.h"
 
 #include "../../formats/sha1.h"
 #include "../../helpers/sha1.h"
@@ -112,24 +113,14 @@ void ReachMPSizeData::update_script_from(GameVariantDataMultiplayer& mp) {
    cobb::bit_or_byte_writer writer;
    auto& list = mp.scriptContent.triggers;
    auto& bits = writer.bits;
-   //
-   this->counts.triggers   = 0;
+   
+   this->counts.triggers   = list.size();
    this->counts.conditions = 0;
    this->counts.actions    = 0;
-   for (auto& trigger : list) {
-      ++this->counts.triggers;
-      //
-      trigger.write(bits);
-      for (auto opcode : trigger.opcodes) {
-         opcode->write(bits);
-         //
-         auto action = dynamic_cast<Megalo::Action*>(opcode);
-         if (action)
-            ++this->counts.actions;
-         else
-            ++this->counts.conditions;
-      }
+   for (const auto& trigger : list) {
+      trigger.count_contents(this->counts.conditions, this->counts.actions);
    }
+
    mp.scriptContent.entryPoints.write(bits);
    {  // Script variable declarations
       auto& vars = mp.scriptContent.variables;
