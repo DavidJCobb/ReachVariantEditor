@@ -196,6 +196,7 @@
     <ClCompile Include="services\syntax_highlight_option.cpp" />
     <ClCompile Include="ui\generic\AllocationMeter.cpp" />
     <ClCompile Include="ui\generic\ColorPickerButton.cpp" />
+    <ClCompile Include="ui\generic\FlowLayout.cpp" />
     <ClCompile Include="ui\generic\ImageStackWidget.cpp" />
     <ClCompile Include="ui\generic\MegaloSyntaxHighlighter.cpp" />
     <ClCompile Include="ui\generic\QListWidgetEx.cpp" />
@@ -353,6 +354,7 @@
     <ClInclude Include="helpers\miscellaneous.h" />
     <ClInclude Include="helpers\numeric.h" />
     <ClInclude Include="helpers\pointer_list.h" />
+    <ClInclude Include="ui\generic\FlowLayout.h" />
     <ClInclude Include="ui\widgets\RoundCardTextPreview.h" />
     <QtMoc Include="ui\script_editor\page_script_code.h" />
     <QtMoc Include="ui\script_editor\page_map_perms.h" />
