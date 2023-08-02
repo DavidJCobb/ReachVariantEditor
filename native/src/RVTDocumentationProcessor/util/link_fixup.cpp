@@ -31,7 +31,10 @@ namespace util {
          // we need to fix those up since we're using a <base/> element to change relative paths 
          // (so that the nav and asset paths can work).
          //
-         out = stem + out;
+         if (stem.endsWith('/') || stem.isEmpty())
+            out = stem + out;
+         else
+            out = stem + '/' + out;
       } else if (out[0] == '/' || out[0] == '\\') {
          out = out.mid(1);
       }
