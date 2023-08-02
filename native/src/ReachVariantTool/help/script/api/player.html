@@ -122,6 +122,7 @@
                   <li data-dont-default-collapse>
                      <a>Advanced</a>
                      <ul>
+                        <li><a href="script/scripted-object-count-limit.html">Scripted object count limit</a></li>
                         <li><a href="script/inline.html">Inlined triggers</a></li>
                         <li><a href="script/under-the-hood.html">Under the hood</a></li>
                      </ul>
@@ -180,6 +181,7 @@
                <a>Concepts</a>
                <ul>
                   <li><a href="concepts/bipeds-and-items.html">Bipeds and items</a></li>
+                  <li><a href="concepts/coordinates.html">Coordinates</a></li>
                   <li><a href="concepts/firefight.html">Firefight</a></li>
                </ul>
             </li>
@@ -246,6 +248,8 @@
    <dd><p>Apply a set of player traits to a player for the current tick.</p></dd>
 <dt><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></dt>
    <dd><p>Force a player into a vehicle if any seat is available.</p></dd>
+<dt><a href="script/api/player/actions/get_armor_ability.html">get_armor_ability <span class="a-k-a">a.k.a.</span> try_get_armor_ability</a></dt>
+   <dd><p>Identify the player's current Armor Ability.</p></dd>
 <dt><a href="script/api/player/actions/get_button_press_duration.html">get_button_press_duration <span class="a-k-a">a.k.a.</span> get_button_time</a></dt>
    <dd><p>MCC-exclusive: Detect whether a player is holding a given button down. Intended for 
             debugging purposes only.</p></dd>
@@ -258,6 +262,10 @@
    <dd><p>Get a player's position on the scoreboard.</p></dd>
 <dt><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></dt>
    <dd><p>Get the number of players that someone has killed without dying.</p></dd>
+<dt><a href="script/api/player/actions/get_vehicle.html">get_vehicle <span class="a-k-a">a.k.a.</span> try_get_vehicle</a></dt>
+   <dd><p>Identify the vehicle that a player is in.</p></dd>
+<dt><a href="script/api/player/actions/get_weapon.html">get_weapon <span class="a-k-a">a.k.a.</span> try_get_weapon</a></dt>
+   <dd><p>Identify the player's current weapon.</p></dd>
 <dt><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></dt>
    <dd><p>A development leftover related to a scrapped Requisition system.</p></dd>
 <dt><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></dt>
@@ -290,18 +298,12 @@
 <dt><a href="script/api/player/actions/set_vehicle_spawning_enabled.html">set_vehicle_spawning_enabled</a></dt>
    <dd><p>MCC-exclusive: Although intended to let you control whether players spawn in vehicles 
             or not, this function doesn't appear to actually do anything.</p></dd>
-<dt><a href="script/api/player/actions/try_get_armor_ability.html">try_get_armor_ability <span class="a-k-a">a.k.a.</span> get_armor_ability</a></dt>
-   <dd><p>Identify the player's current Armor Ability.</p></dd>
 <dt><a href="script/api/player/actions/try_get_death_damage_mod.html">try_get_death_damage_mod <span class="a-k-a">a.k.a.</span> get_death_damage_mod</a></dt>
    <dd><p>Identify the modifier for the damage that killed this player.</p></dd>
 <dt><a href="script/api/player/actions/try_get_death_damage_type.html">try_get_death_damage_type <span class="a-k-a">a.k.a.</span> get_death_damage_type</a></dt>
    <dd><p>Identify the type of damage that killed this player.</p></dd>
 <dt><a href="script/api/player/actions/try_get_killer.html">try_get_killer <span class="a-k-a">a.k.a.</span> get_killer</a></dt>
    <dd><p>Identify the player who killed this player.</p></dd>
-<dt><a href="script/api/player/actions/try_get_vehicle.html">try_get_vehicle <span class="a-k-a">a.k.a.</span> get_vehicle</a></dt>
-   <dd><p>Identify the vehicle that a player is in.</p></dd>
-<dt><a href="script/api/player/actions/try_get_weapon.html">try_get_weapon <span class="a-k-a">a.k.a.</span> get_weapon</a></dt>
-   <dd><p>Identify the player's current weapon.</p></dd>
 </dl>
 
       </main>

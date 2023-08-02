@@ -59,7 +59,7 @@
                         <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
 <li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_armor_ability.html">get_armor_ability</a></li>
+<li><a href="script/api/player/actions/get_armor_ability.html">get_armor_ability</a></li>
 <li><a href="script/api/player/actions/get_button_press_duration.html">get_button_press_duration</a></li>
 <li><a href="script/api/player/actions/get_button_press_duration.html">get_button_time</a></li>
 <li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
@@ -69,8 +69,8 @@
 <li><a href="script/api/player/actions/try_get_killer.html">get_killer</a></li>
 <li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
 <li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
-<li><a href="script/api/player/actions/try_get_vehicle.html">get_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_weapon.html">get_weapon</a></li>
+<li><a href="script/api/player/actions/get_vehicle.html">get_vehicle</a></li>
+<li><a href="script/api/player/actions/get_weapon.html">get_weapon</a></li>
 <li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
 <li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
 <li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
@@ -88,12 +88,12 @@
 <li><a href="script/api/player/actions/set_objective_allegiance_name.html">set_round_card_text</a></li>
 <li><a href="script/api/player/actions/set_objective_text.html">set_round_card_title</a></li>
 <li><a href="script/api/player/actions/set_vehicle_spawning_enabled.html">set_vehicle_spawning_enabled</a></li>
-<li><a href="script/api/player/actions/try_get_armor_ability.html">try_get_armor_ability</a></li>
+<li><a href="script/api/player/actions/get_armor_ability.html">try_get_armor_ability</a></li>
 <li><a href="script/api/player/actions/try_get_death_damage_mod.html">try_get_death_damage_mod</a></li>
 <li><a href="script/api/player/actions/try_get_death_damage_type.html">try_get_death_damage_type</a></li>
 <li><a href="script/api/player/actions/try_get_killer.html">try_get_killer</a></li>
-<li><a href="script/api/player/actions/try_get_vehicle.html">try_get_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_weapon.html">try_get_weapon</a></li>
+<li><a href="script/api/player/actions/get_vehicle.html">try_get_vehicle</a></li>
+<li><a href="script/api/player/actions/get_weapon.html">try_get_weapon</a></li>
 
                      </ul>
                   </li>
@@ -105,21 +105,34 @@
          <header><h1>player.try_get_death_damage_mod</h1><span class="a-k-a">a.k.a. player.get_death_damage_mod</span></header>
 
                <p>
-                  When called on a player who is dead, this function returns a number 
-                  representing a modifier for their cause of death. This number 
-                  complements the "damage reporting types" that can be listed in a 
-                  Post-Game Carnage Report. The potential values are listed and 
-                  named in the <a href="script/api/ns_enums/damage_reporting_mod.html">damage 
-                  reporting modifier enum</a>.
+                  When called on a player on the exact frame that that player died, this 
+                  function returns a number representing a modifier for their cause of 
+                  death. This number complements the 
+                  "<a href="script/api/ns_enums/damage_reporting_type.html">damage reporting types</a>"
+                  that can be listed in a Post-Game Carnage Report. The potential values 
+                  are listed and named in the 
+                  <a href="script/api/ns_enums/damage_reporting_mod.html">damage reporting modifier enum</a>.
                </p>
                <p>
-                  When Bungie and 343i use this function, they often manually clear 
-                  the number variable they are assigning to before calling the function. 
-                  That functionality is automated in this Megalo dialect: calling the 
-                  function with the name <code>get_death_damage_mod</code> will compile in an 
-                  assignment to <var>0</var> before the call, while calling 
-                  the function with the name <code>try_get_death_damage_mod</code> will not.
+                  When called on any other frame, <em>even while the player is dead</em>, 
+                  this function does not return a value:
                </p>
+               <ul>
+                  <li>
+                     If you call <code>get_death_damage_mod</code>, ReachVariantTool will 
+                     silently compile in an assignment to <var>0</var> before the call. 
+                     (Bungie and 343i do the same thing by hand.) This ensures that if you 
+                     call the function at the wrong time, the variable you assign its return 
+                     value to will be set to <var>0</var>.
+                  </li>
+                  <li>
+                     If you call <code>try_get_death_damage_mod</code>, then ReachVariantTool 
+                     does not compile in this failsafe. If you call <code>try_get_death_damage_mod</code> 
+                     at the wrong time, then the function will not return a value: the variable 
+                     that you attempt to assign it to will remain unchanged.
+                     
+                  </li>
+               </ul>
             
 <p>This function returns <a href="script/api/number.html">number</a>. Calling this function without storing its return value in a variable is an error.</p><h2>Example</h2>
 <pre>

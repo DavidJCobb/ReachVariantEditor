@@ -63,7 +63,7 @@
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -98,7 +98,7 @@
 <li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
 <li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
 <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">try_get_carrier</a></li>
 
                      </ul>
                   </li>
@@ -113,15 +113,17 @@
 <dl>
    <dt><a href="script/api/number.html">min</a></dt>
       <dd><p>
-                  A number between -1 and 100, inclusive. A value of 1 represents one Forge
-                  unit. The player will not be able to see the waypoint unless they are
-                  further away than this distance.
+                  The minimum distance at which the player is able to see the waypoint: they 
+                  cannot see it if they get any closer. Positive values are limited to 100. 
+                  All values below zero are treated as a sentinel value.
+                  
                </p></dd>
    <dt><a href="script/api/number.html">max</a></dt>
       <dd><p>
-                  A number between -1 and 100, inclusive. A value of 1 represents one Forge
-                  unit. The player will not be able to see the waypoint unless they are
-                  closer than this distance.
+                  The maximum distance at which the player is able to see the waypoint: they 
+                  cannot see it if they're any further away. Positive values are limited to 100. 
+                  All values below zero are treated as a sentinel value.
+                  
                </p></dd>
 </dl>
 <h2>Example</h2>
@@ -131,6 +133,11 @@
 <span class="keyword">end</span></pre>
 <h2>Notes</h2>
 <ul>
+   <li><p>
+               If the context object doesn't exist, then this function does nothing. It's 
+               safe to call this function without checking whether the object variable 
+               you're using is <var>no_object</var>.
+            </p></li>
    <li><p>
                Most Megalo functions that work with distances use a value of 1 to represent
                <em>one tenth</em> of a Forge unit. However, this function uses a value of 1

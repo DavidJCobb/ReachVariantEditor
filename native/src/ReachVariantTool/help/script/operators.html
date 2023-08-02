@@ -122,6 +122,7 @@
                   <li data-dont-default-collapse>
                      <a>Advanced</a>
                      <ul>
+                        <li><a href="script/scripted-object-count-limit.html">Scripted object count limit</a></li>
                         <li><a href="script/inline.html">Inlined triggers</a></li>
                         <li><a href="script/under-the-hood.html">Under the hood</a></li>
                      </ul>
@@ -180,6 +181,7 @@
                <a>Concepts</a>
                <ul>
                   <li><a href="concepts/bipeds-and-items.html">Bipeds and items</a></li>
+                  <li><a href="concepts/coordinates.html">Coordinates</a></li>
                   <li><a href="concepts/firefight.html">Firefight</a></li>
                </ul>
             </li>
@@ -207,6 +209,11 @@
          <dt>&lt;=</dt>
             <dd>Checks if the lefthand value is less than or equal to the righthand value.</dd>
       </dl>
+      <p>
+         Numbers and timers can be compared to each other. All variables can only be compared 
+         with variables of the same type, and they only support equality and inequality 
+         comparisons (<code>==</code> and <code>!=</code>).
+      </p>
       
       <h2>Assignment operators</h2>
       <p>
@@ -261,6 +268,11 @@
             <dd><dfn>Absolute value assignment.</dfn> Sets the lefthand variable to the absolute 
             value of the righthand value.</dd>
       </dl>
+      <p>
+         Numbers and timers can be assigned to each other, and can use any assignment operator. All 
+         other variables can only be assigned values of the same type, and can't use any operators 
+         other than <code>=</code>.
+      </p>
    
       </main>
       <script src="resources/sidebar.js"></script>

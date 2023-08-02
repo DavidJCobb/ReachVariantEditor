@@ -63,7 +63,7 @@
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -98,7 +98,7 @@
 <li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
 <li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
 <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">try_get_carrier</a></li>
 
                      </ul>
                   </li>
@@ -137,7 +137,9 @@ global.object[0] = global.object[1].place_between_me_and(global.object[2], skull
                If the same object is used as both basis objects — that is, if the object
                that you call this function on is the same object that you pass as an argument
                — then the created object will be rotated. Its rotation will be equivalent
-               to -90 pitch, 0 yaw, and 180 roll as shown in Forge.
+               to -90 pitch, 0 yaw, and 180 roll as shown in Forge. Another way to describe this 
+               is that the created object's local up-vector will match the world forward vector 
+               (i.e. the positive world X-axis).
             </p></li>
 </ul><h2>See also</h2>
 <ul>

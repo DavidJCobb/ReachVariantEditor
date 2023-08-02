@@ -122,6 +122,7 @@
                   <li data-dont-default-collapse>
                      <a>Advanced</a>
                      <ul>
+                        <li><a href="script/scripted-object-count-limit.html">Scripted object count limit</a></li>
                         <li><a href="script/inline.html">Inlined triggers</a></li>
                         <li><a href="script/under-the-hood.html">Under the hood</a></li>
                      </ul>
@@ -180,6 +181,7 @@
                <a>Concepts</a>
                <ul>
                   <li><a href="concepts/bipeds-and-items.html">Bipeds and items</a></li>
+                  <li><a href="concepts/coordinates.html">Coordinates</a></li>
                   <li><a href="concepts/firefight.html">Firefight</a></li>
                </ul>
             </li>
@@ -412,7 +414,7 @@ some_helper_function()
          inside the function. However, once we reach the end of the function body, that alias is, 
          technically, out of scope. The only way to prevent <var>some_important_variable</var> from 
          accidentally reusing that same variable — leading to a variable collision, where 
-         calling the function accidentally <a href="https://en.wikipedia.org/wiki/Clobbering" target="_blank">clobbers</a> 
+         calling the function accidentally <a target="_blank" href="https://en.wikipedia.org/wiki/Clobbering">clobbers</a> 
          data in the caller — is to make it so that variables that are aliased in any in-scope 
          function are reserved.
       </p>

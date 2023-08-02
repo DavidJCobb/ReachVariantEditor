@@ -122,6 +122,7 @@
                   <li data-dont-default-collapse>
                      <a>Advanced</a>
                      <ul>
+                        <li><a href="script/scripted-object-count-limit.html">Scripted object count limit</a></li>
                         <li><a href="script/inline.html">Inlined triggers</a></li>
                         <li><a href="script/under-the-hood.html">Under the hood</a></li>
                      </ul>
@@ -180,6 +181,7 @@
                <a>Concepts</a>
                <ul>
                   <li><a href="concepts/bipeds-and-items.html">Bipeds and items</a></li>
+                  <li><a href="concepts/coordinates.html">Coordinates</a></li>
                   <li><a href="concepts/firefight.html">Firefight</a></li>
                </ul>
             </li>
@@ -344,7 +346,7 @@ MegaloActionScope::Execute(const MegaloScriptCode&amp; script) const {
             with objects, players, and teams.
          </p>
          <p>
-            <dfn>Explicit handle references</dfn> are single values — enums, which specify 
+            <dfn>Explicit handle references</dfn> are single values — enums, which indicate 
             specific, globally-accessible handles; for example, <code>current_object</code>, 
             <code>local_player</code>, and all global and temporary handle variables in Megalo.
          </p>
@@ -659,14 +661,14 @@ class integer_reference {
          <p>
             ReachVariantTool uses a mostly-single-pass compiler for its Megalo dialect. Parsing 
             and compilation are done as a single step, and the resulting grammar is 
-            <a href="https://en.wikipedia.org/wiki/Context-sensitive_grammar" target="_blank">context-dependent</a> 
-            rather than <a href="https://en.wikipedia.org/wiki/Context-free_grammar" target="_blank">context-free</a>. 
+            <a target="_blank" href="https://en.wikipedia.org/wiki/Context-sensitive_grammar">context-dependent</a> 
+            rather than <a target="_blank" href="https://en.wikipedia.org/wiki/Context-free_grammar">context-free</a>. 
             There is not any formal grammar; rather, the grammar is entirely a side-effect of 
             how the parser is implemented.</p>
          <p>
             (This is not a terribly good way to design or implement a scripting language, but 
             in my defense, I had never come across Robert Nystrom's excellent book 
-            <a href="https://craftinginterpreters.com/contents.html" target="_blank"><i>Crafting Interpreters</i></a> 
+            <a target="_blank" href="https://craftinginterpreters.com/contents.html"><i>Crafting Interpreters</i></a> 
             before.)
          </p>
          <p>

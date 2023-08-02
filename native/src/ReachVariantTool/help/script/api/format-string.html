@@ -122,6 +122,7 @@
                   <li data-dont-default-collapse>
                      <a>Advanced</a>
                      <ul>
+                        <li><a href="script/scripted-object-count-limit.html">Scripted object count limit</a></li>
                         <li><a href="script/inline.html">Inlined triggers</a></li>
                         <li><a href="script/under-the-hood.html">Under the hood</a></li>
                      </ul>
@@ -180,6 +181,7 @@
                <a>Concepts</a>
                <ul>
                   <li><a href="concepts/bipeds-and-items.html">Bipeds and items</a></li>
+                  <li><a href="concepts/coordinates.html">Coordinates</a></li>
                   <li><a href="concepts/firefight.html">Firefight</a></li>
                </ul>
             </li>
@@ -231,11 +233,11 @@
          Some functions treat format strings as <dfn>persistent</dfn>. This means that 
          those particular strings can't be used to display "transient" variables — 
          that is, any variable whose value will likely be reset before the frame is over, 
-         like the <a href="script/apins_unnamed/current_player.html"><var>current_player</var></a> or 
-         <a href="script/apins_unnamed/killer_player.html"><var>killer_player</var></a> variables.
+         like the <a href="script/api/ns_unnamed/current_player.html"><var>current_player</var></a> or 
+         <a href="script/api/ns_unnamed/killer_player.html"><var>killer_player</var></a> variables.
       </p>
       <p>
-         The <a href="script/apins_game/show_message_to.html">game.show_message_to</a> function is an 
+         The <a href="script/api/ns_game/show_message_to.html">game.show_message_to</a> function is an 
          example of a non-persistent string:
       </p>
       <pre>
@@ -253,7 +255,7 @@
          <var>current_player</var> at the time the function was called.
       </p>
       <p>
-         The <a href="script/apiwidget/set_text.html">widget.set_text</a> function is an example of 
+         The <a href="script/api/widget/set_text.html">widget.set_text</a> function is an example of 
          a persistent string:
       </p>
       <pre>
@@ -276,7 +278,7 @@ script_widget[0].set_text(<span class="string">"%s won the game!</span>", global
       </p>
       <p>
          If you want players to see their own names (or variables) in a persistent 
-         string, then use variables like <a href="script/apins_unnamed/local_player.html"><var>local_player</var></a>.
+         string, then use variables like <a href="script/api/ns_unnamed/local_player.html"><var>local_player</var></a>.
       </p>
       
       

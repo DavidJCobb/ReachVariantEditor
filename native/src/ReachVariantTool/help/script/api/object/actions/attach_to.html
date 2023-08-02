@@ -63,7 +63,7 @@
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -98,7 +98,7 @@
 <li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
 <li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
 <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">try_get_carrier</a></li>
 
                      </ul>
                   </li>
@@ -210,8 +210,8 @@ global.object[0].attach_to(some_warthog, 0, 0, 20, relative)</pre>
                   Bipeds in an attached vehicle will lose most animations. Passengers'
                   hands may move slightly (and incorrectly) while reloading their weapon;
                   though they have no reloading or weapon swap animations, appropriate
-                  sounds still play, and they cannot fire their animations while the
-                  animations would be taking place. Some animations have player model
+                  sounds still play, and they cannot fire their weapons while the reload 
+                  animation would be taking place. Some animations have player model
                   jiggle physics; these jiggle physics remain functional even though
                   the rest of the animation does not. 
                </p>
@@ -223,7 +223,11 @@ global.object[0].attach_to(some_warthog, 0, 0, 20, relative)</pre>
             <h3>Other notes</h3>
 <ul>
    <li><p>
-               Armor Abilities equipped by other players are an exception to normal
+               If either of the context or <var>basis</var> objects are <var>no_object</var>, 
+               or if both are the same object, then this function does nothing.
+            </p></li>
+   <li><p>
+               Armor Abilities equipped by players are an exception to normal
                attachment behaviors. If you detach an Armor Ability from a player's
                back, you can move it around or attach it without unequipping it from
                that player; however, the Armor Ability will automatically detach
@@ -296,11 +300,11 @@ global.object[0].attach_to(some_warthog, 0, 0, 20, relative)</pre>
             </li>
    <li>
                <p>
-                  If the player is attached to an armor ability, and if this
-                  would normally cause them to pick the armor ability up, then
+                  If the player is attached to an Armor Ability, and if this
+                  would normally cause them to pick the Armor Ability up, then
                   they will experience the same anomalies as if they were
                   attached to a weapon that is destroyed on contact. They will
-                  not be able to use the armor ability during this time.
+                  not be able to use the Armor Ability during this time.
                </p>
             </li>
    <li>

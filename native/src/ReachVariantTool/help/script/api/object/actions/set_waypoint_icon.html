@@ -63,7 +63,7 @@
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -98,7 +98,7 @@
 <li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
 <li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
 <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">try_get_carrier</a></li>
 
                      </ul>
                   </li>
@@ -120,7 +120,14 @@
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"koth_hill</span>" <span class="keyword">do</span>
    current_object.set_waypoint_icon(defend)
 <span class="keyword">end</span></pre>
-<h2>See also</h2>
+<h2>Notes</h2>
+<ul>
+   <li><p>
+               If the context object doesn't exist, then this function does nothing. It's 
+               safe to call this function without checking whether the object variable 
+               you're using is <var>no_object</var>.
+            </p></li>
+</ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/set_waypoint_priority.html">object.set_waypoint_priority</a></li>
    <li><a href="script/api/object/actions/set_waypoint_range.html">object.set_waypoint_range</a></li>

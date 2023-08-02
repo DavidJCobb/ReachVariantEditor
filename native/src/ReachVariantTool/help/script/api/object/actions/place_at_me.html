@@ -63,7 +63,7 @@
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -98,7 +98,7 @@
 <li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
 <li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
 <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">try_get_carrier</a></li>
 
                      </ul>
                   </li>
@@ -108,11 +108,30 @@
       </nav>
       <main>
          <header><h1>object.place_at_me</h1><span class="a-k-a">a.k.a. object.create_object</span></header>
-<p>Spawn a new object at this object.</p>
+
+               <p>
+                  This function spawns a new object as close to the context object (the one you 
+                  call the function on) as possible. The new object will face in the same general 
+                  direction as the context object. (It will have the same yaw rotation by default; 
+                  if you pass the <var>absolute_orientation</var> flag, then the new object will 
+                  also copy the context object's roll and pitch rotations.)
+               </p>
+               <p>
+                  You can optionally create the new object at a position offset from the context 
+                  object's location. The offset you specify is applied relative to the general 
+                  direction that the context object is facing in. By default, the offset only 
+                  takes the context object's yaw rotation into account; if you pass the <var>absolute_orientation</var> 
+                  flag, then the full rotation is accounted for. In this system, the X-offset 
+                  represents "forward" and th Z-offset represents "upward."
+               </p>
+            
 <p>This function returns <a href="script/api/object.html">object</a>.</p><h2>Arguments</h2>
 <dl>
    <dt><a href="script/api/object-type.html">type</a></dt>
-      <dd><p>A type of object that can exist in the game world.</p></dd>
+      <dd><p>
+                  The type of object to create. If this is not a valid object type, then the return 
+                  value is <var>no_object</var>.
+               </p></dd>
    <dt><a href="script/api/forge-label.html">label</a></dt>
       <dd><p>A string literal containing the name of a Forge label, or an integer constant 
    denoting the index of a Forge label in the game variant's label list.</p></dd>
@@ -124,11 +143,16 @@
                   </p>
                   <dl>
                      <dt>never_garbage_collect</dt>
-                     <dd>Prevents the created object from being garbage-collected.</dd>
+                        <dd>Prevents the created object from being garbage-collected.</dd>
                      <dt>suppress_effect</dt>
-                     <dd>Unknown.</dd>
+                        <dd>Unknown.</dd>
                      <dt>absolute_orientation</dt>
-                     <dd>Unknown.</dd>
+                        <dd>
+                           By default, new objects are created with the same yaw rotation as the 
+                           context object, and the offset is applied relative to the context 
+                           object's yaw rotation. This flag forces the context object's roll and 
+                           pitch rotations to be taken into account as well.
+                        </dd>
                   </dl>
                </dd>
    <dt>x</dt>
@@ -160,6 +184,13 @@ global.object[0] = global.object[1].place_at_me(spartan, none, never_garbage_col
 <h2>Notes</h2>
 <ul>
    <li><p>
+               If the context object is facing almost exactly nose-up or nose-down, and you don't 
+               use the <var>absolute_orientation</var> flag, then the game engine will position 
+               and rotate the new object as though the context object were completely un-rotated: 
+               the new object's local forward vector will exactly match the world X-axis, and the 
+               position offsets you specify will act as world-relative X-, Y-, and Z-coordinates.
+            </p></li>
+   <li><p>
                The new object will be created as close to the context object as possible. It may
                not be created exactly at the context object, even if one or both of the objects
                are non-solid. To create one object exactly at another object,
@@ -167,6 +198,10 @@ global.object[0] = global.object[1].place_at_me(spartan, none, never_garbage_col
                the created object to the basis object and then
                <a href="script/api/object/actions/detach.html">detach</a>
                it.
+            </p></li>
+   <li><p>
+               If the context object doesn't exist (i.e. is <var>no_object</var>), then no object 
+               will be created, and the return value will be <var>no_object</var>.
             </p></li>
 </ul><h2>See also</h2>
 <ul>
