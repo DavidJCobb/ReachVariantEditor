@@ -888,8 +888,8 @@
                   Bipeds in an attached vehicle will lose most animations. Passengers'
                   hands may move slightly (and incorrectly) while reloading their weapon;
                   though they have no reloading or weapon swap animations, appropriate
-                  sounds still play, and they cannot fire their animations while the
-                  animations would be taking place. Some animations have player model
+                  sounds still play, and they cannot fire their weapons while the reload 
+                  animation would be taking place. Some animations have player model
                   jiggle physics; these jiggle physics remain functional even though
                   the rest of the animation does not. <!-- i swear to god i'm not making 
                   this up and i don't know why bungie put that in the game lol -->
@@ -905,7 +905,7 @@
                or if both are the same object, then this function does nothing.
             </note>
             <note>
-               Armor Abilities equipped by other players are an exception to normal
+               Armor Abilities equipped by players are an exception to normal
                attachment behaviors. If you detach an Armor Ability from a player's
                back, you can move it around or attach it without unequipping it from
                that player; however, the Armor Ability will automatically detach
@@ -978,11 +978,11 @@
             </note>
             <note>
                <p>
-                  If the player is attached to an armor ability, and if this
-                  would normally cause them to pick the armor ability up, then
+                  If the player is attached to an Armor Ability, and if this
+                  would normally cause them to pick the Armor Ability up, then
                   they will experience the same anomalies as if they were
                   attached to a weapon that is destroyed on contact. They will
-                  not be able to use the armor ability during this time.
+                  not be able to use the Armor Ability during this time.
                </p>
             </note>
             <note>
@@ -1464,11 +1464,15 @@
                         alias current_distance = allocate temporary number
          
                         current_vehicle = no_object
-                        current_vehicle = current_player.try_get_vehicle()
+                        current_vehicle = current_player.get_vehicle()
                         if current_vehicle != current_object then
                            --
                            -- We don't want to apply this effect to vehicles the player is in, as it 
-                           -- will turn those vehicles into inoperable beyblades.
+                           -- will turn those vehicles into inoperable beyblades. They'll try to turn 
+                           -- toward the player, but because the player is attached to whatever vehicle 
+                           -- they're riding in, they'll be displaced by the turning, which makes the 
+                           -- vehicle want to turn some more next frame; and so on, non-stop, until 
+                           -- the player exits the vehicle. Let's avoid that edge-case.
                            
                            current_distance = current_object.get_distance_to(current_player.biped)
                            if current_distance &lt; nearest_distance then
@@ -1503,6 +1507,9 @@
                --
                alias roll_global_basis      = allocate global.object
                alias unrotated_global_basis = allocate global.object
+               alias roll_1deg_reference    = allocate global.object
+               alias helper_marker_1        = allocate global.object
+               alias helper_marker_2        = allocate global.object
                if roll_global_basis == no_object then
                   --
                   -- There are two rotation values that we really need:
@@ -1521,71 +1528,75 @@
                      if roll_global_basis == no_object then
                         roll_global_basis      = current_object.place_between_me_and(current_object, hill_marker, 0)
                         unrotated_global_basis = roll_global_basis.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+                        
+                        -- These are recyclable markers that each SPIN_ROLL object can use to set 
+                        -- up a roll rotation by 1 degree. We'll also use them here, when setting 
+                        -- up the 1-degree rotation reference.
+                        helper_marker_1 = unrotated_global_basis.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+                        helper_marker_2 = unrotated_global_basis.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+                        
+                        -- When we're done, this will be an object whose rotation is exactly one 
+                        -- yaw-degree off from `roll_global_basis`. Right now, it starts off with 
+                        -- the same rotation as `roll_global_basis`: exactly nose-down, local up 
+                        -- coinciding with the world positive X-axis.
+                        roll_1deg_reference = roll_global_basis.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+                        roll_1deg_reference.copy_rotation_from(roll_global_basis, true)
+                        
+                        -- Let's briefly use a more intuitive name for our helper marker.
+                        alias yaw_adjust = helper_marker_1
+                        
+                        yaw_adjust.copy_rotation_from(unrotated_global_basis, true)
+                        
+                        -- Now, we'll attach our 1-degree reference to the `yaw_adjust` marker, and 
+                        -- then rotate the `yaw_adjust` marker by one degree on the yaw axis. From 
+                        -- the point of view of our nose-down object, this is a roll rotation.
+                        -- 
+                        -- Imagine taking a Warthog, turning it nose-down, and placing it on top of a 
+                        -- turntable. Now imagine you're in the driver's seat. As the turntable rotates, 
+                        -- from your point of view, you're doing a barrel roll... a barrel ROLL. Get it?
+                        -- 
+                        roll_1deg_reference.attach_to(yaw_adjust, 0, 0, 0, relative)
+                        yaw_adjust.face_toward(yaw_adjust, 115, -2, 0)
+                        
+                        roll_1deg_reference.detach()
+                        --
+                        -- And now the 1-degree reference is set up! When we actually use it, we'll go 
+                        -- into more detail about how it works.
+                        --
                      end
                   end
                end
                --
                for each object with label "spin_roll" do
-                  alias my_roll_marker = allocate object.object
-                  alias my_yaw_adjust  = allocate object.object
-                  alias my_yaw_to_roll = allocate object.object
-   
-                  alias roll_marker = current_object.my_roll_marker
-                  alias yaw_adjust  = current_object.my_yaw_adjust
-                  alias yaw_to_roll = current_object.my_yaw_to_roll
-                  if roll_marker == no_object then
-                     roll_marker = current_object.place_at_me(hill_marker, none, none, 0, 0, 0, none)
-                     yaw_adjust  = current_object.place_at_me(hill_marker, none, none, 0, 0, 0, none)
-                     yaw_to_roll = current_object.place_at_me(hill_marker, none, none, 0, 0, 0, none)
-                  end
-   
+                  alias roll_marker = helper_marker_1
+                  alias yaw_to_roll = helper_marker_2
+                  
                   --
-                  -- First, we exploit some jank with `object.place_between_me_and`. It's possible 
-                  -- to spawn an object that's pointing nose-down but otherwise not rotated. We've 
-                  -- already created that kind of object, so let's now copy its rotation.
+                  -- Let's recycle our helper markers from above. We'll have them copy the rotations 
+                  -- we set up before, so we can continue where we left off. (We don't want to use 
+                  -- the actual rotation markers from earlier, because we need them "fresh" for each 
+                  -- SPIN_ROLL object we want to spin. Think of the earlier trigger like having Halo: 
+                  -- Reach press Ctrl + C on some rotations, and now we're having it press Ctrl + V.)
                   --
-                  roll_marker.copy_rotation_from(roll_global_basis, true)
-   
-                  --
-                  -- We can exploit `face_toward` jank to rotate objects about their local yaw 
-                  -- axis. We'll use another marker for that; let's first reset its rotation.
-                  --
-                  yaw_adjust.copy_rotation_from(unrotated_global_basis, true)
-   
-                  --
-                  -- We attach our nose-down object to our yaw-adjustment marker. Then, we adjust 
-                  -- the latter's yaw-rotation. From the point of view of our nose-down object, 
-                  -- this is a roll rotation.
-                  --
-                  -- Imagine taking a Warthog, turning it nose-down, and placing it on top of a 
-                  -- turntable. Now imagine you're in the driver's seat. As the turntable rotates, 
-                  -- from your point of view, you're doing a barrel roll... a barrel ROLL. Get it?
-                  --
-                  roll_marker.attach_to(yaw_adjust, 0, 0, 0, relative)
-                  yaw_adjust.face_toward(yaw_adjust, 115, -2, 0)
-                  roll_marker.detach()
-   
-                  --
-                  -- Now, we've got to match our roll marker to the current_object's rotation, 
-                  -- but without losing the roll adjustment we just made. To do that, we'll 
-                  -- use another nose-down object, called `yaw_to_roll`.
-                  --
+                  
+                  roll_marker.copy_rotation_from(roll_1deg_reference, true)
                   yaw_to_roll.copy_rotation_from(roll_global_basis, true)
-   
+                  
                   --
-                  -- There's only a slight difference between the rotation of roll_marker and 
-                  -- the rotation of yaw_to_roll. If we attach roll_marker to yaw_to_roll, and 
-                  -- then have yaw_to_roll copy current_object's rotation, then there will only 
-                  -- be that *same* slight difference between the rotation of roll_marker and 
-                  -- the rotation of current_object. That difference, of course, is the roll 
-                  -- adjustment we want to perform.
+                  -- So now, there's only a slight difference between the rotation of roll_marker 
+                  -- and the rotation of yaw_to_roll: specifically, one degree, along the world's 
+                  -- yaw axis. Remember what I said above: from the perspective of roll_marker, 
+                  -- that's going to be one degree of roll, not yaw. So how do we turn one degree 
+                  -- of marker-relative roll into one degree of current_object-relative roll?
                   --
+                  -- If we attach roll_marker to yaw_to_roll, and then have yaw_to_roll copy the 
+                  -- rotation of current_object, then there will only be that *same* slight angle 
+                  -- difference between roll_marker and current_object -- and that difference will 
+                  -- represent one degree of roll relative to current_object.
+                  --
+                  
                   roll_marker.attach_to(yaw_to_roll, 0, 0, 0, relative)
                   yaw_to_roll.copy_rotation_from(current_object, true)
-                  roll_marker.detach()
-   
-                  -- Move `roll_marker` to the current object.
-                  roll_marker.attach_to(current_object, 0, 0, 0, relative)
                   roll_marker.detach()
    
                   -- Rotate the current object to match `roll_marker`.

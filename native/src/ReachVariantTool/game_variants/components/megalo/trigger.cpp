@@ -3,6 +3,8 @@
 #include "opcode_arg_types/all_indices.h"
 #include "../../types/multiplayer.h"
 
+#include "opcode_arg_types/megalo_scope.h"
+
 namespace {
    constexpr int ce_max_index      = Megalo::Limits::max_script_labels;
    constexpr int ce_index_bitcount = cobb::bitcount(ce_max_index); // DON'T subtract 1; you can do "for each with no label" and that encodes as -1, i.e. we need an extra bit for the sign
@@ -297,7 +299,7 @@ namespace Megalo {
       //
       // Write the opcodes:
       //
-      CodeBlock::decompile(out, state.is_function);
+      CodeBlock::decompile(out, state.is_function, trigger_is_if_block);
       //
       // Close all open blocks.
       //
@@ -317,26 +319,32 @@ namespace Megalo {
       this->is_function = false;
    }
    void TriggerDecompileState::setup_callees(const std::vector<Trigger*>& allTriggers, const Trigger* mine) {
-      for (auto opcode : mine->opcodes) {
-
-         //
-         // TODO: handle inline triggers as callees and callers, including one inline trigger nested 
-         // inside of another
-         //
-
-         if (opcode->function != &actionFunction_runNestedTrigger)
-            continue;
-         auto arg = dynamic_cast<OpcodeArgValueTrigger*>(opcode->arguments[0]);
-         if (!arg)
-            continue;
-         auto index = arg->value;
-         if (index < 0 || index > allTriggers.size()) // invalid index
-            continue;
-         auto  target = allTriggers[index];
-         auto& state  = target->decompile_state;
-         this->callees.push_back(&state);
-         state.callers.push_back(this);
-      }
+      const auto _recurse = [d_state = this, &allTriggers](this auto&& self, const CodeBlock& inlined) -> void {
+         for (const auto* opcode : inlined.opcodes) {
+            if (opcode->function == &actionFunction_runInlineTrigger) {
+               if (opcode->arguments.empty())
+                  continue;
+               const auto* arg = dynamic_cast<const OpcodeArgValueMegaloScope*>(opcode->arguments[0]);
+               if (!arg)
+                  continue;
+               self(arg->data);
+               continue;
+            }
+            if (opcode->function != &actionFunction_runNestedTrigger)
+               continue;
+            const auto* arg = dynamic_cast<OpcodeArgValueTrigger*>(opcode->arguments[0]);
+            if (!arg)
+               continue;
+            auto index = arg->value;
+            if (index < 0 || index > allTriggers.size()) // invalid index
+               continue;
+            auto* target = allTriggers[index];
+            auto& state = target->decompile_state;
+            d_state->callees.push_back(&state);
+            state.callers.push_back(d_state);
+         }
+      };
+      _recurse(*(const CodeBlock*)mine);
    }
    void TriggerDecompileState::check_if_is_function() {
       if (!this->callers.size()) {

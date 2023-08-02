@@ -58,7 +58,7 @@ namespace Megalo {
          void prep_for_flat_opcode_lists(); // call this on ALL instances before calling (generate_flat_opcode_lists) on ANY of them
          void generate_flat_opcode_lists(GameVariantDataMultiplayer& mp, std::vector<Condition*>& allConditions, std::vector<Action*>& allActions);
 
-         void decompile(Decompiler& out, bool is_function = false) noexcept;
+         void decompile(Decompiler& out, bool is_function = false, bool is_if_block = false) noexcept;
 
          void count_contents(size_t& conditions, size_t& actions) const noexcept;
    };

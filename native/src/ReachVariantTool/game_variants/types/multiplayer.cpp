@@ -117,8 +117,22 @@ void ReachMPSizeData::update_script_from(GameVariantDataMultiplayer& mp) {
    this->counts.triggers   = list.size();
    this->counts.conditions = 0;
    this->counts.actions    = 0;
+
+   auto _recursive_count_opcode_bits = [&bits](this auto&& self, const Megalo::CodeBlock& block) -> void {
+      for (const auto* opcode : block.opcodes) {
+         opcode->write(bits);
+         if (opcode->function == &Megalo::actionFunction_runInlineTrigger) {
+            if (opcode->arguments.size() > 0)
+               if (const auto* scope = dynamic_cast<const Megalo::OpcodeArgValueMegaloScope*>(opcode->arguments[0]))
+                  self(scope->data);
+         }
+      }
+   };
+
    for (const auto& trigger : list) {
       trigger.count_contents(this->counts.conditions, this->counts.actions);
+      trigger.write(writer.bits);
+      _recursive_count_opcode_bits(trigger);
    }
 
    mp.scriptContent.entryPoints.write(bits);
@@ -199,7 +213,7 @@ bool GameVariantDataMultiplayer::_read_script_code(cobb::ibitreader& stream) noe
          return false;
       }
    }
-   if (count >= Megalo::Limits::max_conditions) {
+   if (count > Megalo::Limits::max_conditions) {
       error_report.state         = GameEngineVariantLoadError::load_state::failure;
       error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_conditions;
       error_report.detail        = GameEngineVariantLoadError::load_failure_detail::too_many_opcodes;
@@ -221,7 +235,7 @@ bool GameVariantDataMultiplayer::_read_script_code(cobb::ibitreader& stream) noe
          return false;
       }
    }
-   if (count >= Megalo::Limits::max_actions) {
+   if (count > Megalo::Limits::max_actions) {
       error_report.state         = GameEngineVariantLoadError::load_state::failure;
       error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_actions;
       error_report.detail        = GameEngineVariantLoadError::load_failure_detail::too_many_opcodes;

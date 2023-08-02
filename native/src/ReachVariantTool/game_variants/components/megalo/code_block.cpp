@@ -216,15 +216,17 @@ namespace Megalo {
       //
       for (size_t i = 0; i < size; i++) {
          auto* opcode = this->opcodes[i];
-         auto  action = dynamic_cast<const Action*>(opcode);
+         auto* action = dynamic_cast<const Action*>(opcode);
          if (action) {
             if (action->function == &actionFunction_runNestedTrigger) {
+               assert(!action->arguments.empty());
                auto* arg = dynamic_cast<OpcodeArgValueTrigger*>(action->arguments[0]);
                assert(arg && "Found a Run Nested Trigger action with no argument specifying the trigger?!");
                auto  i   = arg->value;
                assert(i >= 0 && i < triggers.size() && "Found a Run Nested Trigger action with an out-of-bounds index.");
                triggers[i].generate_flat_opcode_lists(mp, allConditions, allActions);
             } else if (action->function == &actionFunction_runInlineTrigger) {
+               assert(!action->arguments.empty());
                auto* arg = dynamic_cast<OpcodeArgValueMegaloScope*>(action->arguments[0]);
                assert(arg && "Found a Run Inline Trigger action with no trigger data?!");
                arg->data.generate_flat_opcode_lists(mp, allConditions, allActions);
@@ -240,7 +242,7 @@ namespace Megalo {
       this->raw.actionCount    = 0;
       for (size_t i = 0; i < size; ++i) {
          auto* opcode    = this->opcodes[i];
-         auto  condition = dynamic_cast<Condition*>(opcode);
+         auto* condition = dynamic_cast<Condition*>(opcode);
          if (condition) {
             this->raw.conditionCount += 1;
             allConditions.push_back(condition);
@@ -249,7 +251,7 @@ namespace Megalo {
             //
             continue;
          }
-         auto action = dynamic_cast<Action*>(opcode);
+         auto* action = dynamic_cast<Action*>(opcode);
          if (action) {
             this->raw.actionCount += 1;
             allActions.push_back(action);
@@ -258,7 +260,7 @@ namespace Megalo {
       }
    }
    
-   void CodeBlock::decompile(Decompiler& out, bool is_function) noexcept {
+   void CodeBlock::decompile(Decompiler& out, bool is_function, bool is_if_block) noexcept {
       //
       // We need to handle block structure, line breaks, and similar formatting here. Normally this would be 
       // pretty straightforward: each trigger is one single code block; we open another code block only when 
@@ -279,7 +281,6 @@ namespace Megalo {
       uint16_t indent_count          = 0;     // needed because if-blocks aren't "real;" we "open" one every time we encounter one or more conditions in a row, so we need to remember how many "end"s to write
       bool     is_first_opcode       = true;  // see comment for (trigger_is_if_block)
       bool     is_first_condition    = true;  // if we encounter a condition and this is (true), then we need to write "if "
-      bool     trigger_is_if_block   = false; // we write an initial line break on each trigger; if this trigger is an if-block, then we need to avoid writing another line break when we actually write "if". this variable and (is_first_opcode) are used to facilitate this.
       bool     writing_if_conditions = false; // if we encounter an action and this is (true), then we need to reset (is_first_condition
 
       //
@@ -293,7 +294,7 @@ namespace Megalo {
          is_first_opcode = false;
          if (condition) {
             if (is_first_condition) {
-               if ((!trigger_is_if_block || is_function) || !_first) // if this trigger IS an if-block and we're writing the entire block's "if", then don't write a line break because we did that above
+               if ((!is_if_block || is_function) || !_first) // if this trigger IS an if-block and we're writing the entire block's "if", then don't write a line break because we did that above
                   out.write_line("");
                out.write("if ");
                out.modify_indent_count(1);
@@ -339,11 +340,25 @@ namespace Megalo {
          } else if (opcode->function == &actionFunction_runInlineTrigger) {
             auto* casted = dynamic_cast<OpcodeArgValueMegaloScope*>(opcode->arguments[0]);
             assert(casted);
-            out.write_line("inline: do");
-            out.modify_indent_count(1);
-            casted->data.decompile(out);
-            out.modify_indent_count(-1);
-            out.write_line("end");
+
+            bool is_if_statement = false;
+            if (!casted->data.opcodes.empty()) {
+               if (dynamic_cast<const Condition*>(casted->data.opcodes[0])) {
+                  is_if_statement = true;
+               }
+            }
+
+            if (is_if_statement) {
+               out.write_line("inline: ");
+            } else {
+               out.write_line("inline: do");
+               out.modify_indent_count(1);
+            }
+            casted->data.decompile(out, false, is_if_statement);
+            if (!is_if_statement) {
+               out.modify_indent_count(-1);
+               out.write_line("end");
+            }
             continue;
          }
          out.write_line("");
@@ -373,11 +388,10 @@ namespace Megalo {
          else if (dynamic_cast<const Action*>(opcode)) {
             ++actions;
             if (opcode->function == &actionFunction_runInlineTrigger) {
-               if (opcode->arguments.size() > 0) {
-                  const auto* scope = dynamic_cast<const OpcodeArgValueMegaloScope*>(opcode->arguments[0]);
-                  if (scope)
-                     scope->data.count_contents(conditions, actions);
-               }
+               assert(!opcode->arguments.empty());
+               const auto* scope = dynamic_cast<const OpcodeArgValueMegaloScope*>(opcode->arguments[0]);
+               assert(scope != nullptr);
+               scope->data.count_contents(conditions, actions);
             }
          }
       }
