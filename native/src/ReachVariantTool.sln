@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29519.181
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ReachVariantTool", "ReachVariantTool\ReachVariantTool.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RVTDocRenderer", "RVTDocRenderer\RVTDocRenderer.vcxproj", "{8183C889-C512-425A-9432-E68FC8924031}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RVTDocumentationProcessor", "RVTDocumentationProcessor\RVTDocumentationProcessor.vcxproj", "{E4C26566-3AD1-4D16-B906-B689B41C71BB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InnoSetupInstaller", "InnoSetupInstaller\InnoSetupInstaller.vcxproj", "{B3417B6C-27B2-4031-A47C-8EAC3B1837FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,14 @@ Global
 		{E4C26566-3AD1-4D16-B906-B689B41C71BB}.Release|x64.ActiveCfg = Release|x64
 		{E4C26566-3AD1-4D16-B906-B689B41C71BB}.Release|x64.Build.0 = Release|x64
 		{E4C26566-3AD1-4D16-B906-B689B41C71BB}.Release|x86.ActiveCfg = Release|x64
+		{B3417B6C-27B2-4031-A47C-8EAC3B1837FE}.Debug|x64.ActiveCfg = Debug|x64
+		{B3417B6C-27B2-4031-A47C-8EAC3B1837FE}.Debug|x64.Build.0 = Debug|x64
+		{B3417B6C-27B2-4031-A47C-8EAC3B1837FE}.Debug|x86.ActiveCfg = Debug|Win32
+		{B3417B6C-27B2-4031-A47C-8EAC3B1837FE}.Debug|x86.Build.0 = Debug|Win32
+		{B3417B6C-27B2-4031-A47C-8EAC3B1837FE}.Release|x64.ActiveCfg = Release|x64
+		{B3417B6C-27B2-4031-A47C-8EAC3B1837FE}.Release|x64.Build.0 = Release|x64
+		{B3417B6C-27B2-4031-A47C-8EAC3B1837FE}.Release|x86.ActiveCfg = Release|Win32
+		{B3417B6C-27B2-4031-A47C-8EAC3B1837FE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

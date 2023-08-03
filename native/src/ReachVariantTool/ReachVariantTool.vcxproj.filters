@@ -1173,6 +1173,12 @@
     <ClInclude Include="ui\generic\FlowLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="rvt_version_macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\string\strieq_ascii.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />

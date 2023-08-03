@@ -56,10 +56,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -357,6 +357,8 @@
     <ClInclude Include="helpers\miscellaneous.h" />
     <ClInclude Include="helpers\numeric.h" />
     <ClInclude Include="helpers\pointer_list.h" />
+    <ClInclude Include="helpers\string\strieq_ascii.h" />
+    <ClInclude Include="rvt_version_macros.h" />
     <ClInclude Include="ui\generic\FlowLayout.h" />
     <ClInclude Include="ui\widgets\RoundCardTextPreview.h" />
     <QtMoc Include="ui\script_editor\page_script_code.h" />
@@ -595,4 +597,85 @@
   </ImportGroup>
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <!-- WORKAROUND FOR: https://bugreports.qt.io/browse/QTVSADDINBUG-882 -->
+  <UsingTask TaskName="QtDeployVCInstallDirWorkaround_Task" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <VcInstallDir ParameterType="System.String" Required="true" />
+      <TargetDir ParameterType="System.String" Required="true" />
+      <ArchitectureSuffix ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Code Type="Method" Language="cs"><![CDATA[
+public override bool Execute() {
+
+   string LOG_PREFIX = "[Cobb:Workaround:QTVSADDINBUG-882] ";
+
+   Log.LogMessage(MessageImportance.High, VcInstallDir);
+   Log.LogMessage(MessageImportance.High, TargetDir);
+   Log.LogMessage(MessageImportance.High, ArchitectureSuffix);
+   
+   string filename = "vc_redist." + ArchitectureSuffix + ".exe";
+   
+   string dst     = TargetDir + filename;
+   var    missing = !File.Exists(dst);
+   
+   string src = VcInstallDir + "redist/MSVC";
+   {
+      System.Version newest = null;
+      string newest_str = "";
+      
+      var directory = new System.IO.DirectoryInfo(src);
+      src += "/";
+      var list = directory.GetDirectories();
+      foreach(System.IO.DirectoryInfo subfolder in list) {
+         System.Version here = null;
+         try {
+            here = new System.Version(subfolder.Name);
+         } catch (System.ArgumentException) {
+            continue;
+         }
+         if (newest == null || newest < here) {
+            newest     = here;
+            newest_str = subfolder.Name;
+         }
+      }
+      if (newest == null) {
+         if (missing)
+            Log.LogError(LOG_PREFIX + "failed to find VC Redist folder.");
+         return false;
+      }
+      src += newest_str + "/";
+      //Log.LogMessage(MessageImportance.High, LOG_PREFIX + "redist path:\n" + src);
+   }
+   src += filename;
+   
+   if (!missing) {
+      var src_version = new System.Version(System.Diagnostics.FileVersionInfo.GetVersionInfo(src).FileVersion);
+      var dst_version = new System.Version(System.Diagnostics.FileVersionInfo.GetVersionInfo(dst).FileVersion);
+      if (dst_version >= src_version) {
+         Log.LogMessage(MessageImportance.High, LOG_PREFIX + "VC Redist destination newer than source; will not overwrite.");
+         return true;
+      }
+   }
+   
+   Log.LogMessage(MessageImportance.High, LOG_PREFIX + "attempting to copy VC Redist...");
+   try {
+      File.Copy(src, dst);
+      Log.LogMessage(MessageImportance.High, LOG_PREFIX + "VC Redist copied.");
+   } catch (IOException ex) {
+      Log.LogError(LOG_PREFIX + "failed to copy VC Redist.");
+      Log.LogError(LOG_PREFIX + " - Message: " + ex.Message);
+      Log.LogError(LOG_PREFIX + " - SrcPath: " + src);
+      Log.LogError(LOG_PREFIX + " - DstPath: " + dst);
+      return false;
+   }
+   return true;
+}
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name="QtDeployVCInstallDirWorkaround" AfterTargets="QtDeploy" Inputs="$(QtDeployLog)" Outputs="%TEMP%/vcworkaround.txt" Condition="'$(QtDeploy)' == 'true' AND '$(ApplicationType)' != 'Linux'">
+    <QtDeployVCInstallDirWorkaround_Task VcInstallDir="$(VCInstallDir)" TargetDir="$(TargetDir)" ArchitectureSuffix="x64" />
+  </Target>
+  <!-- END OF: WORKAROUND FOR: https://bugreports.qt.io/browse/QTVSADDINBUG-882 -->
 </Project>
