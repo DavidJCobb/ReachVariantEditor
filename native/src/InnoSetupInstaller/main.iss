@@ -49,7 +49,7 @@ Source: "{#CppProjectPath}themes\*"; DestDir: "{app}\themes\"; Flags: ignorevers
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [UninstallDelete]
-Name: "{app}\ReachVariantTool.ini"
+Type: files; Name: "{app}\ReachVariantTool.ini"
 
 ; Install VC redist
 [Run]
