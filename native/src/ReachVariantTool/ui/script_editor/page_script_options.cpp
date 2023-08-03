@@ -419,6 +419,8 @@ void ScriptEditorPageScriptOptions::updateValuesListFromVariant() {
    this->ui.listValues->clear();
    this->ui.defaultEnumValue->clear();
    if (!this->targetOption) {
+      this->targetValue = nullptr;
+      this->updateValueFromVariant();
       this->ui.buttonValuesDelete->setDisabled(true);
       return;
    }

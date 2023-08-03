@@ -4,6 +4,8 @@
 #include <QWidget>
 #include "../../formats/localized_string_table.h"
 
+class ReachStringDependentModel;
+
 //
 // ReachStringPicker
 //
@@ -47,16 +49,13 @@ class ReachStringPicker : public QWidget {
       void selectedStringSwitched(); // the string is changed via the combobox only
       //
    protected:
+      ReachStringDependentModel* _model = nullptr;
       MegaloStringRef* _targetRef = nullptr;
       bool _allowNoString = false;
       bool _limitToSingleLanguageStrings = false;
       QComboBox* _combobox = nullptr;
       QPushButton* _button = nullptr;
       QList<QString> _blacklist;
-      //
-      void refreshList();
-      //
-      void refreshListItem(uint32_t index);
       //
       #if _DEBUG
          QString _debug_hierarchy;

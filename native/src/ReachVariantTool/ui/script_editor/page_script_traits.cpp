@@ -191,6 +191,10 @@ void ScriptEditorPageScriptTraits::updateTraitsListFromVariant(GameVariant* vari
    }
    if (this->target)
       _selectByPointerData(widget, this->target);
+   else {
+      this->ui.name->clearTarget();
+      this->ui.desc->clearTarget();
+   }
 }
 void ScriptEditorPageScriptTraits::updateTraitsFromVariant() {
    const QSignalBlocker blocker3(this->ui.name);

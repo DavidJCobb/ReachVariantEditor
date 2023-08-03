@@ -100,6 +100,7 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="editor_state\ReachStringCentralModel.cpp" />
     <ClCompile Include="formats\block.cpp" />
     <ClCompile Include="formats\content_author.cpp" />
     <ClCompile Include="formats\localized_string_table.cpp" />
@@ -303,6 +304,7 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="editor_state\ReachStringCentralModel.h" />
     <ClInclude Include="formats\indexed_lists.h" />
     <ClInclude Include="formats\ugc_header.h" />
     <ClInclude Include="game_variants\components\custom_game_options.h" />

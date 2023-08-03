@@ -475,6 +475,9 @@
     <ClCompile Include="ui\generic\FlowLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="editor_state\ReachStringCentralModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -643,6 +646,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="services\RVTThemeEngine.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="editor_state\ReachStringCentralModel.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
