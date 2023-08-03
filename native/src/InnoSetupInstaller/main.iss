@@ -48,6 +48,9 @@ Source: "{#CppProjectPath}help\*"; DestDir: "{app}\help\"; Flags: ignoreversion 
 Source: "{#CppProjectPath}themes\*"; DestDir: "{app}\themes\"; Flags: ignoreversion; Permissions: users-modify
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
+[UninstallDelete]
+Name: "{app}\ReachVariantTool.ini"
+
 ; Install VC redist
 [Run]
 Filename: "{app}\vc_redist.x64.exe"; Parameters: "/install /passive"; StatusMsg: "{#VCInstallMessage}"; Check: IsWin64 and not VCInstalled
