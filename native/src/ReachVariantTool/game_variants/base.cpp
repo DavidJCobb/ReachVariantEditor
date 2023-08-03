@@ -174,6 +174,7 @@ bool ReachBlockMPVR::read_mglo(const void* data, size_t size) {
          error_report.reason == GameEngineVariantLoadError::load_failure_reason::invalid_mpvr_data;
       return false;
    }
+   this->header.found.signature = 'mpvr';
    if (!reader.is_at_end()) {
       if (!reader.is_in_bounds()) {
          error_report.state  = GameEngineVariantLoadError::load_state::failure;
