@@ -14,6 +14,9 @@ class ReachMegaloPlayerTraits;
 class ReachPlayerTraits;
 class ReachTeamData;
 
+class ReachStringCentralModel;
+class ReachStringDependentModel;
+
 class ReachEditorState : public QObject {
    Q_OBJECT
    public:
@@ -43,6 +46,8 @@ class ReachEditorState : public QObject {
          std::optional<QString> eurostile;
          std::optional<QString> tv_nord;
       } reachUIFontFamilyNames;
+      //
+      ReachStringCentralModel* _stringModel = nullptr;
       
    signals:
       void variantAbandoned(GameVariant* variant); // the game variant is deleted after this is emitted
@@ -100,4 +105,7 @@ class ReachEditorState : public QObject {
 
       std::optional<QString> getReachEditingKitWidgetFontFamily() const;
       std::optional<QString> getReachEditingKitBodyTextFontFamily() const;
+
+      ReachStringCentralModel* getStringModel();
+      ReachStringDependentModel* makeFilterableStringModel();
 };

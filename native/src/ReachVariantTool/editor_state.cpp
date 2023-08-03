@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QSaveFile>
+#include <QTimer>
 #include "helpers/steam.h"
 #include "game_variants/base.h"
 #include "game_variants/io_process.h"
@@ -16,6 +17,8 @@
 #include "game_variants/types/firefight.h"
 #include "game_variants/types/multiplayer.h"
 #include "services/ini.h"
+
+#include "editor_state/ReachStringCentralModel.h"
 
 namespace {
    inline bool _get_mcc_directory(std::wstring& out) {
@@ -79,6 +82,16 @@ ReachEditorState::ReachEditorState() {
          }
       }
    }
+
+   // Use a single-shot timer because the constructor for ReachStringCentralModel will 
+   // try to access us; that happening while we're still being constructed = bad.
+   QTimer::singleShot(
+      0,
+      this,
+      [this]() {
+         this->_stringModel = new ReachStringCentralModel(this);
+      }
+   );
 }
 void ReachEditorState::abandonVariant() noexcept {
    if (this->currentVariantClone) {
@@ -344,4 +357,19 @@ std::optional<QString> ReachEditorState::getReachEditingKitWidgetFontFamily() co
 }
 std::optional<QString> ReachEditorState::getReachEditingKitBodyTextFontFamily() const {
    return this->reachUIFontFamilyNames.tv_nord;
+}
+
+ReachStringCentralModel* ReachEditorState::getStringModel() {
+   auto* model = this->_stringModel;
+   if (!model) {
+      model = this->_stringModel = new ReachStringCentralModel;
+      model->refresh();
+   }
+   return model;
+}
+ReachStringDependentModel* ReachEditorState::makeFilterableStringModel() {
+   auto* model = this->getStringModel();
+   auto* proxy = new ReachStringDependentModel();
+   proxy->setSourceModel(model);
+   return proxy;
 }
