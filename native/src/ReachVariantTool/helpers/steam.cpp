@@ -16,66 +16,223 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 #include "steam.h"
 #include "strings.h"
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include <vector>
 #include <Windows.h>
 #include "intrusive_windows_defines.h"
+#include "./string/strieq_ascii.h"
 
 namespace {
-   static constexpr const char* install_directory_key = "installdir";
-   bool _install_directory_from_acf(uint32_t appID, const std::wstring& acf_folder_path, std::wstring& out) {
-      std::wstring acf = acf_folder_path + L"/appmanifest_";
-      acf += std::to_wstring(appID);
-      acf += L".acf";
-      //
-      std::ifstream file(acf);
-      if (!file)
-         return false;
-      std::string line;
-      while (std::getline(file, line)) {
-         //
-         // Very quick-and-dirty code for reading the ACF files; doesn't pay attention to 
-         // hierarchy or such.
-         //
-         size_t size = line.size();
-         size_t i    = 0;
-         for (; i < size; i++)
-            if (!isspace(line[i]))
-               break;
-         if (i >= size)
-            continue;
-         bool hasQuote = false;
-         if (line[i] == '"') {
-            hasQuote = true;
-            ++i;
-            if (i >= size)
-               continue;
-         }
-         if (_strnicmp(line.data() + i, install_directory_key, cobb::strlen(install_directory_key)) != 0)
-            continue;
-         i += cobb::strlen(install_directory_key);
-         if (hasQuote)
-            ++i;
-         for (; i < size; i++)
-            if (!isspace(line[i]))
-               break;
-         if (i >= size)
-            continue;
-         hasQuote = line[i] == '"';
-         if (hasQuote)
-            ++i;
-         out = acf_folder_path;
-         out += L"/common/";
-         for (; i < size; i++) {
-            if (line[i] == '"')
-               break;
-            out += line[i];
-         }
-         return true;
-      }
-      return false;
+   void _file_to_string(std::ifstream& file, std::string& dst) {
+      file.seekg(0, std::ios::end);
+      size_t size = file.tellg();
+      dst.resize(size);
+      file.seekg(0);
+      file.read(&dst[0], size);
    }
+
+   class valve_reader {
+      public:
+         struct node {
+            std::string name;
+            std::optional<std::string> value;
+
+            node* parent = nullptr;
+            std::vector<node*> children;
+
+            constexpr ~node() {
+               for (auto* child : this->children)
+                  delete child;
+               this->children.clear();
+            }
+         };
+
+      protected:
+         size_t offset = 0;
+         node*  target = nullptr;
+
+      public:
+         node root;
+         std::string data;
+
+      protected:
+         static constexpr bool is_space(char c) {
+            switch (c) {
+               case ' ':
+               case '\t':
+               case '\r':
+               case '\n':
+                  return true;
+            }
+            return false;
+         }
+
+         constexpr bool _is_in_bounds() {
+            return this->offset < this->data.size();
+         }
+
+         constexpr void _skip_whitespace() {
+            while (_is_in_bounds() && is_space(this->data[this->offset]))
+               ++this->offset;
+         }
+
+         constexpr std::optional<std::string> _consume_quoted() {
+            _skip_whitespace();
+            if (!_is_in_bounds())
+               return {};
+            char delim = this->data[this->offset];
+            switch (delim) {
+               case '"':
+               case '\'':
+                  break;
+               default:
+                  return {};
+            }
+            size_t end = this->data.find_first_of(delim, this->offset + 1);
+            if (end == std::string::npos)
+               return {};
+            size_t start = this->offset;
+            this->offset = end + 1;
+
+            std::string raw = this->data.substr(start + 1, end - start - 1);
+            std::string out;
+            for (size_t i = 0; i < raw.size(); ++i) {
+               char c = raw[i];
+               if (c != '\\') {
+                  out += c;
+                  continue;
+               }
+               if (i + 1 < raw.size()) {
+                  c = raw[i + 1];
+                  out += c;
+                  ++i; // skip
+               }
+            }
+            return out;
+         }
+
+      public:
+         constexpr bool parse() {
+            this->offset = 0;
+            this->root   = {};
+            this->target = &this->root;
+
+            while (_is_in_bounds()) {
+               _skip_whitespace();
+               if (!_is_in_bounds())
+                  break;
+
+               auto key = this->_consume_quoted();
+               if (!key.has_value()) {
+
+                  // Could be closing a struct?
+                  if (this->data[this->offset] == '}') {
+                     ++this->offset;
+                     this->target = this->target->parent;
+                     if (this->target == nullptr)
+                        return true;
+                     continue;
+                  }
+
+                  // Unexpected absence of a key.
+                  return false;
+               }
+
+               auto* next = new node;
+               this->target->children.push_back(next);
+               next->parent = this->target;
+               next->name = key.value();
+
+               auto value = this->_consume_quoted();
+               if (value.has_value()) {
+                  next->value = value.value();
+                  continue;
+               }
+
+               //_skip_whitespace(); // already done by _consume_quoted()
+               if (this->data[this->offset] == '{') {
+                  ++this->offset;
+                  this->target = next;
+                  continue;
+               }
+               return false;
+            }
+            return this->target == &this->root;
+         }
+         
+         constexpr std::optional<std::string> vdf_library_folder_for(unsigned int appID) const {
+            if (this->root.children.empty())
+               return {};
+            const auto* base = this->root.children[0];
+            if (cobb::strieq_ascii(base->name, "libraryfolders"))
+               return {};
+
+            std::string app_id_string;
+            if (appID == 0)
+               app_id_string = "0";
+            else {
+               while (appID > 0) {
+                  uint8_t digit = appID % 10;
+                  app_id_string = (char)('0' + digit) + app_id_string;
+                  appID /= 10;
+               }
+            }
+
+            for (const auto* indexed : base->children) {
+               {  // Name is numeric?
+                  bool integer = true;
+                  for (char c : indexed->name) {
+                     if (c < '0' || c > '9') {
+                        integer = false;
+                        break;
+                     }
+                  }
+                  if (!integer)
+                     continue;
+               }
+
+               const char* path = nullptr;
+               const node* apps = nullptr;
+
+               for (const auto* child : indexed->children) {
+                  if (cobb::strieq_ascii(child->name, "path")) {
+                     if (child->value.has_value())
+                        path = child->value.value().c_str();
+                     continue;
+                  }
+                  if (cobb::strieq_ascii(child->name, "apps")) {
+                     apps = child;
+                  }
+               }
+               if (!path || !apps)
+                  continue;
+
+               for (auto* app : apps->children)
+                  if (app->name == app_id_string)
+                     return path;
+            }
+            return {};
+         }
+
+         constexpr std::optional<std::string> acf_install_directory_name() const {
+            if (this->root.children.empty())
+               return {};
+            const auto* base = this->root.children[0];
+            if (cobb::strieq_ascii(base->name, "AppState"))
+               return {};
+
+            for (auto* child : base->children) {
+               if (cobb::strieq_ascii(child->name, "installdir")) {
+                  if (child->value.has_value())
+                     return child->value.value();
+               }
+            }
+            return {};
+         }
+   };
 }
 namespace cobb {
    namespace steam {
@@ -104,72 +261,56 @@ namespace cobb {
          std::wstring steam;
          if (!get_steam_directory(steam))
             return false;
-         steam += L"/steamapps/";
-         if (_install_directory_from_acf(appID, steam, out))
-            return true;
-         steam += L"/libraryfolders.vdf";
-         std::ifstream file(steam);
-         if (!file)
-            return false;
-         std::vector<std::wstring> libraries;
-         std::string line;
-         bool found = false;
-         while (std::getline(file, line)) {
-            //
-            // Very quick-and-dirty code for reading the VDF file; doesn't pay attention to 
-            // hierarchy or such.
-            //
-            size_t size = line.size();
-            size_t i = 0;
-            for (; i < size; i++)
-               if (!isspace(line[i]))
-                  break;
-            if (i >= size)
-               continue;
-            bool hasQuote = false;
-            if (line[i] == '"') {
-               hasQuote = true;
-               ++i;
-               if (i >= size)
-                  continue;
-            }
-            char* end = nullptr;
-            auto index = strtoul(line.data() + i, &end, 10);
-            if ((index == 0 && errno) || index == UINT_MAX)
-               continue;
-            if (!end)
-               continue;
-            i = end - line.data();
-            if (hasQuote)
-               ++i;
-            for (; i < size; i++)
-               if (!isspace(line[i]))
-                  break;
-            if (i >= size)
-               continue;
-            hasQuote = line[i] == '"';
-            if (hasQuote)
-               ++i;
-            std::wstring working = L"";
-            for (; i < size; i++) {
-               if (line[i] == '"')
-                  break;
-               working += line[i];
-            }
-            working += L"/steamapps/";
-            libraries.push_back(working);
-            found = true;
-            break;
+         steam += L"/steamapps/libraryfolders.vdf";
+
+         std::string library_path;
+         std::string acf_path;
+         std::string directory;
+         {
+            std::ifstream file(steam);
+            if (!file)
+               return false;
+
+            valve_reader vdf;
+            _file_to_string(file, vdf.data);
+            if (!vdf.parse())
+               return false;
+
+            auto opt_library_path = vdf.vdf_library_folder_for(appID);
+            if (!opt_library_path.has_value())
+               return false;
+
+            acf_path = opt_library_path.value() + "/steamapps/appmanifest_" + std::to_string(appID) + ".acf";
+            library_path = std::move(opt_library_path.value());
          }
-         if (!found)
-            return false;
-         for (auto& path : libraries) {
-            if (_install_directory_from_acf(appID, path, out)) {
-               std::filesystem::directory_entry dir(out);
-               return dir.exists();
-            }
+         {
+            std::ifstream file(acf_path);
+            if (!file)
+               return false;
+
+            valve_reader acf;
+            _file_to_string(file, acf.data);
+            if (!acf.parse())
+               return false;
+
+            auto opt_directory = acf.acf_install_directory_name();
+            if (!opt_directory.has_value())
+               return false;
+            directory = std::move(opt_directory.value());
          }
-         return false;
+         std::string result = library_path;
+         if (!library_path.ends_with('/') && !library_path.ends_with('\\'))
+            result += '/';
+         result += "steamapps/common/";
+         result += directory;
+         if (!directory.ends_with('/') && !directory.ends_with('\\'))
+            result += '/';
+         
+         out.clear();
+         out.reserve(result.size());
+         for (char c : result)
+            out += c;
+         return true;
       }
    }
 }
