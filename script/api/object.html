@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>Object | ReachVariantTool Documentation</title>
       <base href="../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -90,7 +91,7 @@
                   <li>
                      <a href="editor/script_window/string-table.html">All Other Strings</a>
                      <ul>
-                        <li><a href="editor/script_window/string-localization.html">Localization</a></li>
+                        <li><a href="editor/script_window/string-localization.html">Editing and Localization</a></li>
                      </ul>
                   </li>
                   <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
@@ -118,6 +119,14 @@
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
                   <li><a href="script/best-practices.html">Best practices</a></li>
+                  <li data-dont-default-collapse>
+                     <a>Advanced</a>
+                     <ul>
+                        <li><a href="script/scripted-object-count-limit.html">Scripted object count limit</a></li>
+                        <li><a href="script/inline.html">Inlined triggers</a></li>
+                        <li><a href="script/under-the-hood.html">Under the hood</a></li>
+                     </ul>
+                  </li>
                </ul>
             </li>
             <li>
@@ -130,6 +139,7 @@
                         <li><a href="script/api/ns_enums.html">enums</a></li>
                         <li><a href="script/api/ns_game.html">game</a></li>
                         <li><a href="script/api/ns_global.html">global</a></li>
+                        <li><a href="script/api/ns_temporaries.html">temporaries</a></li>
                      </ul>
                   </li>
                   <li data-dont-default-collapse>
@@ -155,7 +165,7 @@
                               <li><a href="script/api/incident.html">Incident</a></li>
                               <li><a href="script/api/object-type.html">Object Type</a></li>
                               <li><a href="script/api/player-set.html">Player Set</a></li>
-                              <li><a href="script/api/player-traits.html">Player Traits</a></li>
+                              <li><a href="script/api/traits.html">Player Traits</a></li>
                               <li><a href="script/api/sound.html">Sound</a></li>
                               <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
                               <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
@@ -171,6 +181,7 @@
                <a>Concepts</a>
                <ul>
                   <li><a href="concepts/bipeds-and-items.html">Bipeds and items</a></li>
+                  <li><a href="concepts/coordinates.html">Coordinates</a></li>
                   <li><a href="concepts/firefight.html">Firefight</a></li>
                </ul>
             </li>
@@ -180,16 +191,16 @@
          <h1>Object</h1>
 
       <p>
-         Object variables refer to objects that are currently present on the map. Objects 
+         Object variables refer to objects that are currently present on the map. Objects
          that have not spawned do not count.
       </p>
       <p>
-         There are sixteen global object variables, numbered from 0 to 15, which can 
+         There are sixteen global object variables, numbered from 0 to 15, which can
          be accessed as <code>global.object[<var>n</var>]</code>.
       </p>
    <p>This type contains nested variables. There are 8 nested <a href="script/api/number.html">numbers</a>, 4 nested <a href="script/api/object.html">objects</a>, 4 nested <a href="script/api/player.html">players</a>, 2 nested <a href="script/api/team.html">teams</a>, and 0 nested <a href="script/api/timer.html">timers</a> available. 
-      Note that only 256 objects on the map can have variables at a time; if you try to 
-      set variables on objects past that limit, Megalo may fail to set variables on the 
+      Note that only 256 objects on the map can have variables at a time; if you try to
+      set variables on objects past that limit, Megalo may fail to set variables on the
       new objects, or it may clear variables off of the old objects.
    </p>
 <h2>Properties</h2>
@@ -242,6 +253,8 @@
    <dd><p>Sets whether a Respawn Zone is enabled and able to affect spawning.</p></dd>
 <dt><a href="script/api/object/actions/face_toward.html">face_toward</a></dt>
    <dd><p>Rotate one object to face another.</p></dd>
+<dt><a href="script/api/object/actions/get_carrier.html">get_carrier <span class="a-k-a">a.k.a.</span> try_get_carrier</a></dt>
+   <dd><p>Identify the player carrying a weapon or Armor Ability.</p></dd>
 <dt><a href="script/api/object/actions/get_device_position.html">get_device_position</a></dt>
    <dd><p>Gets the current position level of a device machine.</p></dd>
 <dt><a href="script/api/object/actions/get_device_power.html">get_device_power</a></dt>
@@ -254,7 +267,7 @@
    <dd><p>Returns the object's speed in feet per second.</p></dd>
 <dt><a href="script/api/object/actions/kill.html">kill</a></dt>
    <dd><p>Kill an object.</p></dd>
-<dt><a href="script/api/object/actions/place_at_me.html">place_at_me</a></dt>
+<dt><a href="script/api/object/actions/place_at_me.html">place_at_me <span class="a-k-a">a.k.a.</span> create_object</a></dt>
    <dd><p>Spawn a new object at this object.</p></dd>
 <dt><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></dt>
    <dd><p>Spawn a new object between this object and another.</p></dd>
@@ -272,6 +285,8 @@
    <dd><p>Sets the current power level of a device machine.</p></dd>
 <dt><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></dt>
    <dd><p>Disables garbage collection for objects.</p></dd>
+<dt><a href="script/api/object/actions/set_hidden.html">set_hidden</a></dt>
+   <dd><p>MCC-exclusive: Make an object invisible.</p></dd>
 <dt><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></dt>
    <dd><p>Make an object invincible.</p></dd>
 <dt><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></dt>
@@ -280,13 +295,13 @@
    <dd><p>Set whether an object displays a progress bar, and who should be able to see it.</p></dd>
 <dt><a href="script/api/object/actions/set_scale.html">set_scale</a></dt>
    <dd><p>Resize an object.</p></dd>
-<dt><a href="script/api/object/actions/set_shape.html">set_shape</a></dt>
+<dt><a href="script/api/object/actions/set_shape.html">set_shape <span class="a-k-a">a.k.a.</span> set_boundary</a></dt>
    <dd><p>Change an object's shape boundary.</p></dd>
 <dt><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></dt>
    <dd><p>Adjust which players can see an object's shape boundary.</p></dd>
-<dt><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_spawn_location_fireteams</a></dt>
+<dt><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_spawn_location_fireteams <span class="a-k-a">a.k.a.</span> set_fireteam_respawn_filter</a></dt>
    <dd><p>Adjust which fireteam can spawn at a location.</p></dd>
-<dt><a href="script/api/object/actions/set_spawn_location_permissions.html">set_spawn_location_permissions</a></dt>
+<dt><a href="script/api/object/actions/set_spawn_location_permissions.html">set_spawn_location_permissions <span class="a-k-a">a.k.a.</span> set_respawn_filter</a></dt>
    <dd><p>Adjust which players can spawn at a location.</p></dd>
 <dt><a href="script/api/object/actions/set_waypoint_icon.html">set_waypoint_icon</a></dt>
    <dd><p>Change the icon that this waypoint displays.</p></dd>
@@ -302,8 +317,6 @@
    <dd><p>Adjust who can see this object's waypoint.</p></dd>
 <dt><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></dt>
    <dd><p>Set how a weapon is picked up.</p></dd>
-<dt><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier <span class="a-k-a">a.k.a.</span> get_carrier</a></dt>
-   <dd><p>Identify the player carrying a weapon or Armor Ability.</p></dd>
 </dl>
 
       </main>

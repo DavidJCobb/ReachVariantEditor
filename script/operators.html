@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>Operators | ReachVariantTool Documentation</title>
       <base href="../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -90,7 +91,7 @@
                   <li>
                      <a href="editor/script_window/string-table.html">All Other Strings</a>
                      <ul>
-                        <li><a href="editor/script_window/string-localization.html">Localization</a></li>
+                        <li><a href="editor/script_window/string-localization.html">Editing and Localization</a></li>
                      </ul>
                   </li>
                   <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
@@ -118,6 +119,14 @@
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
                   <li><a href="script/best-practices.html">Best practices</a></li>
+                  <li data-dont-default-collapse>
+                     <a>Advanced</a>
+                     <ul>
+                        <li><a href="script/scripted-object-count-limit.html">Scripted object count limit</a></li>
+                        <li><a href="script/inline.html">Inlined triggers</a></li>
+                        <li><a href="script/under-the-hood.html">Under the hood</a></li>
+                     </ul>
+                  </li>
                </ul>
             </li>
             <li>
@@ -130,6 +139,7 @@
                         <li><a href="script/api/ns_enums.html">enums</a></li>
                         <li><a href="script/api/ns_game.html">game</a></li>
                         <li><a href="script/api/ns_global.html">global</a></li>
+                        <li><a href="script/api/ns_temporaries.html">temporaries</a></li>
                      </ul>
                   </li>
                   <li data-dont-default-collapse>
@@ -155,7 +165,7 @@
                               <li><a href="script/api/incident.html">Incident</a></li>
                               <li><a href="script/api/object-type.html">Object Type</a></li>
                               <li><a href="script/api/player-set.html">Player Set</a></li>
-                              <li><a href="script/api/player-traits.html">Player Traits</a></li>
+                              <li><a href="script/api/traits.html">Player Traits</a></li>
                               <li><a href="script/api/sound.html">Sound</a></li>
                               <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
                               <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
@@ -171,6 +181,7 @@
                <a>Concepts</a>
                <ul>
                   <li><a href="concepts/bipeds-and-items.html">Bipeds and items</a></li>
+                  <li><a href="concepts/coordinates.html">Coordinates</a></li>
                   <li><a href="concepts/firefight.html">Firefight</a></li>
                </ul>
             </li>
@@ -198,6 +209,11 @@
          <dt>&lt;=</dt>
             <dd>Checks if the lefthand value is less than or equal to the righthand value.</dd>
       </dl>
+      <p>
+         Numbers and timers can be compared to each other. All variables can only be compared 
+         with variables of the same type, and they only support equality and inequality 
+         comparisons (<code>==</code> and <code>!=</code>).
+      </p>
       
       <h2>Assignment operators</h2>
       <p>
@@ -241,7 +257,22 @@
             <dd><dfn>Binary-NOT-assign.</dfn> Modifies each bit in the variable on the lefthand 
             side: bits will be set to zero if the corresponding bit in the righthand value is 
             one, or left unchanged otherwise. This is equivalent to <code>a &amp;= ~b</code>.</dd>
+         <dt>&lt;&lt;=</dt>
+            <dd><dfn>Binary left shift.</dfn> Shifts the bits of the lefthand operand to the left; 
+            the righthand operand controls the number of bits to shift by.</dd>
+         <dt>&gt;&gt;=</dt>
+            <dd><dfn>Arithmetic right shift.</dfn> Shifts the bits of the lefthand operand to the right; 
+            the righthand operand controls the number of bits to shift by. If the lefthand operand is 
+            negative, its sign bit is extended.</dd>
+         <dt><var>lhs</var> = abs(<var>rhs</var>)</dt>
+            <dd><dfn>Absolute value assignment.</dfn> Sets the lefthand variable to the absolute 
+            value of the righthand value.</dd>
       </dl>
+      <p>
+         Numbers and timers can be assigned to each other, and can use any assignment operator. All 
+         other variables can only be assigned values of the same type, and can't use any operators 
+         other than <code>=</code>.
+      </p>
    
       </main>
       <script src="resources/sidebar.js"></script>

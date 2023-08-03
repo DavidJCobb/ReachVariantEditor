@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      
+      <title>player.set_objective_text | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+      <script src="resources/head.js"></script>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/player.html">Player</a>
+               <ul>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Properties</a>
+                     <ul>
+                        <li><a href="script/api/player/properties/biped.html">biped</a></li>
+<li><a href="script/api/player/properties/money.html">money</a></li>
+<li><a href="script/api/player/properties/rating.html">rating</a></li>
+<li><a href="script/api/player/properties/score.html">score</a></li>
+<li><a href="script/api/player/properties/script_stat.html">script_stat[<var>n</var>]</a></li>
+<li><a href="script/api/player/properties/team.html">team</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Accessors</a>
+                     <ul>
+                        <li><a href="script/api/player/accessors/frag_grenades.html">frag_grenades</a></li>
+<li><a href="script/api/player/accessors/plasma_grenades.html">plasma_grenades</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/player/conditions/assisted_kill_of.html">assisted_kill_of</a></li>
+<li><a href="script/api/player/conditions/is_elite.html">is_elite</a></li>
+<li><a href="script/api/player/conditions/is_fireteam_leader.html">is_fireteam_leader</a></li>
+<li><a href="script/api/player/conditions/is_monitor.html">is_monitor</a></li>
+<li><a href="script/api/player/conditions/is_not_respawning.html">is_not_respawning</a></li>
+<li><a href="script/api/player/conditions/is_spartan.html">is_spartan</a></li>
+<li><a href="script/api/player/conditions/killer_type_is.html">killer_type_is</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
+<li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
+<li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
+<li><a href="script/api/player/actions/get_armor_ability.html">get_armor_ability</a></li>
+<li><a href="script/api/player/actions/get_button_press_duration.html">get_button_press_duration</a></li>
+<li><a href="script/api/player/actions/get_button_press_duration.html">get_button_time</a></li>
+<li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_mod.html">get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_type.html">get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></li>
+<li><a href="script/api/player/actions/try_get_killer.html">get_killer</a></li>
+<li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
+<li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
+<li><a href="script/api/player/actions/get_vehicle.html">get_vehicle</a></li>
+<li><a href="script/api/player/actions/get_weapon.html">get_weapon</a></li>
+<li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
+<li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
+<li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
+<li><a href="script/api/player/actions/set_co_op_spawning.html">set_co_op_spawning</a></li>
+<li><a href="script/api/player/actions/set_fireteam.html">set_fireteam</a></li>
+<li><a href="script/api/player/actions/set_loadout_palette.html">set_loadout_palette</a></li>
+<li><a href="script/api/player/actions/set_objective_allegiance_icon.html">set_objective_allegiance_icon</a></li>
+<li><a href="script/api/player/actions/set_objective_allegiance_name.html">set_objective_allegiance_name</a></li>
+<li><a href="script/api/player/actions/set_objective_text.html">set_objective_text</a></li>
+<li><a href="script/api/player/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></li>
+<li><a href="script/api/player/actions/set_req_purchase_modes.html">set_req_purchase_modes</a></li>
+<li><a href="script/api/player/actions/set_requisition_palette.html">set_requisition_palette</a></li>
+<li><a href="script/api/player/actions/set_respawn_vehicle.html">set_respawn_vehicle</a></li>
+<li><a href="script/api/player/actions/set_objective_allegiance_icon.html">set_round_card_icon</a></li>
+<li><a href="script/api/player/actions/set_objective_allegiance_name.html">set_round_card_text</a></li>
+<li><a href="script/api/player/actions/set_objective_text.html">set_round_card_title</a></li>
+<li><a href="script/api/player/actions/set_vehicle_spawning_enabled.html">set_vehicle_spawning_enabled</a></li>
+<li><a href="script/api/player/actions/get_armor_ability.html">try_get_armor_ability</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_mod.html">try_get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_type.html">try_get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/try_get_killer.html">try_get_killer</a></li>
+<li><a href="script/api/player/actions/get_vehicle.html">try_get_vehicle</a></li>
+<li><a href="script/api/player/actions/get_weapon.html">try_get_weapon</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <header><h1>player.set_objective_text</h1><span class="a-k-a">a.k.a. player.set_round_card_title</span></header>
+
+               <p>
+                  Typically, at the start of a round in most game modes, the player sees a small informational 
+                  popup with a brief blurb describing their objective; this is unofficially called the "round 
+                  card." This function sets the body text for the round card.
+               </p>
+               <p>
+                  If the text passed in differs from that used in the previous frame, then this function will 
+                  also trigger display of the round card.
+               </p>
+            
+<h2>Arguments</h2>
+<dl>
+   <dt><a href="script/api/format-string.html">text</a></dt>
+      <dd><p>
+                  The description text to display. This is a <a href="script/api/format-string.html#persistent">persistent</a> format string.
+               </p></dd>
+</dl>
+<h2>Example</h2>
+<pre>
+<span class="comment">--</span>
+<span class="comment">-- Slayer TU round card description code:</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span> <span class="comment">-- round card</span>
+   <span class="keyword">if</span> game.score_to_win != 0 <span class="keyword">and</span> game.teams_enabled == 1 <span class="keyword">then</span> 
+      current_player.set_round_card_title(<span class="string">"Kill players on the enemy team.\r\n%n points to win.</span>", game.score_to_win)
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> game.score_to_win != 0 <span class="keyword">and</span> game.teams_enabled == 0 <span class="keyword">then</span> 
+      current_player.set_round_card_title(<span class="string">"Score points by killing other players.\r\n%n points to win.</span>", game.score_to_win)
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> game.score_to_win == 0 <span class="keyword">and</span> game.teams_enabled == 1 <span class="keyword">then</span> 
+      current_player.set_round_card_title(<span class="string">"Kill players on the enemy team.</span>")
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> game.score_to_win == 0 <span class="keyword">and</span> game.teams_enabled == 0 <span class="keyword">then</span> 
+      current_player.set_round_card_title(<span class="string">"Score points by killing other players.</span>")
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+<h2>Notes</h2>
+<ul>
+   <li><p>
+               The alternate name for this function, <code>set_round_card_title</code>, originates 
+               from the oldest versions of ReachVariantTool. It is unintuitive and considered 
+               deprecated.
+            </p></li>
+   <li><p>
+               Only the first 116 characters of the specified string will be displayed; this limitation 
+               applies after all format string parameters are substituted in. It seems that the UI 
+               reserves room for 117 characters, including an invisible "end of text" marker.
+            </p></li>
+   <li><p>
+               Text does not word wrap automatically; you must insert line breaks manually. The font 
+               used to display the text is "TV Nord;" there are font preview websites that you can use 
+               to compare line lengths and save yourself a bit of trial and error.
+            </p></li>
+</ul><h2>See also</h2>
+<ul>
+   <li><a href="script/api/player/actions/set_objective_allegiance_icon.html">player.set_objective_allegiance_icon</a></li>
+   <li><a href="script/api/player/actions/set_objective_allegiance_name.html">player.set_objective_allegiance_name</a></li>
+</ul>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

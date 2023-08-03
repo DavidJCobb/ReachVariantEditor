@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>Useful code snippets | ReachVariantTool Documentation</title>
       <base href="../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -90,7 +91,7 @@
                   <li>
                      <a href="editor/script_window/string-table.html">All Other Strings</a>
                      <ul>
-                        <li><a href="editor/script_window/string-localization.html">Localization</a></li>
+                        <li><a href="editor/script_window/string-localization.html">Editing and Localization</a></li>
                      </ul>
                   </li>
                   <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
@@ -118,6 +119,14 @@
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
                   <li><a href="script/best-practices.html">Best practices</a></li>
+                  <li data-dont-default-collapse>
+                     <a>Advanced</a>
+                     <ul>
+                        <li><a href="script/scripted-object-count-limit.html">Scripted object count limit</a></li>
+                        <li><a href="script/inline.html">Inlined triggers</a></li>
+                        <li><a href="script/under-the-hood.html">Under the hood</a></li>
+                     </ul>
+                  </li>
                </ul>
             </li>
             <li>
@@ -130,6 +139,7 @@
                         <li><a href="script/api/ns_enums.html">enums</a></li>
                         <li><a href="script/api/ns_game.html">game</a></li>
                         <li><a href="script/api/ns_global.html">global</a></li>
+                        <li><a href="script/api/ns_temporaries.html">temporaries</a></li>
                      </ul>
                   </li>
                   <li data-dont-default-collapse>
@@ -155,7 +165,7 @@
                               <li><a href="script/api/incident.html">Incident</a></li>
                               <li><a href="script/api/object-type.html">Object Type</a></li>
                               <li><a href="script/api/player-set.html">Player Set</a></li>
-                              <li><a href="script/api/player-traits.html">Player Traits</a></li>
+                              <li><a href="script/api/traits.html">Player Traits</a></li>
                               <li><a href="script/api/sound.html">Sound</a></li>
                               <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
                               <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
@@ -171,6 +181,7 @@
                <a>Concepts</a>
                <ul>
                   <li><a href="concepts/bipeds-and-items.html">Bipeds and items</a></li>
+                  <li><a href="concepts/coordinates.html">Coordinates</a></li>
                   <li><a href="concepts/firefight.html">Firefight</a></li>
                </ul>
             </li>
@@ -213,8 +224,8 @@
             base gametype has its own incident.
          </p>
          <pre>
-<span class="keyword">alias</span> announced_game_start = player.number[0]
-<span class="keyword">alias</span> announce_start_timer = player.timer[0]
+<span class="keyword">alias</span> announced_game_start = <span class="keyword">allocate</span> player.number
+<span class="keyword">alias</span> announce_start_timer = <span class="keyword">allocate</span> player.timer
 
 <span class="keyword">declare</span> player.announced_game_start <span class="subkeyword">with</span> <span class="subkeyword">network</span> <span class="subkeyword">priority</span> <span class="subkeyword">low</span> = 0
 <span class="keyword">declare</span> player.announce_start_timer = 5
@@ -228,24 +239,24 @@
          <p>
             In addition to announcing the game start, you may want to display explanatory 
             text at the start of the round. You can do this by calling the 
-            <a href="script/api/player/actions/set_round_card_title.html">player.set_round_card_title</a> 
+            <a href="script/api/player/actions/set_objective_text.html">player.set_objective_text</a> 
             function. Commonly, gametypes will display the score to win in the "round card," 
             unless the player has turned off the score limit, and this can be accomplished 
             using <a href="script/api/format-string.html">format strings</a>.
          </p>
          <pre>
-<span class="keyword">alias</span> announced_game_start = player.number[0]
-<span class="keyword">alias</span> announce_start_timer = player.timer[0]
+<span class="keyword">alias</span> announced_game_start = <span class="keyword">allocate</span> player.number
+<span class="keyword">alias</span> announce_start_timer = <span class="keyword">allocate</span> player.timer
 
 <span class="keyword">declare</span> player.announced_game_start <span class="subkeyword">with</span> <span class="subkeyword">network</span> <span class="subkeyword">priority</span> <span class="subkeyword">low</span> = 0
 <span class="keyword">declare</span> player.announce_start_timer = 5
 
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    <span class="keyword">if</span> game.score_to_win != 0 <span class="keyword">then</span>
-      current_player.set_round_card_title(<span class="string">"Collect flags for your team.\r\n%n points to win.</span>", game.score_to_win)
+      current_player.set_objective_text(<span class="string">"Collect flags for your team.\r\n%n points to win.</span>", game.score_to_win)
    <span class="keyword">end</span>
    <span class="keyword">if</span> game.score_to_win == 0 <span class="keyword">then</span>
-      current_player.set_round_card_title(<span class="string">"Collect flags for your team.</span>")
+      current_player.set_objective_text(<span class="string">"Collect flags for your team.</span>")
    <span class="keyword">end</span>
    <span class="keyword">if</span> current_player.announced_game_start == 0 <span class="keyword">and</span> current_player.announce_start_timer.is_zero() <span class="keyword">then</span>
       send_incident(stockpile_game_start, current_player, no_player)
@@ -284,16 +295,16 @@
             with unnamed Forge labels, as 343i does).
          </p>
          <pre>
-<span class="keyword">alias</span> ach_top_shot_count        = player.number[0]
-<span class="keyword">alias</span> ach_license_to_kill_count = player.number[1]
-<span class="keyword">alias</span> ach_paper_beats_rock_vuln_timer = player.timer[0]
+<span class="keyword">alias</span> ach_top_shot_count              = <span class="keyword">allocate</span> player.number
+<span class="keyword">alias</span> ach_license_to_kill_count       = <span class="keyword">allocate</span> player.number
+<span class="keyword">alias</span> ach_paper_beats_rock_vuln_timer = <span class="keyword">allocate</span> player.timer
 <span class="keyword">declare</span> player.ach_top_shot_count        <span class="subkeyword">with</span> <span class="subkeyword">network</span> <span class="subkeyword">priority</span> <span class="subkeyword">low</span>
 <span class="keyword">declare</span> player.ach_license_to_kill_count <span class="subkeyword">with</span> <span class="subkeyword">network</span> <span class="subkeyword">priority</span> <span class="subkeyword">low</span>
 
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span> <span class="comment">-- award Dive Bomber achievement as appropriate</span>
-   <span class="keyword">alias</span> killer    = global.player[0]
-   <span class="keyword">alias</span> killer_aa = global.object[0]
-   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">alias</span> killer    = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> player
+   <span class="keyword">alias</span> killer_aa = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> object
+   <span class="keyword">alias</span> death_mod = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
    <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
       killer    = current_player.get_killer()
       death_mod = current_player.get_death_damage_mod()
@@ -307,8 +318,8 @@
 <span class="keyword">end</span>
 
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span> <span class="comment">-- award From Hell's Heart achievement as appropriate</span>
-   <span class="keyword">alias</span> death_mod = global.number[0]
-   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">alias</span> death_mod = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
+   <span class="keyword">alias</span> killer    = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> player
    <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span>
       death_mod = current_player.get_death_damage_mod()
       <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.sticky <span class="keyword">then</span>
@@ -321,8 +332,8 @@
 <span class="keyword">end</span>
 
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span> <span class="comment">-- manage and award Top Shot achievement as appropriate</span>
-   <span class="keyword">alias</span> killer    = global.player[0]
-   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">alias</span> killer    = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> player
+   <span class="keyword">alias</span> death_mod = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
    <span class="keyword">if</span> current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) <span class="keyword">then</span> 
       current_player.ach_top_shot_count = 0
       <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
@@ -342,8 +353,8 @@
 <span class="keyword">end</span>
 
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span> <span class="comment">-- manage and award License To Kill achievement as appropriate</span>
-   <span class="keyword">alias</span> killer    = global.player[0]
-   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">alias</span> killer    = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> player
+   <span class="keyword">alias</span> death_mod = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
    <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
       killer    = current_player.get_killer()
       death_mod = current_player.get_death_damage_mod()
@@ -357,7 +368,7 @@
 <span class="keyword">end</span>
 
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span> <span class="comment">-- manage timing for the Paper Beats Rock achievement</span>
-   <span class="keyword">alias</span> current_ability = global.object[0]
+   <span class="keyword">alias</span> current_ability = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> object
    <span class="comment">--</span>
    current_ability = current_player.get_armor_ability()
    <span class="keyword">if</span> current_ability.is_of_type(armor_lock) <span class="keyword">and</span> current_ability.is_in_use() <span class="keyword">then</span> 
@@ -366,8 +377,8 @@
    <span class="keyword">end</span>
 <span class="keyword">end</span>
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span> <span class="comment">-- award Paper Beats Rock achievement as appropriate</span>
-   <span class="keyword">alias</span> killer    = global.player[0]
-   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">alias</span> killer    = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> player
+   <span class="keyword">alias</span> death_mod = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
    <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">and</span> <span class="keyword">not</span> current_player.ach_paper_beats_rock_vuln_timer.is_zero() <span class="keyword">then</span> 
       death_mod = current_player.get_death_damage_mod()
       <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.assassination <span class="keyword">then</span>
@@ -414,25 +425,27 @@
             to know a player's team color, so that it can apply the right set of traits.
          </p>
          <pre>
-<span class="keyword">alias</span> red_team  = global.team[0]
-<span class="keyword">alias</span> blue_team = global.team[1]
+<span class="keyword">alias</span> red_team  = <span class="keyword">allocate</span> global.team
+<span class="keyword">alias</span> blue_team = <span class="keyword">allocate</span> global.team
 <span class="keyword">declare</span> red_team  <span class="subkeyword">with</span> <span class="subkeyword">network</span> <span class="subkeyword">priority</span> <span class="subkeyword">high</span> = team[0]
 <span class="keyword">declare</span> blue_team <span class="subkeyword">with</span> <span class="subkeyword">network</span> <span class="subkeyword">priority</span> <span class="subkeyword">high</span> = team[1]
 
 <span class="keyword">on</span> init: <span class="keyword">do</span>
+   <span class="keyword">alias</span> is_odd = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
+
    <span class="comment">--</span>
    <span class="comment">-- We need to know which team is red and which team is blue, so we can apply the </span>
    <span class="comment">-- appropriate visuals to players that are frozen. However, that's trickier than </span>
    <span class="comment">-- you might expect: teams alternate each round, but their indices are remapped. </span>
    <span class="comment">-- On round 1, Red Team is team[0], but on round 2, it's team[1].</span>
    <span class="comment">--</span>
-   global.number[2] = game.current_round
-   global.number[2] %= 2
-   <span class="keyword">if</span> global.number[2] == 0 <span class="keyword">then</span> <span class="comment">-- even-numbered round</span>
+   is_odd = game.current_round
+   is_odd %= 2
+   <span class="keyword">if</span> is_odd == 0 <span class="keyword">then</span> <span class="comment">-- even-numbered round</span>
       red_team  = team[0]
       blue_team = team[1]
    <span class="keyword">end</span>
-   <span class="keyword">if</span> global.number[2] != 0 <span class="keyword">then</span> <span class="comment">-- odd-numbered round</span>
+   <span class="keyword">if</span> is_odd != 0 <span class="keyword">then</span> <span class="comment">-- odd-numbered round</span>
       red_team  = team[1]
       blue_team = team[0]
    <span class="keyword">end</span>
@@ -523,8 +536,8 @@ temporary.delete() <span class="comment">-- make sure to delete the temporary Hi
             Period does.
          </p>
          <pre>
-<span class="keyword">alias</span> sudden_death_enabled   = global.number[0] <span class="comment">-- set this to 1 when you want Sudden Death to be active, or 0 otherwise</span>
-<span class="keyword">alias</span> announced_sudden_death = global.number[1] <span class="comment">-- only announce the start of Sudden Death once</span>
+<span class="keyword">alias</span> sudden_death_enabled   = <span class="keyword">allocate</span> global.number <span class="comment">-- set this to 1 when you want Sudden Death to be active, or 0 otherwise</span>
+<span class="keyword">alias</span> announced_sudden_death = <span class="keyword">allocate</span> global.number <span class="comment">-- only announce the start of Sudden Death once</span>
 
 <span class="keyword">if</span> <span class="keyword">not</span> game.round_timer.is_zero() <span class="keyword">then</span> 
    game.grace_period_timer = 0
@@ -569,7 +582,7 @@ temporary.delete() <span class="comment">-- make sure to delete the temporary Hi
          </p>
          <pre>
 <span class="keyword">alias</span> opt_super_shields = script_option[12]
-<span class="keyword">alias</span> lifespan = object.timer[0]
+<span class="keyword">alias</span> lifespan = <span class="keyword">allocate</span> object.timer
 
 <span class="comment">-- This should be the index of a nameless Forge label whose object type </span>
 <span class="comment">-- is the fire particle emitter:</span>
@@ -579,8 +592,8 @@ temporary.delete() <span class="comment">-- make sure to delete the temporary Hi
 
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span> <span class="comment">-- handle super shields VFX</span>
    <span class="keyword">if</span> opt_super_shields == 1 <span class="keyword">then</span> 
-      <span class="keyword">alias</span> current_shields = global.number[0]
-      <span class="keyword">alias</span> outcome = global.number[1]
+      <span class="keyword">alias</span> current_shields = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
+      <span class="keyword">alias</span> outcome         = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
       <span class="comment">--</span>
       current_shields = 0
       current_shields = current_player.biped.shields

@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>object.set_garbage_collection_disabled | ReachVariantTool Documentation</title>
       <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -57,11 +58,12 @@
 <li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
+<li><a href="script/api/object/actions/place_at_me.html">create_object</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -72,14 +74,18 @@
 <li><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></li>
 <li><a href="script/api/object/actions/push_upward.html">push_upward</a></li>
 <li><a href="script/api/object/actions/remove_weapon.html">remove_weapon</a></li>
+<li><a href="script/api/object/actions/set_shape.html">set_boundary</a></li>
 <li><a href="script/api/object/actions/set_device_actual_position.html">set_device_actual_position</a></li>
 <li><a href="script/api/object/actions/set_device_animation_position.html">set_device_animation_position</a></li>
 <li><a href="script/api/object/actions/set_device_position.html">set_device_position</a></li>
 <li><a href="script/api/object/actions/set_device_power.html">set_device_power</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_fireteam_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></li>
+<li><a href="script/api/object/actions/set_hidden.html">set_hidden</a></li>
 <li><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></li>
 <li><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></li>
 <li><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_permissions.html">set_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_scale.html">set_scale</a></li>
 <li><a href="script/api/object/actions/set_shape.html">set_shape</a></li>
 <li><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></li>
@@ -92,7 +98,7 @@
 <li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
 <li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
 <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">try_get_carrier</a></li>
 
                      </ul>
                   </li>
@@ -104,11 +110,11 @@
          <header><h1>object.set_garbage_collection_disabled</h1></header>
 
                <p>
-                  This function can be used to enable and disable garbage collection for 
-                  individual objects after they have been created. However, it only works 
-                  if the object <em>was not</em> created with the 
-                  <var>never_garbage_collect</var> 
-                  flag set. Objects created with that flag cannot have garbage collection 
+                  This function can be used to enable and disable garbage collection for
+                  individual objects after they have been created. However, it only works
+                  if the object <em>was not</em> created with the
+                  <var>never_garbage_collect</var>
+                  flag set. Objects created with that flag cannot have garbage collection
                   re-enabled using this function.
                </p>
             
@@ -116,7 +122,7 @@
 <dl>
    <dt><a href="script/api/number.html">disable</a></dt>
       <dd><p>
-                  If this argument is 1, then garbage collection will be disabled; 
+                  If this argument is 1, then garbage collection will be disabled;
                   if it is 0, then garbage collection will be enabled.
                </p></dd>
 </dl>
@@ -130,7 +136,7 @@
 <span class="comment">-- pretend this is a Forge label with no name, targeted to Rocket Launchers:</span>
 <span class="keyword">alias</span> all_rockets  = 1
 
-<span class="comment">-- Let's say we want to prevent dropped Rocket Launchers from </span>
+<span class="comment">-- Let's say we want to prevent dropped Rocket Launchers from</span>
 <span class="comment">-- despawning for a full minute.</span>
 
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> all_rockets <span class="keyword">do</span>

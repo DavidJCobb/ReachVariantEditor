@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>object.face_toward | ReachVariantTool Documentation</title>
       <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -57,11 +58,12 @@
 <li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
+<li><a href="script/api/object/actions/place_at_me.html">create_object</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -72,14 +74,18 @@
 <li><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></li>
 <li><a href="script/api/object/actions/push_upward.html">push_upward</a></li>
 <li><a href="script/api/object/actions/remove_weapon.html">remove_weapon</a></li>
+<li><a href="script/api/object/actions/set_shape.html">set_boundary</a></li>
 <li><a href="script/api/object/actions/set_device_actual_position.html">set_device_actual_position</a></li>
 <li><a href="script/api/object/actions/set_device_animation_position.html">set_device_animation_position</a></li>
 <li><a href="script/api/object/actions/set_device_position.html">set_device_position</a></li>
 <li><a href="script/api/object/actions/set_device_power.html">set_device_power</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_fireteam_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></li>
+<li><a href="script/api/object/actions/set_hidden.html">set_hidden</a></li>
 <li><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></li>
 <li><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></li>
 <li><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_permissions.html">set_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_scale.html">set_scale</a></li>
 <li><a href="script/api/object/actions/set_shape.html">set_shape</a></li>
 <li><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></li>
@@ -92,7 +98,7 @@
 <li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
 <li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
 <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">try_get_carrier</a></li>
 
                      </ul>
                   </li>
@@ -104,7 +110,7 @@
          <header><h1>object.face_toward</h1></header>
 
                <p>
-                  This function can be used to make one object face toward another. It only 
+                  This function can be used to make one object face toward another. It only
                   affects the object's heading (yaw), not its pitch or roll rotations.
                </p>
             
@@ -116,33 +122,242 @@
                </p></dd>
    <dt>x</dt>
       <dd><p>
-                  The X-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive, where 10 is equal to 
+                  The X-coordinate of an offset-position. The object will rotate to face
+                  <var>other</var>'s position plus the offset position. Allowed values are
+                  integer constants between -128 and 127, inclusive, where 10 is equal to
                   one Forge unit.
                </p></dd>
    <dt>y</dt>
       <dd><p>
-                  The Y-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive, where 10 is equal to 
+                  The Y-coordinate of an offset-position. The object will rotate to face
+                  <var>other</var>'s position plus the offset position. Allowed values are
+                  integer constants between -128 and 127, inclusive, where 10 is equal to
                   one Forge unit.
                </p></dd>
    <dt>z</dt>
       <dd><p>
-                  The Z-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive, where 10 is equal to 
+                  The Z-coordinate of an offset-position. The object will rotate to face
+                  <var>other</var>'s position plus the offset position. Allowed values are
+                  integer constants between -128 and 127, inclusive, where 10 is equal to
                   one Forge unit.
                </p></dd>
 </dl>
 <h2>Example</h2>
 <pre>
-global.object[0].copy_rotation_from(global.object[1], true)</pre>
+<span class="comment">-- make all WATCHING_YOU objects face toward the nearest player</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"watching_you</span>" <span class="keyword">do</span>
+   <span class="keyword">alias</span> nearest_player   = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> player
+   <span class="keyword">alias</span> nearest_distance = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
+   nearest_player   = no_player
+   nearest_distance = 30000
+
+   <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
+      <span class="keyword">if</span> current_player.biped != no_object <span class="keyword">then</span>
+         <span class="keyword">alias</span> current_vehicle  = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> object
+         <span class="keyword">alias</span> current_distance = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
+
+         current_vehicle = no_object
+         current_vehicle = current_player.get_vehicle()
+         <span class="keyword">if</span> current_vehicle != current_object <span class="keyword">then</span>
+            <span class="comment">--</span>
+            <span class="comment">-- We don't want to apply this effect to vehicles the player is in, as it </span>
+            <span class="comment">-- will turn those vehicles into inoperable beyblades. They'll try to turn </span>
+            <span class="comment">-- toward the player, but because the player is attached to whatever vehicle </span>
+            <span class="comment">-- they're riding in, they'll be displaced by the turning, which makes the </span>
+            <span class="comment">-- vehicle want to turn some more next frame; and so on, non-stop, until </span>
+            <span class="comment">-- the player exits the vehicle. Let's avoid that edge-case.</span>
+            
+            current_distance = current_object.get_distance_to(current_player.biped)
+            <span class="keyword">if</span> current_distance &lt; nearest_distance <span class="keyword">then</span>
+               nearest_distance = current_distance
+               nearest_player   = current_player
+            <span class="keyword">end</span>
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+
+   <span class="keyword">if</span> nearest_player != no_player <span class="keyword">then</span>
+      current_object.face_toward(nearest_player.biped, 0, 0, 0)
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- make all SPIN_YAW objects rotate on the yaw axis by one degree every frame</span>
+<span class="comment">-- (60deg per second)</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"spin_yaw</span>" <span class="keyword">do</span>
+   current_object.face_toward(current_object, 115, -2, 0)
+<span class="keyword">end</span>
+
+<span class="comment">-- make all SPIN_ROLL objects rotate on the roll axis by one degree every frame</span>
+<span class="comment">-- (60deg per second)</span>
+<span class="comment">--</span>
+<span class="comment">-- This one is harder because we need to use object attachment and invisible Hill </span>
+<span class="comment">-- Markers to compose the rotations we want. The naive approach would be to spawn </span>
+<span class="comment">-- disposable Hill Markers, rotate them as needed, and then immediately delete </span>
+<span class="comment">-- them all. However, if we try that, then it seems like they get deleted *before* </span>
+<span class="comment">-- the rotations actually take effect, and there seem to be negative effects on </span>
+<span class="comment">-- game stability as well (as if the map is overloaded). Instead, we need to </span>
+<span class="comment">-- keep our Hill Markers around and reuse them.</span>
+<span class="comment">--</span>
+<span class="keyword">alias</span> roll_global_basis      = <span class="keyword">allocate</span> global.object
+<span class="keyword">alias</span> unrotated_global_basis = <span class="keyword">allocate</span> global.object
+<span class="keyword">alias</span> roll_1deg_reference    = <span class="keyword">allocate</span> global.object
+<span class="keyword">alias</span> helper_marker_1        = <span class="keyword">allocate</span> global.object
+<span class="keyword">alias</span> helper_marker_2        = <span class="keyword">allocate</span> global.object
+<span class="keyword">if</span> roll_global_basis == no_object <span class="keyword">then</span>
+   <span class="comment">--</span>
+   <span class="comment">-- There are two rotation values that we really need:</span>
+   <span class="comment">--</span>
+   <span class="comment">--  - An object that isn't rotated</span>
+   <span class="comment">--</span>
+   <span class="comment">--  - An object that is nose-down, but otherwise not rotated</span>
+   <span class="comment">--</span>
+   <span class="comment">-- The former is the default rotation for any newly-created objects. The latter </span>
+   <span class="comment">-- can be accomplished by exploiting some jank in `object.place_between_me_and`: </span>
+   <span class="comment">-- it happens if you spawn something between an object and itself. We'll create </span>
+   <span class="comment">-- two objects with these rotations, then, and keep them around so that our </span>
+   <span class="comment">-- other Hill Markers can `copy_rotation_from` them.</span>
+   <span class="comment">--</span>
+   <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="keyword">do</span>
+      <span class="keyword">if</span> roll_global_basis == no_object <span class="keyword">then</span>
+         roll_global_basis      = current_object.place_between_me_and(current_object, hill_marker, 0)
+         unrotated_global_basis = roll_global_basis.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+         
+         <span class="comment">-- These are recyclable markers that each SPIN_ROLL object can use to set </span>
+         <span class="comment">-- up a roll rotation by 1 degree. We'll also use them here, when setting </span>
+         <span class="comment">-- up the 1-degree rotation reference.</span>
+         helper_marker_1 = unrotated_global_basis.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+         helper_marker_2 = unrotated_global_basis.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+         
+         <span class="comment">-- When we're done, this will be an object whose rotation is exactly one </span>
+         <span class="comment">-- yaw-degree off from `roll_global_basis`. Right now, it starts off with </span>
+         <span class="comment">-- the same rotation as `roll_global_basis`: exactly nose-down, local up </span>
+         <span class="comment">-- coinciding with the world positive X-axis.</span>
+         roll_1deg_reference = roll_global_basis.place_at_me(hill_marker, none, none, 0, 0, 0, none)
+         roll_1deg_reference.copy_rotation_from(roll_global_basis, true)
+         
+         <span class="comment">-- Let's briefly use a more intuitive name for our helper marker.</span>
+         <span class="keyword">alias</span> yaw_adjust = helper_marker_1
+         
+         yaw_adjust.copy_rotation_from(unrotated_global_basis, true)
+         
+         <span class="comment">-- Now, we'll attach our 1-degree reference to the `yaw_adjust` marker, and </span>
+         <span class="comment">-- then rotate the `yaw_adjust` marker by one degree on the yaw axis. From </span>
+         <span class="comment">-- the point of view of our nose-down object, this is a roll rotation.</span>
+         <span class="comment">-- </span>
+         <span class="comment">-- Imagine taking a Warthog, turning it nose-down, and placing it on top of a </span>
+         <span class="comment">-- turntable. Now imagine you're in the driver's seat. As the turntable rotates, </span>
+         <span class="comment">-- from your point of view, you're doing a barrel roll... a barrel ROLL. Get it?</span>
+         <span class="comment">-- </span>
+         roll_1deg_reference.attach_to(yaw_adjust, 0, 0, 0, relative)
+         yaw_adjust.face_toward(yaw_adjust, 115, -2, 0)
+         
+         roll_1deg_reference.detach()
+         <span class="comment">--</span>
+         <span class="comment">-- And now the 1-degree reference is set up! When we actually use it, we'll go </span>
+         <span class="comment">-- into more detail about how it works.</span>
+         <span class="comment">--</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"spin_roll</span>" <span class="keyword">do</span>
+   <span class="keyword">alias</span> roll_marker = helper_marker_1
+   <span class="keyword">alias</span> yaw_to_roll = helper_marker_2
+   
+   <span class="comment">--</span>
+   <span class="comment">-- Let's recycle our helper markers from above. We'll have them copy the rotations </span>
+   <span class="comment">-- we set up before, so we can continue where we left off. (We don't want to use </span>
+   <span class="comment">-- the actual rotation markers from earlier, because we need them "fresh" for each </span>
+   <span class="comment">-- SPIN_ROLL object we want to spin. Think of the earlier trigger like having Halo: </span>
+   <span class="comment">-- Reach press Ctrl + C on some rotations, and now we're having it press Ctrl + V.)</span>
+   <span class="comment">--</span>
+   
+   roll_marker.copy_rotation_from(roll_1deg_reference, true)
+   yaw_to_roll.copy_rotation_from(roll_global_basis, true)
+   
+   <span class="comment">--</span>
+   <span class="comment">-- So now, there's only a slight difference between the rotation of roll_marker </span>
+   <span class="comment">-- and the rotation of yaw_to_roll: specifically, one degree, along the world's </span>
+   <span class="comment">-- yaw axis. Remember what I said above: from the perspective of roll_marker, </span>
+   <span class="comment">-- that's going to be one degree of roll, not yaw. So how do we turn one degree </span>
+   <span class="comment">-- of marker-relative roll into one degree of current_object-relative roll?</span>
+   <span class="comment">--</span>
+   <span class="comment">-- If we attach roll_marker to yaw_to_roll, and then have yaw_to_roll copy the </span>
+   <span class="comment">-- rotation of current_object, then there will only be that *same* slight angle </span>
+   <span class="comment">-- difference between roll_marker and current_object -- and that difference will </span>
+   <span class="comment">-- represent one degree of roll relative to current_object.</span>
+   <span class="comment">--</span>
+   
+   roll_marker.attach_to(yaw_to_roll, 0, 0, 0, relative)
+   yaw_to_roll.copy_rotation_from(current_object, true)
+   roll_marker.detach()
+
+   <span class="comment">-- Rotate the current object to match `roll_marker`.</span>
+   current_object.copy_rotation_from(roll_marker, true)
+<span class="keyword">end</span></pre>
 <h2>Notes</h2>
 <ul>
+   <li>
+               <p>
+                  If you face an object toward itself, you can use the position offset to
+                  rotate it about its local yaw axis. The X-offset should be the sine of
+                  your desired yaw angle, and the Y-offset should be the cosine of your
+                  desired yaw angle.
+               </p>
+               <p>
+                  As a quick trigonometry overview: the sine and cosine functions take an
+                  angle (usually in radians) and give you a number between zero and one.
+                  If you treat the cosine as X and the sine as Y, and plot these numbers
+                  on a graph for every angle from 0 to 360, you'll end up drawing a
+                  circle. If you multiply the cosine and sine by the same number, then
+                  that number becomes the radius of the circle.
+               </p>
+               <p>
+                  You can only use integer offsets with the "face toward" function here,
+                  so cosine and sine values between 0 and 1 aren't useful except in the
+                  really basic cases (multiples of 90 degrees). However, if you multiply
+                  your cosine and sine — if you pick a large enough radius —
+                  then you'll end up with a cosine and sine that end up being <em>mostly</em>
+                  accurate when rounded to integers. Remember: all that matters is the
+                  underlying angle, so the radius is just a tool to smush the angle into
+                  something that <i>Halo: Reach</i> can understand.
+               </p>
+               <p>
+                  <i>Halo: Reach</i> follows the same conventions as a typical graphing
+                  calculator here. This means that the angle "zero" is an object's normal
+                  forward angle, and objects rotate counterclockwise as the angle increases.
+                  If you imagine yourself looking at an object from above, with the object
+                  pointing exactly to your right before you rotate it with this function,
+                  then this will exactly match what you see in a graphing calculator.
+               </p>
+               
+               
+               <p>
+                  You can use this calculator to compute the right x/y values to use for a 
+                  given yaw-angle change:
+               </p>
+               
+               <script src="script/api/object/actions/face_toward/calculator.js"></script>
+               <style>
+                  face-toward-calculator {
+                     display: flex;
+                     flex-flow: row nowrap;
+                     gap: 1em;
+                  }
+               </style>
+               
+               <face-toward-calculator></face-toward-calculator>
+               <noscript>
+                  <p>Wait, no, you can't. You need JavaScript for this. (Sorry.)</p>
+               </noscript>
+               
+            </li>
    <li><p>
-               If you face an object toward itself, you can use the position offset to rotate it.
+               You can face an object toward itself to adjust its yaw-axis rotation. You can 
+               also use clever tricks with <a href="script/api/object/actions/place_between_me_and.html">object.place_between_me_and</a> 
+               to spawn an object nose-down, such that its up-vector points laterally. If you 
+               combine these two tricks, using object attachment, you can adjust any object's 
+               roll-axis rotation. The code example demonstrates the trick.
             </p></li>
 </ul><h2>See also</h2>
 <ul>

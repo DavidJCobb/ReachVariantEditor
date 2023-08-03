@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>object.apply_shape_color_from_player_member | ReachVariantTool Documentation</title>
       <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -57,11 +58,12 @@
 <li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
+<li><a href="script/api/object/actions/place_at_me.html">create_object</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -72,14 +74,18 @@
 <li><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></li>
 <li><a href="script/api/object/actions/push_upward.html">push_upward</a></li>
 <li><a href="script/api/object/actions/remove_weapon.html">remove_weapon</a></li>
+<li><a href="script/api/object/actions/set_shape.html">set_boundary</a></li>
 <li><a href="script/api/object/actions/set_device_actual_position.html">set_device_actual_position</a></li>
 <li><a href="script/api/object/actions/set_device_animation_position.html">set_device_animation_position</a></li>
 <li><a href="script/api/object/actions/set_device_position.html">set_device_position</a></li>
 <li><a href="script/api/object/actions/set_device_power.html">set_device_power</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_fireteam_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></li>
+<li><a href="script/api/object/actions/set_hidden.html">set_hidden</a></li>
 <li><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></li>
 <li><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></li>
 <li><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_permissions.html">set_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_scale.html">set_scale</a></li>
 <li><a href="script/api/object/actions/set_shape.html">set_shape</a></li>
 <li><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></li>
@@ -92,7 +98,7 @@
 <li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
 <li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
 <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">try_get_carrier</a></li>
 
                      </ul>
                   </li>
@@ -104,22 +110,24 @@
          <header><h1>object.apply_shape_color_from_player_member</h1></header>
 
                <p>
-                  This function recolors an object's shape boundary baesd on the armor color 
-                  of the player referred to by an <var>object.player</var> variable on the 
-                  object. The function's argument specifies which <var>object.player</var> 
+                  This function recolors an object's shape boundary baesd on the armor color
+                  of the player referred to by an <var>object.player</var> variable on the
+                  object. The function's argument specifies which <var>object.player</var>
                   variable to use.
                </p>
                <p>
-                  This function is used in King of the Hill FFA modes to recolor the hill to 
+                  This function is used in King of the Hill FFA modes to recolor the hill to
                   match the player currently controlling it.
                </p>
             
 <h2>Arguments</h2>
 <dl>
    <dt>member</dt>
-      <dd><p>An integer constant indicating the index of an object.player 
-               variable, or an object-relative player variable e.g. <code>object.player[0]</code>,
-                  or an alias of such.</p></dd>
+      <dd><p>
+                  An integer constant indicating the index of an object.player
+                  variable, or an object-relative player variable e.g. <code>object.player[0]</code>,
+                  or an alias of such.
+               </p></dd>
 </dl>
 <h2>Example</h2>
 <pre>

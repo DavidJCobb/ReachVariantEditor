@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>Content not in any namespace | ReachVariantTool Documentation</title>
       <base href="../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -90,7 +91,7 @@
                   <li>
                      <a href="editor/script_window/string-table.html">All Other Strings</a>
                      <ul>
-                        <li><a href="editor/script_window/string-localization.html">Localization</a></li>
+                        <li><a href="editor/script_window/string-localization.html">Editing and Localization</a></li>
                      </ul>
                   </li>
                   <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
@@ -118,6 +119,14 @@
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
                   <li><a href="script/best-practices.html">Best practices</a></li>
+                  <li data-dont-default-collapse>
+                     <a>Advanced</a>
+                     <ul>
+                        <li><a href="script/scripted-object-count-limit.html">Scripted object count limit</a></li>
+                        <li><a href="script/inline.html">Inlined triggers</a></li>
+                        <li><a href="script/under-the-hood.html">Under the hood</a></li>
+                     </ul>
+                  </li>
                </ul>
             </li>
             <li>
@@ -130,6 +139,7 @@
                         <li><a href="script/api/ns_enums.html">enums</a></li>
                         <li><a href="script/api/ns_game.html">game</a></li>
                         <li><a href="script/api/ns_global.html">global</a></li>
+                        <li><a href="script/api/ns_temporaries.html">temporaries</a></li>
                      </ul>
                   </li>
                   <li data-dont-default-collapse>
@@ -155,7 +165,7 @@
                               <li><a href="script/api/incident.html">Incident</a></li>
                               <li><a href="script/api/object-type.html">Object Type</a></li>
                               <li><a href="script/api/player-set.html">Player Set</a></li>
-                              <li><a href="script/api/player-traits.html">Player Traits</a></li>
+                              <li><a href="script/api/traits.html">Player Traits</a></li>
                               <li><a href="script/api/sound.html">Sound</a></li>
                               <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
                               <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
@@ -171,6 +181,7 @@
                <a>Concepts</a>
                <ul>
                   <li><a href="concepts/bipeds-and-items.html">Bipeds and items</a></li>
+                  <li><a href="concepts/coordinates.html">Coordinates</a></li>
                   <li><a href="concepts/firefight.html">Firefight</a></li>
                </ul>
             </li>
@@ -192,24 +203,10 @@
    <dd><p>During an <a href="script/events.html">object death event</a>, this is the 
          damage type that killed the object. It is presumed to be a 
          <a href="script/api/ns_enums/damage_reporting_type.html">damage reporting type</a>; testing is pending.</p></dd>
-<dt><a href="script/api/ns_unnamed/hud_player.html">hud_player</a></dt>
-   <dd><p>This value can be used with HUD widgets and object waypoints to display 
-         different information for each player. It refers to the player that the widget 
-         or waypoint is being shown to.</p></dd>
-<dt><a href="script/api/ns_unnamed/hud_player_team.html">hud_player_team</a></dt>
-   <dd><p>This value's precise meaning is unknown, but it can presumably be used 
-         with HUD widgets and object waypoints to display different information for each 
-         player.</p></dd>
 <dt><a href="script/api/ns_unnamed/hud_target_object.html">hud_target_object</a></dt>
    <dd><p>This value can be used with object waypoint text to display values related 
          to the object that has the waypoint.</p></dd>
-<dt><a href="script/api/ns_unnamed/hud_target_object_team.html">hud_target_object_team</a></dt>
-   <dd><p>This value is believed to refer to the owner team for <code>hud_target_object</code>.</p></dd>
 <dt><a href="script/api/ns_unnamed/hud_target_player.html">hud_target_player</a></dt>
-   <dd><p>This value's precise meaning is unknown, but it can presumably be used 
-         with HUD widgets and object waypoints to display different information for each 
-         player.</p></dd>
-<dt><a href="script/api/ns_unnamed/hud_target_player_team.html">hud_target_player_team</a></dt>
    <dd><p>This value's precise meaning is unknown, but it can presumably be used 
          with HUD widgets and object waypoints to display different information for each 
          player.</p></dd>
@@ -222,6 +219,17 @@
 <dt><a href="script/api/ns_unnamed/killer_player.html">killer_player</a></dt>
    <dd><p>During an <a href="script/events.html">object death event</a>, this is the 
          killer player.</p></dd>
+<dt><a href="script/api/ns_unnamed/local_player.html">local_player</a></dt>
+   <dd><p>This value can be used with HUD widgets and object waypoints to display 
+         different information for each player. It refers to the player that the widget 
+         or waypoint is being shown to.</p></dd>
+<dt><a href="script/api/ns_unnamed/local_team.html">local_team</a></dt>
+   <dd><p>
+            This is the team to which the <a href="script/api/unnamed/local_player.html">local player</a> belongs. 
+            This value can be passed to HUD widgets as part of a 
+            <a href="script/api/format-string.html">format string</a> to display information 
+            about the team.
+         </p></dd>
 <dt><a href="script/api/ns_unnamed/neutral_team.html">neutral_team</a></dt>
    <dd><p>A value that can be used to refer to Neutral Team.</p></dd>
 <dt><a href="script/api/ns_unnamed/no_object.html">no_object</a></dt>
@@ -243,14 +251,20 @@
    <dd><p>One of the sixteen sets of player traits available to scripts.</p></dd>
 <dt><a href="script/api/ns_unnamed/script_widget.html">script_widget[<var>n</var>]</a></dt>
    <dd><p>One of the four HUD widgets available to scripts.</p></dd>
+<dt><a href="script/api/ns_unnamed/target_team.html">target_team</a></dt>
+   <dd><p>
+            If there is a <a href="script/api/unnamed/hud_target_player.html">hud_target_player</a>, then 
+            this is the team that that player is on. Otherwise, it's the team of the 
+            target object. This value can be passed to HUD widgets as part of a 
+            <a href="script/api/format-string.html">format string</a> to display information 
+            about the team.
+         </p></dd>
 <dt><a href="script/api/ns_unnamed/team.html">team[<var>n</var>]</a></dt>
    <dd><p>Allows direct access to all eight possible teams in a match.</p></dd>
-<dt><a href="script/api/ns_unnamed/unk_15_team.html">unk_15_team</a></dt>
-   <dd><p>Unknown, and potentially unused.</p></dd>
 </dl>
 
 <h2>Member actions</h2>
-<dl><dt><a href="script/api/ns_unnamed/actions/debug_break.html">debug_break</a></dt>
+<dl><dt><a href="script/api/ns_unnamed/actions/debug_break.html">debug_break <span class="a-k-a">a.k.a.</span> break_into_debugger</a></dt>
    <dd><p>A non-functional debugging tool. In Halo: Reach's debug builds, 
             this probably broke into a debugger.</p></dd>
 <dt><a href="script/api/ns_unnamed/actions/debug_force_player_view_count.html">debug_force_player_view_count</a></dt>
@@ -258,12 +272,12 @@
 <dt><a href="script/api/ns_unnamed/actions/debug_print.html">debug_print</a></dt>
    <dd><p>A non-functional debugging tool. In Halo: Reach's debug builds, 
             this probably writes a message to some log file.</p></dd>
-<dt><a href="script/api/ns_unnamed/actions/debug_set_tracing_enabled.html">debug_set_tracing_enabled</a></dt>
+<dt><a href="script/api/ns_unnamed/actions/debug_set_tracing_enabled.html">debug_set_tracing_enabled <span class="a-k-a">a.k.a.</span> debugging_enable_tracing</a></dt>
    <dd><p>A non-functional debugging tool. In Halo: Reach's debug builds, 
             this probably set whether tracing was enabled.</p></dd>
 <dt><a href="script/api/ns_unnamed/actions/get_random_object.html">get_random_object</a></dt>
    <dd><p>Get a random object on the map with the specified Forge label.</p></dd>
-<dt><a href="script/api/ns_unnamed/actions/insert_theater_film_marker.html">insert_theater_film_marker</a></dt>
+<dt><a href="script/api/ns_unnamed/actions/insert_theater_film_marker.html">insert_theater_film_marker <span class="a-k-a">a.k.a.</span> saved_film_insert_marker</a></dt>
    <dd><p>Unknown.</p></dd>
 <dt><a href="script/api/ns_unnamed/actions/rand.html">rand</a></dt>
    <dd><p>Generates a random number.</p></dd>

@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>Best practices | ReachVariantTool Documentation</title>
       <base href="../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -90,7 +91,7 @@
                   <li>
                      <a href="editor/script_window/string-table.html">All Other Strings</a>
                      <ul>
-                        <li><a href="editor/script_window/string-localization.html">Localization</a></li>
+                        <li><a href="editor/script_window/string-localization.html">Editing and Localization</a></li>
                      </ul>
                   </li>
                   <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
@@ -118,6 +119,14 @@
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
                   <li><a href="script/best-practices.html">Best practices</a></li>
+                  <li data-dont-default-collapse>
+                     <a>Advanced</a>
+                     <ul>
+                        <li><a href="script/scripted-object-count-limit.html">Scripted object count limit</a></li>
+                        <li><a href="script/inline.html">Inlined triggers</a></li>
+                        <li><a href="script/under-the-hood.html">Under the hood</a></li>
+                     </ul>
+                  </li>
                </ul>
             </li>
             <li>
@@ -130,6 +139,7 @@
                         <li><a href="script/api/ns_enums.html">enums</a></li>
                         <li><a href="script/api/ns_game.html">game</a></li>
                         <li><a href="script/api/ns_global.html">global</a></li>
+                        <li><a href="script/api/ns_temporaries.html">temporaries</a></li>
                      </ul>
                   </li>
                   <li data-dont-default-collapse>
@@ -155,7 +165,7 @@
                               <li><a href="script/api/incident.html">Incident</a></li>
                               <li><a href="script/api/object-type.html">Object Type</a></li>
                               <li><a href="script/api/player-set.html">Player Set</a></li>
-                              <li><a href="script/api/player-traits.html">Player Traits</a></li>
+                              <li><a href="script/api/traits.html">Player Traits</a></li>
                               <li><a href="script/api/sound.html">Sound</a></li>
                               <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
                               <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
@@ -171,6 +181,7 @@
                <a>Concepts</a>
                <ul>
                   <li><a href="concepts/bipeds-and-items.html">Bipeds and items</a></li>
+                  <li><a href="concepts/coordinates.html">Coordinates</a></li>
                   <li><a href="concepts/firefight.html">Firefight</a></li>
                </ul>
             </li>
@@ -206,18 +217,11 @@
       </p>
       <pre>
 <span class="comment">--</span>
-<span class="comment">-- I use names like these for my temporary variables:</span>
-<span class="comment">--</span>
-<span class="keyword">alias</span> temp_int_00 = global.number[0]
-<span class="keyword">alias</span> temp_int_01 = global.number[1]
-<span class="keyword">alias</span> temp_obj_00 = global.object[0]
-
-<span class="comment">--</span>
 <span class="comment">-- Variables that need to remain "pristine" throughout a single game tick, or across</span>
-<span class="comment">-- multiple game ticks, get more meaningful names:</span>
+<span class="comment">-- multiple game ticks, get meaningful names:</span>
 <span class="comment">--</span>
-<span class="keyword">alias</span> sudden_death_enabled   = global.number[2] <span class="comment">-- set this to 1 when you want Sudden Death to be active, or 0 otherwise</span>
-<span class="keyword">alias</span> announced_sudden_death = global.number[3] <span class="comment">-- only announce the start of Sudden Death once</span>
+<span class="keyword">alias</span> sudden_death_enabled   = <span class="keyword">allocate</span> global.number <span class="comment">-- set this to 1 when you want Sudden Death to be active, or 0 otherwise</span>
+<span class="keyword">alias</span> announced_sudden_death = <span class="keyword">allocate</span> global.number <span class="comment">-- only announce the start of Sudden Death once</span>
 
 <span class="comment">-- I usually define names like the ones above at the start of the script file.</span>
 
@@ -226,8 +230,8 @@
 <span class="comment">-- you can give it a specific name.</span>
 <span class="comment">--</span>
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"goal</span>" <span class="keyword">do</span>
-   <span class="keyword">alias</span> current_biped = temp_obj_00
-   <span class="keyword">alias</span> distance      = temp_int_00
+   <span class="keyword">alias</span> current_biped = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> object
+   <span class="keyword">alias</span> distance      = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number
    <span class="comment">--</span>
    <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
       current_biped = current_player.biped
@@ -263,10 +267,11 @@
    <span class="comment">-- ...</span>
 <span class="keyword">end</span></pre>
       <p>
-         Most programming languages let you create as many variables as you need. Megalo doesn't; you 
-         have a limited pool of variables to use, and ReachVariantTool doesn't automatically manage 
-         them for you. You have the maximum level of control over them, but also the maximum amount 
-         of responsibility. Aliases are a powerful tool for keeping things manageable.
+         Most programming languages let you create as many variables as you need. ReachVariantTool's 
+         dialect of Megalo is lower-level; you have a limited pool of variables to use, and the compiler 
+         doesn't automatically manage them for you. You have the maximum level of control over them, but 
+         also the maximum amount of responsibility. Aliases are a powerful tool for keeping things 
+         manageable.
       </p>
       
       <h2>Use object-scoped variables sparingly!</h2>
@@ -294,7 +299,7 @@
    game.end_round()
 <span class="keyword">end</span></pre>
       <p>
-         It's somewhat common for novice programmers to write code comments that... aren't strictly 
+         It's somewhat common for novice programmers to write code comments that... aren't super 
          helpful, like in this deliberately exaggerated example here:
       </p>
       <pre>
@@ -302,7 +307,7 @@
 global.number[0] += 5</pre>
       <p>
          But... how does one write a good code comment? Well, a good way to view programming is as its 
-         own form of communication, in a setting where precision is required and enforced, and we don't 
+         own form of communication, in a setting where precision is required and enforced; we don't 
          call these things "programming <em>languages</em>" for nothing. When you write code, you're 
          communicating with the machine, but you're also communicating with whoever else reads your 
          code. Some ideas are easier to express in plain English, however — particularly high-level 

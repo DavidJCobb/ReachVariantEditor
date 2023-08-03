@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>object.attach_to | ReachVariantTool Documentation</title>
       <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -57,11 +58,12 @@
 <li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
+<li><a href="script/api/object/actions/place_at_me.html">create_object</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -72,14 +74,18 @@
 <li><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></li>
 <li><a href="script/api/object/actions/push_upward.html">push_upward</a></li>
 <li><a href="script/api/object/actions/remove_weapon.html">remove_weapon</a></li>
+<li><a href="script/api/object/actions/set_shape.html">set_boundary</a></li>
 <li><a href="script/api/object/actions/set_device_actual_position.html">set_device_actual_position</a></li>
 <li><a href="script/api/object/actions/set_device_animation_position.html">set_device_animation_position</a></li>
 <li><a href="script/api/object/actions/set_device_position.html">set_device_position</a></li>
 <li><a href="script/api/object/actions/set_device_power.html">set_device_power</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_fireteam_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></li>
+<li><a href="script/api/object/actions/set_hidden.html">set_hidden</a></li>
 <li><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></li>
 <li><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></li>
 <li><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_permissions.html">set_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_scale.html">set_scale</a></li>
 <li><a href="script/api/object/actions/set_shape.html">set_shape</a></li>
 <li><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></li>
@@ -92,7 +98,7 @@
 <li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
 <li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
 <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">try_get_carrier</a></li>
 
                      </ul>
                   </li>
@@ -104,19 +110,19 @@
          <header><h1>object.attach_to</h1></header>
 
                <p>
-                  This function attaches the context object to a given basis object. 
-                  The context object will be moved to the basis object's position plus 
-                  the supplied offset before the attachment is performed; an argument 
-                  allows you to control whether the offset is relative to the rotation 
-                  of the basis object. Note that the context object will <em>not</em> 
+                  This function attaches the context object to a given basis object.
+                  The context object will be moved to the basis object's position plus
+                  the supplied offset before the attachment is performed; an argument
+                  allows you to control whether the offset is relative to the rotation
+                  of the basis object. Note that the context object will <em>not</em>
                   be rotated before the attachment is performed.
                </p>
                <p>
-                  Attached objects effectively take on Phased physics; their movement 
-                  cannot be impeded by other objects. Additionally, if objects are 
-                  attached to a non-solid basis, such as a Flag Stand, then they 
-                  themselves stop being solid; and if they are attached to an invisible 
-                  basis, such as a Hill Marker, then they stop being visible altogether. 
+                  Attached objects effectively take on Phased physics; their movement
+                  cannot be impeded by other objects. Additionally, if objects are
+                  attached to a non-solid basis, such as a Flag Stand, then they
+                  themselves stop being solid; and if they are attached to an invisible
+                  basis, such as a Hill Marker, then they stop being visible altogether.
                   Note that non-solid vehicles still offer entry prompts.
                </p>
             
@@ -128,27 +134,27 @@
                </p></dd>
    <dt>x</dt>
       <dd><p>
-                  The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are integer constants between 
+                  The X-coordinate to anchor this object at, relative to the position
+                  of the other object. Allowed values are integer constants between
                   -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </p></dd>
    <dt>y</dt>
       <dd><p>
-                  The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are integer constants between 
+                  The X-coordinate to anchor this object at, relative to the position
+                  of the other object. Allowed values are integer constants between
                   -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </p></dd>
    <dt>z</dt>
       <dd><p>
-                  The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are integer constants between 
+                  The X-coordinate to anchor this object at, relative to the position
+                  of the other object. Allowed values are integer constants between
                   -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </p></dd>
    <dt>reference_frame</dt>
       <dd><p>
-                  Either the word <var>relative</var>, indicating that the position 
-                  offset passed to this function is relative to the rotation of the 
-                  <var>basis</var> object, or the word <var>absolute</var>, indicating 
+                  Either the word <var>relative</var>, indicating that the position
+                  offset passed to this function is relative to the rotation of the
+                  <var>basis</var> object, or the word <var>absolute</var>, indicating
                   that the position offset passed to this function uses the world axes.
                </p></dd>
 </dl>
@@ -160,9 +166,9 @@ current_object.attach_to(basis, 0, 0, 20, relative)</pre>
 <h3><a name="anchoring">Anchoring</a></h3>
 
                <p>
-                  Objects appear to be attached to the nearest node on a basis object's 
-                  3D model, with no apparent distance limit. For example, this piece 
-                  of code would create a skull and anchor that skull to a Warthog's 
+                  Objects appear to be attached to the nearest node on a basis object's
+                  3D model, with no apparent distance limit. For example, this piece
+                  of code would create a skull and anchor that skull to a Warthog's
                   steering wheel:
                </p>
                <pre>
@@ -171,146 +177,150 @@ current_object.attach_to(basis, 0, 0, 20, relative)</pre>
 global.object[0] = some_warthog.place_at_me(skull, none, none, 0, 0, 0, none)
 global.object[0].attach_to(some_warthog, 0, 0, 20, relative)</pre>
                <p>
-                  Even though the skull is attached to a point two full Forge units 
-                  above the Warthog, it still attaches to the nearest node in the 
-                  Warthog's 3D model, which happens to be the steering wheel. If a 
-                  player enters the driver's seat and turns to the left or right, 
-                  the skull will move and rotate in an arc above them, in synch with 
-                  the steering wheel. Different offsets would anchor the skull to 
+                  Even though the skull is attached to a point two full Forge units
+                  above the Warthog, it still attaches to the nearest node in the
+                  Warthog's 3D model, which happens to be the steering wheel. If a
+                  player enters the driver's seat and turns to the left or right,
+                  the skull will move and rotate in an arc above them, in synch with
+                  the steering wheel. Different offsets would anchor the skull to
                   other nodes in the Warthog's 3D model, such as its tires.
                </p>
                <p>
-                  Most objects have a node defined at their origins, and that can 
-                  be used to avoid this behavior: spawn an extra object, have it 
-                  copy the rotation of the basis, and then attach it to the basis 
-                  with offset (0, 0, 0); then, attach the rest of your objects to 
+                  Most objects have a node defined at their origins, and that can
+                  be used to avoid this behavior: spawn an extra object, have it
+                  copy the rotation of the basis, and then attach it to the basis
+                  with offset (0, 0, 0); then, attach the rest of your objects to
                   that extra object.
                </p>
             <h3><a name="vehicle-attachment">Effects of attaching vehicles to other objects</a></h3>
 
                <p>
-                  Attaching a vehicle to an object will lock the vehicle in place. The 
-                  pilot will be able to look around at any angle, but the vehicle will 
-                  not turn, and the vehicle's weapons fire will be constrained to the 
+                  Attaching a vehicle to an object will lock the vehicle in place. The
+                  pilot will be able to look around at any angle, but the vehicle will
+                  not turn, and the vehicle's weapons fire will be constrained to the
                   weapon's turn radius.
                </p>
                <p>
-                  Attached vehicles will not play any entry/exit animations (e.g. a 
-                  Banshee's canopy opening and closing), but will instantaneously 
-                  update to any animations' end states when detached (e.g. a Banshee's 
+                  Attached vehicles will not play any entry/exit animations (e.g. a
+                  Banshee's canopy opening and closing), but will instantaneously
+                  update to any animations' end states when detached (e.g. a Banshee's
                   canopy will instantly snap open or closed as appropriate).
                </p>
                <p>
-                  Bipeds in an attached vehicle will lose most animations. Passengers' 
-                  hands may move slightly (and incorrectly) while reloading their weapon; 
-                  though they have no reloading or weapon swap animations, appropriate 
-                  sounds still play, and they cannot fire their animations while the 
-                  animations would be taking place. Some animations have player model 
-                  jiggle physics; these jiggle physics remain functional even though 
+                  Bipeds in an attached vehicle will lose most animations. Passengers'
+                  hands may move slightly (and incorrectly) while reloading their weapon;
+                  though they have no reloading or weapon swap animations, appropriate
+                  sounds still play, and they cannot fire their weapons while the reload 
+                  animation would be taking place. Some animations have player model
+                  jiggle physics; these jiggle physics remain functional even though
                   the rest of the animation does not. 
                </p>
                <p>
-                  If a Banshee is performing an evasive maneuver at the moment it is 
-                  attached, the maneuver will end instantly; no such maneuvers can be 
+                  If a Banshee is performing an evasive maneuver at the moment it is
+                  attached, the maneuver will end instantly; no such maneuvers can be
                   performed once the vehicle is attached.
                </p>
             <h3>Other notes</h3>
 <ul>
    <li><p>
-               Armor Abilities equipped by other players are an exception to normal 
-               attachment behaviors. If you detach an Armor Ability from a player's 
-               back, you can move it around or attach it without unequipping it from 
-               that player; however, the Armor Ability will automatically detach 
-               itself every frame. (Verified for Armor Abilities worn by Monitors, 
+               If either of the context or <var>basis</var> objects are <var>no_object</var>, 
+               or if both are the same object, then this function does nothing.
+            </p></li>
+   <li><p>
+               Armor Abilities equipped by players are an exception to normal
+               attachment behaviors. If you detach an Armor Ability from a player's
+               back, you can move it around or attach it without unequipping it from
+               that player; however, the Armor Ability will automatically detach
+               itself every frame. (Verified for Armor Abilities worn by Monitors,
                but not tested for Armor Abilities worn by Spartans and Elites.)
             </p></li>
    <li><p>
-               Attaching a biped to an object will lock the biped in place. If the 
-               biped is controlled by the player, they will be able to turn but not 
-               to move, and their first-person legs will desynch from their upper 
+               Attaching a biped to an object will lock the biped in place. If the
+               biped is controlled by the player, they will be able to turn but not
+               to move, and their first-person legs will desynch from their upper
                body.
             </p></li>
    <li><p>
-               When a biped enters a vehicle, it is considered attached to that 
-               vehicle. Scripts cannot attach it to something else while it is in 
-               the vehicle. Weapons being carried by a biped are expected to behave 
+               When a biped enters a vehicle, it is considered attached to that
+               vehicle. Scripts cannot attach it to something else while it is in
+               the vehicle. Weapons being carried by a biped are expected to behave
                similarly.
             </p></li>
    <li><p>
-               If something is attached to a Monitor biped, it will bob up and down 
-               in synch with that biped's animation. All of a Monitor's nodes, 
-               including the one with the animation, are located at the same 
-               model-relative coordinate, and the one with the animation is the one 
+               If something is attached to a Monitor biped, it will bob up and down
+               in synch with that biped's animation. All of a Monitor's nodes,
+               including the one with the animation, are located at the same
+               model-relative coordinate, and the one with the animation is the one
                that is found by the game engine when performing an attachment.
             </p></li>
    <li><p>
-               It appears that attaching an object to <var>no_object</var> and then 
-               detaching it will teleport it to the world origin. On Forge World, 
+               It appears that attaching an object to <var>no_object</var> and then
+               detaching it will teleport it to the world origin. On Forge World,
                this is a point out by the canyon's beach.
             </p></li>
    <li>
                <p>
-                  If a player's biped is attached to an object that is destroyed on 
-                  contact with a player, such as a landmine or powerup, then that 
-                  player's camera will be locked to a consistent but unusual place; 
-                  on Boneyard, this is a point in space far outside the map. Using 
-                  Theater will show that the object appears to still exist, and that 
-                  the affected player's biped is frozen in place inside of the 
-                  object. The player's camera will remain fixed exactly in this 
-                  spot even if they were in third-person view at the time they were 
+                  If a player's biped is attached to an object that is destroyed on
+                  contact with a player, such as a landmine or powerup, then that
+                  player's camera will be locked to a consistent but unusual place;
+                  on Boneyard, this is a point in space far outside the map. Using
+                  Theater will show that the object appears to still exist, and that
+                  the affected player's biped is frozen in place inside of the
+                  object. The player's camera will remain fixed exactly in this
+                  spot even if they were in third-person view at the time they were
                   affected.
                </p>
                <p>
-                  In this state, the player can switch weapons, drop a detached 
-                  turret if they are carrying one, fire their weapons, and throw 
-                  grenades. All of these actions will occur relative to the player's 
-                  "true" position at the object they were attached to, rather than 
-                  at their camera position. Projectiles will fire roughly in the 
-                  direction that the player is looking, but the yaw angle may be 
-                  mismatched: it will be a combination of the direction that the 
-                  player was looking just prior to the attachment, and the amount 
-                  by which they have turned to the side after being attached, 
-                  rather than matching their current camera yaw angle. The player 
-                  will not be able to interact with objects near their "true" 
-                  position; a vehicle next to them, for example, will not show 
-                  button prompts for entry, and pressing the button to enter a 
+                  In this state, the player can switch weapons, drop a detached
+                  turret if they are carrying one, fire their weapons, and throw
+                  grenades. All of these actions will occur relative to the player's
+                  "true" position at the object they were attached to, rather than
+                  at their camera position. Projectiles will fire roughly in the
+                  direction that the player is looking, but the yaw angle may be
+                  mismatched: it will be a combination of the direction that the
+                  player was looking just prior to the attachment, and the amount
+                  by which they have turned to the side after being attached,
+                  rather than matching their current camera yaw angle. The player
+                  will not be able to interact with objects near their "true"
+                  position; a vehicle next to them, for example, will not show
+                  button prompts for entry, and pressing the button to enter a
                   vehicle anyway will not work.
                </p>
                <p>
-                  The object to which the player was attached may activate some 
-                  of its on-contact behaviors; landmines don't detonate, and 
-                  Active Camo Powerups aren't destroyed and don't give the 
-                  player camo, but the latter cause the player to constantly 
+                  The object to which the player was attached may activate some
+                  of its on-contact behaviors; landmines don't detonate, and
+                  Active Camo Powerups aren't destroyed and don't give the
+                  player camo, but the latter cause the player to constantly
                   experience the sound loop that plays when camo is active.
                </p>
                <p>
-                  These are the results of a local, single-player test. The 
+                  These are the results of a local, single-player test. The
                   networked behavior is not known.
                </p>
             </li>
    <li>
                <p>
-                  If the player is attached to an armor ability, and if this 
-                  would normally cause them to pick the armor ability up, then 
-                  they will experience the same anomalies as if they were 
-                  attached to a weapon that is destroyed on contact. They will 
-                  not be able to use the armor ability during this time.
+                  If the player is attached to an Armor Ability, and if this
+                  would normally cause them to pick the Armor Ability up, then
+                  they will experience the same anomalies as if they were
+                  attached to a weapon that is destroyed on contact. They will
+                  not be able to use the Armor Ability during this time.
                </p>
             </li>
    <li>
                <p>
-                  If the player is attached to a weapon right as they equip it 
-                  (e.g. an unarmed player being attached to a weapon, such that 
-                  they touch the weapon and equip it as they are attached), 
-                  then they will equip the item normally rather than being 
-                  attached to it... but they will also be launched with 
-                  considerable force — possibly enough to break a map's 
+                  If the player is attached to a weapon right as they equip it
+                  (e.g. an unarmed player being attached to a weapon, such that
+                  they touch the weapon and equip it as they are attached),
+                  then they will equip the item normally rather than being
+                  attached to it... but they will also be launched with
+                  considerable force — possibly enough to break a map's
                   boundaries.
                </p>
                <p>
-                  If the player is attached to a grenade, and if this causes 
-                  them to pick the grenade up, then the player will be unable 
-                  to move, their animations will freeze, and their camera will 
+                  If the player is attached to a grenade, and if this causes
+                  them to pick the grenade up, then the player will be unable
+                  to move, their animations will freeze, and their camera will
                   be anchored to the spot the grenade used to be in.
                </p>
             </li>

@@ -2,6 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
+      
       <title>object.detach | ReachVariantTool Documentation</title>
       <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
@@ -57,11 +58,12 @@
 <li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
+<li><a href="script/api/object/actions/place_at_me.html">create_object</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -72,14 +74,18 @@
 <li><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></li>
 <li><a href="script/api/object/actions/push_upward.html">push_upward</a></li>
 <li><a href="script/api/object/actions/remove_weapon.html">remove_weapon</a></li>
+<li><a href="script/api/object/actions/set_shape.html">set_boundary</a></li>
 <li><a href="script/api/object/actions/set_device_actual_position.html">set_device_actual_position</a></li>
 <li><a href="script/api/object/actions/set_device_animation_position.html">set_device_animation_position</a></li>
 <li><a href="script/api/object/actions/set_device_position.html">set_device_position</a></li>
 <li><a href="script/api/object/actions/set_device_power.html">set_device_power</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_fireteam_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></li>
+<li><a href="script/api/object/actions/set_hidden.html">set_hidden</a></li>
 <li><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></li>
 <li><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></li>
 <li><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_permissions.html">set_respawn_filter</a></li>
 <li><a href="script/api/object/actions/set_scale.html">set_scale</a></li>
 <li><a href="script/api/object/actions/set_shape.html">set_shape</a></li>
 <li><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></li>
@@ -92,7 +98,7 @@
 <li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
 <li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
 <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">try_get_carrier</a></li>
 
                      </ul>
                   </li>
@@ -104,7 +110,7 @@
          <header><h1>object.detach</h1></header>
 
                <p>
-                  This function detaches an object from anything it has been attached 
+                  This function detaches an object from anything it has been attached
                   to — even if that attachment wasn't set up by script.
                </p>
             
@@ -114,41 +120,41 @@ current_object.detach()</pre>
 <h2>Notes</h2>
 <ul>
    <li><p>
-               Detaching a player's carried weapons will cause those weapons to 
-               drop into the game world. Of course, it would probably be better to 
-               use <a href="script/api/object/actions/remove_weapon.html">object.remove_weapon</a> to achieve this 
+               Detaching a player's carried weapons will cause those weapons to
+               drop into the game world. Of course, it would probably be better to
+               use <a href="script/api/object/actions/remove_weapon.html">object.remove_weapon</a> to achieve this
                effect more directly.
             </p></li>
    <li><p>
-               If a player is occupying a vehicle, calling this function on their 
+               If a player is occupying a vehicle, calling this function on their
                biped will instantly force them out of the vehicle.
             </p></li>
    <li>
                <p>
-                  Detaching a player's equipped Armor Ability will not cause them to 
-                  drop it; however, the Armor Ability's 3D model (ordinarily visible 
-                  on the player's back) will detach and stop moving in synch with the 
-                  player. At this point, a script can move the ability independently 
-                  of the player without the player losing it (though the effects of 
-                  moving an equipped Armor Ability out of bounds have not been tested). 
-                  Armor Abilities in this state do not have physics and collision, and 
-                  will remain wherever a script places them until such time as the 
-                  player carrying them is killed: the ability will teleport back to 
+                  Detaching a player's equipped Armor Ability will not cause them to
+                  drop it; however, the Armor Ability's 3D model (ordinarily visible
+                  on the player's back) will detach and stop moving in synch with the
+                  player. At this point, a script can move the ability independently
+                  of the player without the player losing it (though the effects of
+                  moving an equipped Armor Ability out of bounds have not been tested).
+                  Armor Abilities in this state do not have physics and collision, and
+                  will remain wherever a script places them until such time as the
+                  player carrying them is killed: the ability will teleport back to
                   the player's body at that moment.
                </p>
                <p>
-                  A jetpack moved in this manner will show thruster animations without 
-                  moving whenever its carrier uses it. Other abilities have glowing 
-                  lights whose brightness indicates the player's ability energy (i.e. 
+                  A jetpack moved in this manner will show thruster animations without
+                  moving whenever its carrier uses it. Other abilities have glowing
+                  lights whose brightness indicates the player's ability energy (i.e.
                   cooldown).
                </p>
                <p>
-                  The most interesting side-effect of detaching an Armor Ability 
-                  occurs when Active Camo is used: the radar-jamming effect comes 
-                  from the Armor Ability's 3D model and remains centered on that, 
-                  not on the carrier. No other Armor Abilities have gameplay side-effects 
-                  from being detached, even when their visuals would imply it; Armor Lock, 
-                  for example, shows EMP surge graphics on the ability while it's held, 
+                  The most interesting side-effect of detaching an Armor Ability
+                  occurs when Active Camo is used: the radar-jamming effect comes
+                  from the Armor Ability's 3D model and remains centered on that,
+                  not on the carrier. No other Armor Abilities have gameplay side-effects
+                  from being detached, even when their visuals would imply it; Armor Lock,
+                  for example, shows EMP surge graphics on the ability while it's held,
                   but the EMP itself still comes from the player.
                </p>
             </li>
