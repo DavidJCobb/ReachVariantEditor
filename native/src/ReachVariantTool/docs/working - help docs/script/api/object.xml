@@ -604,7 +604,13 @@
                </arg>
                <arg name="who" type="player-set" />
             </args>
-            <blurb>Set whether an object displays a progress bar, and who should be able to see it.</blurb>
+            <blurb>Set whether an object displays a progress bar to certain players when they're 
+            inside of the object's shape volume, and sets which players are eligible to see it.</blurb>
+            <description>
+               Objects can be made to display a progress bar whenever players stand inside of their 
+               <a href="set_shape">shape</a>. This function turns this behavior on or off, and also 
+               controls which players are allowed to see the progress bar.
+            </description>
             <example>
                for each object with label "koth_hill" do
                   current_object.set_progress_bar(3, everyone)

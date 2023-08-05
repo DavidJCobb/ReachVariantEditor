@@ -1,4 +1,5 @@
 #include "compiler.h"
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include "enums.h"
@@ -213,34 +214,58 @@ namespace Megalo {
       }
       void Block::get_ifs_for_alt(std::vector<Block*>& out) const {
          out.clear();
-         auto parent = dynamic_cast<Block*>(this->parent);
+         auto* parent = dynamic_cast<Block*>(this->parent);
          if (!parent)
             return;
          auto i = parent->index_of_item(this);
+         static_assert(std::is_signed_v<decltype(i)>);
          if (--i < 0)
             return;
-         std::vector<Block*> temp;
          for (; i >= 0; i--) {
-            auto sibling = parent->items[i];
-            auto block   = dynamic_cast<Block*>(sibling);
+            auto* sibling = parent->items[i];
+            auto* block   = dynamic_cast<Block*>(sibling);
             if (!block)
                break;
             switch (block->type) {
                case Type::if_block:
                case Type::altif_block:
                case Type::alt_block:
-                  temp.push_back(block);
+                  out.push_back(block);
             }
             if (block->type != Type::altif_block)
                break;
          }
-         out.reserve(temp.size());
-         for (auto it = temp.rbegin(); it != temp.rend(); ++it)
-            out.push_back(*it);
+         std::reverse(out.begin(), out.end());
       }
       void Block::make_alt_of(const Block& other) {
          size_t size_e = other.conditions_alt.size();
          size_t size_c = other.conditions.size();
+         /*//
+         //
+         // Don't do this. Given a new `alt` or `altif` block, we call this function 
+         // once per preceding `alt`, `altif`, or `if` block (up to and not past the 
+         // first seen `if` block). If we copy the conditions-alt from the former 
+         // two block types, then we end up duplicating the negated conditions as 
+         // you add more branches, i.e.
+         //
+         //    if a then
+         //    altif b then
+         //    altif c then
+         //    end
+         //
+         // compiles as
+         //
+         //    if a then
+         //    end
+         //    if not a and b then
+         //    end
+         //    if not a and not a and not b and c then
+         //    end
+         //    if not a and not a and not b and not a and not b and not c then
+         //    end
+         //
+         // which is obviously wrong.
+         //
          this->conditions_alt.reserve(this->conditions_alt.size() + size_e + size_c);
          for (size_t i = 0; i < size_e; ++i) {
             auto cnd   = other.conditions_alt[i];
@@ -249,6 +274,7 @@ namespace Megalo {
             if (i == size_e - 1)
                clone->next_is_or = false;
          }
+         //*/
          for (size_t i = 0; i < size_c; ++i) {
             auto cnd   = other.conditions[i];
             auto clone = cnd->clone();
@@ -540,13 +566,30 @@ namespace Megalo {
             body = &this->inlined_trigger->data;
          }
          {  // Conditions on "if" blocks
+
+            bool is_top_level = dynamic_cast<Script::Block*>(this->parent) == nullptr;
+            //
+            // Technically, we've already compiled our conditions, but we haven't placed them 
+            // into a compiled trigger. We'll be doing that here.
+            //
+            // For top-level conditions, we need to retain the opcodes we compile so that 
+            // top-level alt(if) branches can see and invert them. However, Statement::opcode 
+            // is an owning pointer: if we retain the opcodes, we'll also delete them when we 
+            // get destroyed. To prevent that from breaking our compiled triggers, we'll have 
+            // to clone the condition opcodes.
+            //
+
             auto& count = body->raw.conditionCount; // multiple Blocks can share one Trigger, so let's co-opt this field to keep track of the or-group. it'll be reset when we save the variant anyway
             for (auto item : this->conditions_alt) {
                auto cnd = dynamic_cast<Condition*>(item->opcode);
                if (cnd) {
-                  body->opcodes.push_back(cnd);
                   cnd->or_group = count;
-                  item->opcode = nullptr;
+                  if (is_top_level) {
+                     body->opcodes.push_back(cnd->clone());
+                  } else {
+                     body->opcodes.push_back(cnd);
+                     item->opcode = nullptr;
+                  }
                }
                if (!item->next_is_or)
                   count += 1;
@@ -554,9 +597,13 @@ namespace Megalo {
             for (auto item : this->conditions) {
                auto cnd = dynamic_cast<Condition*>(item->opcode);
                if (cnd) {
-                  body->opcodes.push_back(cnd);
                   cnd->or_group = count;
-                  item->opcode = nullptr;
+                  if (is_top_level) {
+                     body->opcodes.push_back(cnd->clone());
+                  } else {
+                     body->opcodes.push_back(cnd);
+                     item->opcode = nullptr;
+                  }
                }
                if (!item->next_is_or)
                   count += 1;
@@ -585,6 +632,12 @@ namespace Megalo {
                block->compile(compiler);
 
                if (child_is_inline) {
+                  if (!block->inlined_trigger) {
+                     //
+                     // This can happen if the inlined block was empty.
+                     //
+                     continue;
+                  }
                   auto* call = new Action;
                   body->opcodes.push_back(call);
                   call->function = &actionFunction_runInlineTrigger;
@@ -3053,27 +3106,6 @@ namespace Megalo {
                   break;
             }
             ++i; // convert from "index of last alias to keep" to "number of aliases to keep"
-            if (i < size) {
-               this->aliases_in_scope.resize(i);
-
-               // keep track of what temporaries are allocated to aliases
-               this->temporary_allocated_state.is_allocated = {};
-               for (const auto* alias : this->aliases_in_scope) {
-                  if (!alias->via_allocate)
-                     continue;
-                  if (!alias->target)
-                     continue;
-                  if (alias->target->resolved.top_level.is_temporary) {
-                     this->temporary_allocated_state.is_allocated.mark_variable(
-                        variable_scope::temporary,
-                        getVariableTypeForTypeinfo(alias->target->resolved.top_level.type),
-                        alias->target->resolved.top_level.index
-                     );
-                  }
-               }
-               this->temporary_allocated_state.is_initialized &= this->temporary_allocated_state.is_allocated;
-
-            }
          }
       }
       {  // The block's contained enums are going out of scope.
@@ -3429,17 +3461,6 @@ namespace Megalo {
       bool  warned_on_top_level_function = false;
       bool  is_allocated_temporary       = new_alias.via_allocate && new_alias.target->resolved.top_level.is_temporary;
 
-      if (is_allocated_temporary) {
-         auto vt = getVariableTypeForTypeinfo(new_alias.target->resolved.top_level.type);
-         if (vt != variable_type::not_a_variable) {
-            this->temporary_allocated_state.is_allocated.mark_variable(
-               variable_scope::temporary,
-               vt,
-               new_alias.target->resolved.top_level.index
-            );
-         }
-      }
-
       auto* udf_block = this->block->get_nearest_function();
       while (udf_block != nullptr) {
          for (auto& in_scope : this->functions_in_scope) {
@@ -3599,6 +3620,36 @@ namespace Megalo {
       }
    }
 
+   void Compiler::_set_up_branch_conditions_for_alt(Script::Block& alt, bool is_top_level) {
+      std::vector<Script::Block*> blocks;
+      if (is_top_level) {
+         //
+         // HACK: We (mostly) forget about top-level blocks because we compile them right 
+         // when they close. That means that we have to look elsewhere to get a top-level 
+         // alt(if) block's previous sibling(s).
+         //
+         auto& list = this->already_compiled_blocks;
+         for (auto it = list.rbegin(); it != list.rend(); ++it) {
+            auto* block = dynamic_cast<Script::Block*>(*it);
+            if (!block)
+               break;
+            switch (block->type) {
+               case Script::Block::Type::if_block:
+               case Script::Block::Type::altif_block:
+               case Script::Block::Type::alt_block:
+                  blocks.push_back(block);
+            }
+            if (block->type != Script::Block::Type::altif_block)
+               break;
+         }
+         std::reverse(blocks.begin(), blocks.end());
+      } else {
+         alt.get_ifs_for_alt(blocks);
+      }
+      for (auto block : blocks)
+         alt.make_alt_of(*block);
+   }
+   //
    void Compiler::_handleKeyword_Alt(const pos start) {
       if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::altif_block) {
          auto prev = this->block->item(-1);
@@ -3606,6 +3657,8 @@ namespace Megalo {
          if (p_bl) {
             if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::altif_block)
                this->raise_fatal("Unexpected \"alt\". This keyword should not be preceded by the \"end\" keyword.");
+            else if (p_bl->type == Script::Block::Type::alt_block)
+               this->raise_fatal("Unexpected \"altif\". You cannot attach more \"altif\" or \"alt\" blocks to an \"alt\" block.");
          }
          this->raise_fatal("Unexpected \"alt\".");
          return;
@@ -3614,17 +3667,15 @@ namespace Megalo {
          this->raise_fatal("Unexpected \"alt\".");
          return;
       }
+
+      bool is_top_level = this->block == this->root;
+
       auto item = new Script::Block;
       item->type = Script::Block::Type::alt_block;
       item->set_start(start);
       this->block->insert_item(item);
       this->_openBlock(item);
-      {
-         std::vector<Script::Block*> blocks;
-         item->get_ifs_for_alt(blocks);
-         for (auto block : blocks)
-            item->make_alt_of(*block);
-      }
+      this->_set_up_branch_conditions_for_alt(*item, is_top_level);
    }
    void Compiler::_handleKeyword_AltIf(const pos start) {
       if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::altif_block) {
@@ -3633,6 +3684,8 @@ namespace Megalo {
          if (p_bl) {
             if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::altif_block)
                this->raise_fatal("Unexpected \"altif\". This keyword should not be preceded by the \"end\" keyword.");
+            else if (p_bl->type == Script::Block::Type::alt_block)
+               this->raise_fatal("Unexpected \"altif\". You cannot attach more \"altif\" or \"alt\" blocks to an \"alt\" block.");
          }
          this->raise_fatal("Unexpected \"altif\".");
          return;
@@ -3641,17 +3694,15 @@ namespace Megalo {
          this->raise_fatal("Unexpected \"altif\".");
          return;
       }
+
+      bool is_top_level = this->block == this->root;
+
       auto item = new Script::Block;
       item->type = Script::Block::Type::altif_block;
       item->set_start(start);
       this->block->insert_item(item);
       this->_openBlock(item);
-      {
-         std::vector<Script::Block*> blocks;
-         item->get_ifs_for_alt(blocks);
-         for (auto block : blocks)
-            item->make_alt_of(*block);
-      }
+      this->_set_up_branch_conditions_for_alt(*item, is_top_level);
       this->_parseBlockConditions();
    }
    

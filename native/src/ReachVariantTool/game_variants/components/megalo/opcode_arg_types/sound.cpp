@@ -373,12 +373,12 @@ namespace Megalo {
             DetailedEnumValueInfo::make_description("Voiceover for the Spartans played upon winning Phase 3."),
             DetailedEnumValueInfo::make_subtitle("Outstanding, Spartans. We have the package. Let's move.")
          ),
-         DetailedEnumValue("inv_boneyard_vo_spartan_p3_loss",
+         DetailedEnumValue("inv_boneyard_vo_spartan_p4_start",
             DetailedEnumValueInfo::make_map_tag('snd!', "sound/dialog/invasion/bone_sp_ph3_defeat"),
             DetailedEnumValueInfo::make_description("An unused voiceover for the Spartans, apparently meant to be played at the start of a fourth phase, in which the Covenant must wait for evac."),
             DetailedEnumValueInfo::make_subtitle("Phantom on approach; do not let them get that core on board, Spartans!")
          ),
-         DetailedEnumValue("inv_spire_vo_covenant_p3_loss",
+         DetailedEnumValue("inv_spire_vo_covenant_p4_start",
             DetailedEnumValueInfo::make_map_tag('snd!', "sound/dialog/invasion/isle_cv_ph3_defeat"),
             DetailedEnumValueInfo::make_description("An unused voiceover for the Covenant, apparently meant to be played at the start of a fourth phase, in which the Spartans must wait for evac."),
             DetailedEnumValueInfo::make_subtitle("Damn! The humans have sent for air transport! Do not let them escape!")
@@ -448,7 +448,7 @@ namespace Megalo {
       //
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueSound>
-   ).import_names(enums::sound).import_names({ "none" });
+   ).import_names(enums::sound).import_names({ "none", "reinforcements" });
 
    bool OpcodeArgValueSound::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->value = stream.read_bits(ce_bitcount) - 1;
@@ -508,6 +508,9 @@ namespace Megalo {
          if (word.compare("none", Qt::CaseInsensitive) == 0) {
             this->value = -1;
             return arg_compile_result::success();
+         }
+         if (word.compare("reinforcements", Qt::CaseInsensitive) == 0) { // HACK: MCC renamed and repurposed this sound entry
+            word = "firefight_lives_added";
          }
          value = enums::sound.lookup(word);
          if (value < 0)

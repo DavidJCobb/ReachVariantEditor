@@ -42,6 +42,7 @@ void EOFBlock::write(cobb::bytewriter& stream) const noexcept {
    ReachFileBlock::write(stream);
    stream.write(myPos, cobb::endian::big); // NOTE: in some files this is little-endian, without the block having a different version or flags
    stream.write(uint8_t(0));
+   this->write_postprocess(stream);
 }
 
 bool ReachBlockATHR::read(reach_block_stream& stream) noexcept {
@@ -60,6 +61,7 @@ void ReachBlockATHR::write(cobb::bytewriter& stream) const noexcept {
    stream.write(this->data.buildNumber);
    stream.write(this->data.unk14);
    stream.write(this->data.buildString);
+   this->header.write_postprocess(stream);
 }
 
 bool ReachBlockMPVR::read(reach_block_stream& reader) {
@@ -171,10 +173,16 @@ bool ReachBlockMPVR::read_mglo(const void* data, size_t size) {
    if (!this->data->read(reader)) {
       error_report.state = GameEngineVariantLoadError::load_state::failure;
       if (error_report.reason == GameEngineVariantLoadError::load_failure_reason::none)
-         error_report.reason == GameEngineVariantLoadError::load_failure_reason::invalid_mpvr_data;
+         error_report.reason = GameEngineVariantLoadError::load_failure_reason::invalid_mpvr_data;
       return false;
    }
    this->header.found.signature = 'mpvr';
+   this->header.found.version = 0x36;
+   this->header.found.flags = 1;
+   {
+      auto* mp = (GameVariantDataMultiplayer*)this->data;
+      mp->engineVersion = -1;
+   }
    if (!reader.is_at_end()) {
       if (!reader.is_in_bounds()) {
          error_report.state  = GameEngineVariantLoadError::load_state::failure;
@@ -406,10 +414,16 @@ bool GameVariant::read_mglo(const void* data, size_t size) {
       error_report.state = GameEngineVariantLoadError::load_state::failure;
       return false;
    }
+
    this->blamHeader.header.found = this->blamHeader.header.expected;
    this->blamHeader.header.found.version = 1;
    this->blamHeader.header.found.flags   = 2;
    this->blamHeader.data.unk0C = 0xFFFE;
+
+   this->eofBlock.found = this->eofBlock.expected;
+   this->eofBlock.found.flags   = 1;
+   this->eofBlock.found.version = 1;
+
    this->multiplayer.type = ReachGameEngine::multiplayer;
    if (auto mp = this->get_multiplayer_data()) {
       if (error_report.state == GameEngineVariantLoadError::load_state::failure) {

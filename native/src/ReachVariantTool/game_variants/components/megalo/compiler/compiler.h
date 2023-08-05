@@ -282,12 +282,6 @@ namespace Megalo {
          std::vector<Script::Alias*> aliases_in_scope; // unowned pointers; the aliases are owned by their containing Blocks
          std::vector<Script::UserDefinedEnum> enums_in_scope;
          std::vector<Script::UserDefinedFunction> functions_in_scope;
-         struct {
-            // see Compiler::__after_compiled_statement comments
-
-            Script::variable_usage_set is_allocated;
-            Script::variable_usage_set is_initialized;
-         } temporary_allocated_state;
          std::vector<Script::Block*> already_compiled_blocks;
          GameVariantDataMultiplayer& variant;
          //
@@ -448,6 +442,9 @@ namespace Megalo {
             Script::Alias* _allocate_alias(QString name, const _allocation_request_type&);
             const Script::Alias* _alias_is_explicit_reference_to_allocated(const Script::Alias& new_alias);
             void _store_new_alias(Script::Alias&);
+         #pragma endregion
+         #pragma region Alt(if) helpers
+            void _set_up_branch_conditions_for_alt(Script::Block& alt, bool is_top_level);
          #pragma endregion
          #pragma region Variable declaration helpers
             void _declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified);

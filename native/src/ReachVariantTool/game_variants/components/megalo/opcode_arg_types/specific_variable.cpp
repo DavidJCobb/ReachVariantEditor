@@ -122,7 +122,7 @@ namespace Megalo {
          OpcodeArgTypeinfo::default_factory<OpcodeArgValueObjectPlayerVariable>
       ).set_accessor_proxy_types({
          &OpcodeArgValueObject::typeinfo
-      });
+      }).import_names({ "none" });
       //
       bool OpcodeArgValueObjectPlayerVariable::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
          if (!this->object.read(stream, mp))
@@ -167,6 +167,10 @@ namespace Megalo {
          int32_t index;
          if (!arg.extract_integer_literal(index)) {
             auto word    = arg.extract_word();
+            if (word.compare("none", Qt::CaseInsensitive) == 0) {
+               this->playerIndex = -1;
+               return arg_compile_result::success();
+            }
             auto working = std::make_unique<Script::VariableReference>(compiler, word);
             working->resolve(compiler, true); // Pass (true) to use alias-resolving logic, so that typename.typename[n] is allowed
             if (working->is_invalid)
