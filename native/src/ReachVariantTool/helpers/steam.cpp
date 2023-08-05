@@ -167,7 +167,7 @@ namespace {
             if (this->root.children.empty())
                return {};
             const auto* base = this->root.children[0];
-            if (cobb::strieq_ascii(base->name, "libraryfolders"))
+            if (!cobb::strieq_ascii(base->name, "libraryfolders"))
                return {};
 
             std::string app_id_string;
@@ -221,7 +221,7 @@ namespace {
             if (this->root.children.empty())
                return {};
             const auto* base = this->root.children[0];
-            if (cobb::strieq_ascii(base->name, "AppState"))
+            if (!cobb::strieq_ascii(base->name, "AppState"))
                return {};
 
             for (auto* child : base->children) {
