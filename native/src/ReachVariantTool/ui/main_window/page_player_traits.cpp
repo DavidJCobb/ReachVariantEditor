@@ -64,7 +64,7 @@ PagePlayerTraits::PagePlayerTraits(QWidget* parent) : QWidget(parent) {
       reach_main_window_setup_combobox(playerTraits, this->ui.fieldMovementSpeed,   movement.speed);
       reach_main_window_setup_spinbox(playerTraits, this->ui.fieldJumpHeight,       movement.jumpHeight);
       reach_main_window_setup_combobox(playerTraits, this->ui.fieldGravity,         movement.gravity);
-      reach_main_window_setup_combobox(playerTraits, this->ui.fieldMovementUnknown, movement.unknown);
+      reach_main_window_setup_combobox(playerTraits, this->ui.fieldMovementUnknown, movement.doubleJump);
       reach_main_window_setup_combobox(playerTraits, this->ui.fieldVehicleUse,      movement.vehicleUsage);
    }
    {  // Appearance
@@ -127,7 +127,7 @@ void PagePlayerTraits::updateFromVariant(ReachPlayerTraits* data) {
       reach_main_window_update_combobox(this->ui.fieldMovementSpeed,   movement.speed);
       reach_main_window_update_spinbox(this->ui.fieldJumpHeight,       movement.jumpHeight);
       reach_main_window_update_combobox(this->ui.fieldGravity,         movement.gravity);
-      reach_main_window_update_combobox(this->ui.fieldMovementUnknown, movement.unknown);
+      reach_main_window_update_combobox(this->ui.fieldMovementUnknown, movement.doubleJump);
       reach_main_window_update_combobox(this->ui.fieldVehicleUse,      movement.vehicleUsage);
    }
    {  // Appearance

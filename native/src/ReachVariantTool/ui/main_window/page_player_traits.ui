@@ -264,11 +264,6 @@
            <string>400%</string>
           </property>
          </item>
-         <item>
-          <property name="text">
-           <string>Unknown 7</string>
-          </property>
-         </item>
         </widget>
        </item>
        <item row="2" column="1">
@@ -563,16 +558,6 @@
            <string>100%</string>
           </property>
          </item>
-         <item>
-          <property name="text">
-           <string>100%(?)</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>100%(?)</string>
-          </property>
-         </item>
         </widget>
        </item>
        <item row="9" column="1">
@@ -864,7 +849,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Default</string>
+           <string>Not With Objectives</string>
           </property>
          </item>
          <item>
@@ -914,7 +899,7 @@
        <item row="3" column="0">
         <widget class="QLabel" name="labelMovementUnknown">
          <property name="text">
-          <string>Unknown</string>
+          <string>Double Jump (Unused)</string>
          </property>
          <property name="buddy">
           <cstring>fieldMovementUnknown</cstring>
@@ -990,12 +975,12 @@
          </item>
          <item>
           <property name="text">
-           <string>130% (Unverified)</string>
+           <string>130%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>140% (Unverified)</string>
+           <string>140%</string>
           </property>
          </item>
          <item>
@@ -1005,22 +990,22 @@
          </item>
          <item>
           <property name="text">
-           <string>160% (Unverified)</string>
+           <string>160%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>170% (Unverified)</string>
+           <string>170%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>180% (Unverified)</string>
+           <string>180%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>190% (Unverified)</string>
+           <string>190%</string>
           </property>
          </item>
          <item>
@@ -1113,17 +1098,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Unknown 1</string>
+           <string>Disabled</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Unknown 2</string>
+           <string>Enabled</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Unknown 3</string>
+           <string>Enabled + Lunge</string>
           </property>
          </item>
         </widget>

@@ -25,10 +25,10 @@ namespace reach {
       drop_shield      =  9
    };
    enum class ability_usage : uint8_t {
-      unchanged = 0,
-      disabled  = 1,
-      normal    = 2, // "default"?
-      enabled   = 3,
+      unchanged           = 0,
+      disabled            = 1,
+      not_with_objectives = 2,
+      enabled             = 3,
    };
    enum class active_camo : uint8_t {
       unchanged = 0,
@@ -55,19 +55,19 @@ namespace reach {
       enabled   = 2,
    };
    enum class damage_multiplier : uint8_t {
-      unchanged =  0,
-      value_000 =  1,
-      value_025 =  2,
-      value_050 =  3,
-      value_075 =  4,
-      value_090 =  5,
-      value_100 =  6,
-      value_110 =  7,
-      value_125 =  8,
-      value_150 =  9,
-      value_200 = 10,
-      value_300 = 11,
-      // bitfield can hold 12, 13, 14, and 15, though they're likely not valid
+      unchanged    =  0,
+      value_000    =  1,
+      value_025    =  2,
+      value_050    =  3,
+      value_075    =  4,
+      value_090    =  5,
+      value_100    =  6,
+      value_110    =  7,
+      value_125    =  8,
+      value_150    =  9,
+      value_200    = 10,
+      value_300    = 11,
+      //instant_kill = 12, // listed in HREK/Foundation, but MCC doesn't seem to recognize it as valid
    };
    enum class damage_resist : uint8_t {
       unchanged    =  0,
@@ -84,6 +84,12 @@ namespace reach {
       value_2000   = 11,
       invulnerable = 12,
       // bitfield can hold 13, 14, and 15, though they're likely not valid
+   };
+   enum class double_jump : uint8_t { // unused
+      unchanged = 0,
+      disabled  = 1,
+      enabled   = 2,
+      enabled_plus_lunge = 3,
    };
    enum class forced_color : uint8_t {
       unchanged =  0,
@@ -157,13 +163,13 @@ namespace reach {
       value_100 =  6,
       value_110 =  7,
       value_120 =  8,
-      //  9 == 130?
-      // 10 == 140?
+      value_130,
+      value_140,
       value_150 = 11,
-      // 12 == 160?
-      // 13 == 170?
-      // 14 == 180?
-      // 15 == 190?
+      value_160,
+      value_170,
+      value_180,
+      value_190,
       value_200 = 16,
       value_300 = 17,
       // bitfield can hold up to 31, though values past the known end likely aren't valid
@@ -175,7 +181,11 @@ namespace reach {
       value_100 = 3,
       value_150 = 4,
       value_200 = 5,
-      // bitfield can hold up to 15, though values past the known end likely aren't valid
+      //
+      // NOTE: As of this writing, Foundation/HREK lists values in 10% increments from 
+      // 100% to 200%. These values are not considered valid by MCC, although the option 
+      // certainly has enough bits in-file for them.
+      //
    };
    enum class radar_range : uint8_t {
       unchanged  = 0,
@@ -221,6 +231,14 @@ namespace reach {
       value_125 = 12,
       value_150 = 13,
       value_200 = 14,
+   };
+   enum class vampirism_rate : uint8_t {
+      unchanged = 0,
+      value_000,
+      value_010,
+      value_025,
+      value_050,
+      value_100,
    };
    enum class vehicle_usage : uint8_t {
       unchanged      = 0,
@@ -284,9 +302,9 @@ class ReachPlayerTraits {
          cobb::bitnumber<4, reach::shield_rate>       shieldRate     = reach::shield_rate::unchanged;
          cobb::bitnumber<4, reach::shield_rate>       overshieldRate = reach::shield_rate::unchanged; // recharge rate for overshield powerup? or for overshields in general?
          cobb::bitnumber<2, reach::bool_trait>        headshotImmune = reach::bool_trait::unchanged;
-         cobb::bitnumber<3, uint8_t> vampirism;
-         cobb::bitnumber<2, reach::bool_trait> assassinImmune = reach::bool_trait::unchanged;
-         cobb::bitnumber<2, reach::bool_trait> cannotDieFromDamage;
+         cobb::bitnumber<3, reach::vampirism_rate>    vampirism      = reach::vampirism_rate::unchanged;
+         cobb::bitnumber<2, reach::bool_trait>        assassinImmune = reach::bool_trait::unchanged;
+         cobb::bitnumber<2, reach::bool_trait>        cannotDieFromDamage = reach::bool_trait::unchanged;
       } defense;
       struct {
          cobb::bitnumber<4, reach::damage_multiplier> damageMult = reach::damage_multiplier::unchanged;
@@ -306,7 +324,7 @@ class ReachPlayerTraits {
          cobb::bitnumber<5, reach::movement_speed> speed = reach::movement_speed::unchanged;
          cobb::bitnumber<4, reach::player_gravity> gravity = reach::player_gravity::unchanged;
          cobb::bitnumber<4, reach::vehicle_usage> vehicleUsage = reach::vehicle_usage::unchanged;
-         cobb::bitnumber<2, uint8_t> unknown; // Assembly and KSoft both call this "double jump," but I couldn't replicate that in testing
+         cobb::bitnumber<2, reach::double_jump> doubleJump = reach::double_jump::unchanged;
          cobb::bitnumber<9, int16_t, false, std::true_type, -1> jumpHeight = -1;
       } movement;
       struct {

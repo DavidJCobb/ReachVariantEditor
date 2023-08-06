@@ -29,7 +29,7 @@
    bitcount += decltype(movement.speed)::bitcount;
    bitcount += decltype(movement.gravity)::bitcount;
    bitcount += decltype(movement.vehicleUsage)::bitcount;
-   bitcount += decltype(movement.unknown)::bitcount;
+   bitcount += decltype(movement.doubleJump)::bitcount;
    bitcount += decltype(movement.jumpHeight)::bitcount + 1; // don't forget the presence bit
    //
    bitcount += decltype(appearance.activeCamo)::bitcount;
@@ -181,7 +181,7 @@ void ReachPlayerTraits::read(cobb::ibitreader& stream) noexcept {
    m.speed.read(stream);
    m.gravity.read(stream);
    m.vehicleUsage.read(stream);
-   m.unknown.read(stream);
+   m.doubleJump.read(stream);
    m.jumpHeight.read(stream);
    //
    a.activeCamo.read(stream);
@@ -228,7 +228,7 @@ void ReachPlayerTraits::write(cobb::bitwriter& stream) const noexcept {
    m.speed.write(stream);
    m.gravity.write(stream);
    m.vehicleUsage.write(stream);
-   m.unknown.write(stream);
+   m.doubleJump.write(stream);
    m.jumpHeight.write(stream);
    //
    a.activeCamo.write(stream);

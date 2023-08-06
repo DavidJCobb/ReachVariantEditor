@@ -32,7 +32,7 @@ PageFFScenario::PageFFScenario(QWidget* parent) : QWidget(parent) {
       GameVariantDataFirefight::mcc_extension_flags::network_test_1
    );
    reach_main_window_setup_spinbox(firefightData, this->ui.unkB, unkB);
-   reach_main_window_setup_spinbox(firefightData, this->ui.unkC, unkC);
+   reach_main_window_setup_spinbox(firefightData, this->ui.bonusTarget, bonusTarget);
    reach_main_window_setup_spinbox(firefightData, this->ui.unkD, unkD);
    #include "widget_macros_setup_end.h"
    //
@@ -66,7 +66,7 @@ void PageFFScenario::updateFromVariant(GameVariant* variant) {
       GameVariantDataFirefight::mcc_extension_flags::network_test_1
    );
    reach_main_window_update_spinbox(this->ui.unkB, unkB);
-   reach_main_window_update_spinbox(this->ui.unkC, unkC);
+   reach_main_window_update_spinbox(this->ui.bonusTarget, bonusTarget);
    reach_main_window_update_spinbox(this->ui.unkD, unkD);
    #include "widget_macros_update_end.h"
    //

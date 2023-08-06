@@ -24,7 +24,7 @@ class FFSkullListWidget : public QWidget {
       Ui::FFSkullListWidget ui;
       skull_list_t* target = nullptr;
       //
-      void _setupCheckbox(QCheckBox*, reach::firefight_skull::type);
-      void _updateCheckbox(QCheckBox*, reach::firefight_skull::type);
+      void _setupCheckbox(QCheckBox*, reach::firefight_skull);
+      void _updateCheckbox(QCheckBox*, reach::firefight_skull);
       void _updateFromTarget();
 };

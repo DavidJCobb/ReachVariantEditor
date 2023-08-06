@@ -88,10 +88,9 @@
             <dd>Scales the player's Jump Height. The "Unchanged" value is "below" zero.</dd>
          <dt>Player Gravity</dt>
             <dd>Scales the player's gravity.</dd>
-         <dt>Unknown</dt>
-            <dd>Community reverse-engineering efforts identify this as enabling or 
-            disabling the ability to double-jump, but testing fails to produce the 
-            expected result.</dd>
+         <dt>Double Jump (Unused)</dt>
+            <dd>This option was intended to control the player's ability to double-jump. 
+            However, in testing, it has no effect.</dd>
          <dt>Vehicle Use</dt>
             <dd>Controls whether the player can enter vehicles, and which seats they 
             can enter.</dd>

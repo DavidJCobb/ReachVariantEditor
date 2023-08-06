@@ -13,23 +13,19 @@
       </p>
       <dl>
          <dt>Team Scoring Method</dt>
-            <dd>Unknown. This may be related to the oldest Halo games' options to 
-            control how a team's score was computed from the scores of its players, 
-            but testing is pending. <i>Halo: Reach</i> official files seem to use 
-            the value 0.</dd>
+            <dd>Control whether a team's score is the sum of its members' scores, 
+            or equal to the highest or lowest score among them.</dd>
          <dt>Designator Switch Type</dt>
             <dd>
-               <p>This option controls how teams are remapped across rounds, but the 
-               meanings of its values are unknown.</p>
+               <p>This option controls how teams are remapped across rounds.</p>
                <p>After each round in a match, teams will swap places; for example, in 
                offense/defense game variants with two teams, each team will take turns 
                playing the "defense" role. The game engine takes care of this behavior 
                by remapping teams internally: the gametype script always treats "Red 
                Team" (or <code>team[0]</code> internally) as Defense, and the game 
                engine just lies about which team <em>is</em> "Red Team."</p>
-               <p>This option, then, would presumably determine how teams are remapped. 
-               However, it is impossible to fully test its meanings without gathering 
-               up eight people to play game variants in-game.</p>
+               <p>This option, then, determines whether and how that remapping actually 
+               occurs.</p>
             </dd>
       </dl>
    </body>

@@ -114,7 +114,14 @@ class ReachCGSocialOptions {
             friendly_fire     = 0x10,
          };
       };
-      //
+
+      struct team_flag {
+         enum {
+            enabled        = 0x01,
+            balancing_only = 0x02,
+         };
+      };
+      
    public:
       cobb::bitbool observers = false;
       cobb::bitnumber<2, uint8_t> teamChanges; // enum: disabled; enabled; balancing only
@@ -173,11 +180,17 @@ class ReachCGTeamOptions {
             spartans_vs_elites = 4,
          };
       };
+
+      enum class team_designator_switch_type : uint8_t {
+         none,
+         random,
+         rotate,
+      };
       
    public:
       cobb::bitnumber<3, scoring_modes> scoring = scoring_modes::sum; // values above 3 are treated as 0
       cobb::bitnumber<3, species::type> species;
-      cobb::bitnumber<2, uint8_t> designatorSwitchType;
+      cobb::bitnumber<2, team_designator_switch_type> designatorSwitchType = team_designator_switch_type::rotate;
       ReachTeamData teams[8];
 
       bool read(cobb::ibitreader& stream) noexcept;

@@ -26,17 +26,67 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="8" column="0">
-    <widget class="QCheckBox" name="skullCustomYellow">
+   <item row="2" column="1">
+    <widget class="QCheckBox" name="skullFamine">
      <property name="toolTip">
-      <string>A customizable skull whose effects can be configured through game variant settings.</string>
+      <string>Dropped weapons lose half of their ammo or charge.</string>
      </property>
      <property name="text">
-      <string>Custom Yellow</string>
+      <string>Famine</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
+   <item row="7" column="0">
+    <widget class="QCheckBox" name="skullTilt">
+     <property name="toolTip">
+      <string>Weapons' strengths and weaknesses are amplified.</string>
+     </property>
+     <property name="text">
+      <string>Tilt</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QCheckBox" name="skullIWHBYD">
+     <property name="toolTip">
+      <string>Rare dialogue becomes more common and vice versa, for both enemies and players.</string>
+     </property>
+     <property name="text">
+      <string>IWHBYD</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QCheckBox" name="skullMythic">
+     <property name="toolTip">
+      <string>NPC enemy health is doubled.</string>
+     </property>
+     <property name="text">
+      <string>Mythic</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QCheckBox" name="skullCowbell">
+     <property name="toolTip">
+      <string>Physics effects are tripled, though physics-related damage is unchanged.</string>
+     </property>
+     <property name="text">
+      <string>Cowbell</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QCheckBox" name="skullIron">
+     <property name="toolTip">
+      <string>Prevents killed players from respawning, even if they have lives remaining. This SHOULD NOT be enabled for non-bonus waves, or it will softlock the game if all Spartans die but still have lives remaining.</string>
+     </property>
+     <property name="text">
+      <string>Iron</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
     <widget class="QCheckBox" name="skullGruntParty">
      <property name="toolTip">
       <string>Killing a Grunt with a headshot produces an explosion of confetti that can damage other enemies.</string>
@@ -46,27 +96,17 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
-    <widget class="QCheckBox" name="skullToughLuck">
+   <item row="3" column="0">
+    <widget class="QCheckBox" name="skullFog">
      <property name="toolTip">
-      <string>NPC enemies dodge dangerous attacks more often, and Grunts are less likely to flee or attempt suicide bombings.</string>
+      <string>Players' motion trackers are disabled.</string>
      </property>
      <property name="text">
-      <string>Tough Luck</string>
+      <string>Fog</string>
      </property>
     </widget>
    </item>
-   <item row="7" column="0">
-    <widget class="QCheckBox" name="skullCustomRed">
-     <property name="toolTip">
-      <string>A customizable skull whose effects can be configured through game variant settings.</string>
-     </property>
-     <property name="text">
-      <string>Custom Red</string>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="0" colspan="2">
+   <item row="11" column="0" colspan="2">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -79,107 +119,17 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="1">
-    <widget class="QCheckBox" name="skullFamine">
-     <property name="toolTip">
-      <string>Dropped weapons lose half of their ammo or charge.</string>
-     </property>
-     <property name="text">
-      <string>Famine</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
-    <widget class="QCheckBox" name="skullTilt">
-     <property name="toolTip">
-      <string>Weapons' strengths and weaknesses are amplified.</string>
-     </property>
-     <property name="text">
-      <string>Tilt</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QCheckBox" name="skullCatch">
-     <property name="toolTip">
-      <string>Enemies throw grenades twice as often, and drop two grenades when killed.</string>
-     </property>
-     <property name="text">
-      <string>Catch</string>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="1">
-    <widget class="QCheckBox" name="skullCustomBlue">
+   <item row="10" column="0">
+    <widget class="QCheckBox" name="skullCustomYellow">
      <property name="toolTip">
       <string>A customizable skull whose effects can be configured through game variant settings.</string>
      </property>
      <property name="text">
-      <string>Custom Blue</string>
+      <string>Custom Yellow</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QCheckBox" name="skullCowbell">
-     <property name="toolTip">
-      <string>Physics effects are tripled, though physics-related damage is unchanged.</string>
-     </property>
-     <property name="text">
-      <string>Cowbell</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QCheckBox" name="skullBlackEye">
-     <property name="toolTip">
-      <string>Players can only recharge their shields by meleeing and assassinating enemies.</string>
-     </property>
-     <property name="text">
-      <string>Black Eye</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QCheckBox" name="skullFog">
-     <property name="toolTip">
-      <string>Players' motion trackers are disabled.</string>
-     </property>
-     <property name="text">
-      <string>Fog</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QCheckBox" name="skullIron">
-     <property name="toolTip">
-      <string>Prevents killed players from respawning, even if they have lives remaining. This SHOULD NOT be enabled for non-bonus waves, or it will softlock the game if all Spartans die but still have lives remaining.</string>
-     </property>
-     <property name="text">
-      <string>Iron</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QCheckBox" name="skullIWHBYD">
-     <property name="toolTip">
-      <string>Rare dialogue becomes more common and vice versa, for both enemies and players.</string>
-     </property>
-     <property name="text">
-      <string>IWHBYD</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QCheckBox" name="skullMythic">
-     <property name="toolTip">
-      <string>NPC enemy health is doubled.</string>
-     </property>
-     <property name="text">
-      <string>Mythic</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="1">
+   <item row="5" column="1">
     <widget class="QCheckBox" name="skullThunderstorm">
      <property name="toolTip">
       <string>Increases NPC enemy ranks.</string>
@@ -189,11 +139,73 @@
      </property>
     </widget>
    </item>
+   <item row="9" column="1">
+    <widget class="QCheckBox" name="skullCustomBlue">
+     <property name="toolTip">
+      <string>A customizable skull whose effects can be configured through game variant settings.</string>
+     </property>
+     <property name="text">
+      <string>Custom Blue</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QCheckBox" name="skullCustomRed">
+     <property name="toolTip">
+      <string>A customizable skull whose effects can be configured through game variant settings.</string>
+     </property>
+     <property name="text">
+      <string>Custom Red</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QCheckBox" name="skullToughLuck">
+     <property name="toolTip">
+      <string>NPC enemies dodge dangerous attacks more often, and Grunts are less likely to flee or attempt suicide bombings.</string>
+     </property>
+     <property name="text">
+      <string>Tough Luck</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="skullBlind">
+     <property name="text">
+      <string>Blind</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QCheckBox" name="skullCatch">
+     <property name="toolTip">
+      <string>Enemies throw grenades twice as often, and drop two grenades when killed.</string>
+     </property>
+     <property name="text">
+      <string>Catch</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QCheckBox" name="skullBlackEye">
+     <property name="toolTip">
+      <string>Players can only recharge their shields by meleeing and assassinating enemies.</string>
+     </property>
+     <property name="text">
+      <string>Black Eye</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QCheckBox" name="skullAssassin">
+     <property name="text">
+      <string>Assassin</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>skullBlackEye</tabstop>
-  <tabstop>skullCatch</tabstop>
   <tabstop>skullCowbell</tabstop>
   <tabstop>skullFamine</tabstop>
   <tabstop>skullFog</tabstop>
@@ -204,9 +216,6 @@
   <tabstop>skullThunderstorm</tabstop>
   <tabstop>skullTilt</tabstop>
   <tabstop>skullToughLuck</tabstop>
-  <tabstop>skullCustomRed</tabstop>
-  <tabstop>skullCustomBlue</tabstop>
-  <tabstop>skullCustomYellow</tabstop>
  </tabstops>
  <resources/>
  <connections/>

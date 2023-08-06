@@ -13,14 +13,21 @@ void ReachTeamData::read(cobb::ibitreader& stream) noexcept {
 void ReachTeamData::write(cobb::bitwriter& stream) noexcept {
    this->flags.write(stream);
    this->name.write(stream);
-   if (this->flags & Flags::enabled) {
-      this->initialDesignator.write(stream);
-   } else {
-      //
-      // If a team is disabled but has a non-zero designator, then the gametype is invalid.
-      //
-      decltype(this->initialDesignator) temporary = 0;
-      temporary.write(stream);
+   {
+      auto copy = this->initialDesignator;
+      if (this->flags & Flags::enabled) {
+         if (copy == -1)
+            //
+            // If a team is enabled but has a None designator, then the gametype is invalid.
+            //
+            copy = 8; // Neutral Team
+      } else {
+         //
+         // If a team is disabled but has a non-none designator, then the gametype is invalid.
+         //
+         copy = -1;
+      }
+      copy.write(stream);
    }
    this->spartanOrElite.write(stream);
    this->colorPrimary.write(stream);

@@ -74,7 +74,7 @@ PageMPSettingsTeamSpecific::PageMPSettingsTeamSpecific(QWidget* parent) : QWidge
    reach_main_window_setup_flag_checkbox(multiplayerTeam, this->ui.fieldEnableColorText,      flags, ReachTeamData::Flags::override_color_text);
    reach_main_window_setup_combobox(multiplayerTeam,      this->ui.fieldSpecies,              spartanOrElite);
    reach_main_window_setup_spinbox(multiplayerTeam,       this->ui.fieldFireteamCount,        fireteamCount);
-   reach_main_window_setup_spinbox(multiplayerTeam,       this->ui.fieldInitialDesignator,    initialDesignator);
+   reach_main_window_setup_combobox(multiplayerTeam,      this->ui.fieldInitialDesignator,    initialDesignator);
    QObject::connect(this->ui.fieldButtonColorPrimary,   &QPushButton::clicked, [this]() {
       auto& editor = ReachEditorState::get();
       auto  team   = editor.multiplayerTeam();
@@ -128,9 +128,9 @@ void PageMPSettingsTeamSpecific::updateFromVariant(GameVariant* variant, int8_t 
    reach_main_window_update_flag_checkbox(this->ui.fieldEnableColorPrimary,   flags, ReachTeamData::Flags::override_color_primary);
    reach_main_window_update_flag_checkbox(this->ui.fieldEnableColorSecondary, flags, ReachTeamData::Flags::override_color_secondary);
    reach_main_window_update_flag_checkbox(this->ui.fieldEnableColorText,      flags, ReachTeamData::Flags::override_color_text);
-   reach_main_window_update_combobox(this->ui.fieldSpecies,          spartanOrElite);
+   reach_main_window_update_combobox(this->ui.fieldSpecies,           spartanOrElite);
    reach_main_window_update_spinbox(this->ui.fieldFireteamCount,     fireteamCount);
-   reach_main_window_update_spinbox(this->ui.fieldInitialDesignator, initialDesignator);
+   reach_main_window_update_combobox(this->ui.fieldInitialDesignator, initialDesignator);
    #include "widget_macros_update_end.h"
    this->updateTeamColor(data);
 }

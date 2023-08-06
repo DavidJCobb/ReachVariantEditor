@@ -16,9 +16,14 @@
       </p>
       <img src="round-skulls.png" />
       <dl>
+         <dt>Assassin</dt>
+            <dd>An unused skull that has no name or description in-game, and no readily 
+            apparent effect.</dd>
          <dt>Black Eye</dt>
             <dd>Players can only recharge their shields by meleeing and assassinating 
             enemies.</dd>
+         <dt>Blind</dt>
+            <dd>Players have no HUD or first-person view model.</dd>
          <dt>Catch</dt>
             <dd>Enemies throw grenades twice as often, and drop two grenades when 
             killed.</dd>

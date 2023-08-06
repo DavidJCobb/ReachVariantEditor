@@ -37,17 +37,14 @@
             <dd>Determines the number of "fireteams" on this team.</dd>
          <dt>Initial Designator</dt>
             <dd>
-               <p>Determines how this team definition is mapped to the list of teams 
-               in-game. Valid designators range from 1 to 8. The values chosen for 
-               all enabled teams should not leave any gaps.</p>
                <p>After each round in a match, teams will swap places; for example, in 
                offense/defense game variants with two teams, each team will take turns 
                playing the "defense" role. The game engine takes care of this behavior 
                by remapping teams internally: the gametype script always treats "Red 
                Team" (or <code>team[0]</code> internally) as Defense, and the game 
                engine just lies about which team <em>is</em> "Red Team."</p>
-               <p>This option, then, determines a team's initial identity. Which team 
-               is "Red Team," or <code>team[0]</code>, or "1," in the first round?</p>
+               <p>This option, then, determines a team's initial identity. "Which team 
+               is 'Red Team,' or <code>team[0]</code>, in the first round?"</p>
             </dd>
       </dl>
    </body>
