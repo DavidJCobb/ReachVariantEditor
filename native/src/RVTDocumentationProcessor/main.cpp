@@ -288,6 +288,9 @@ int main(int argc, char *argv[]) {
                      folder.truncate(i);
                   QDir("/").mkpath(folder);
                }
+               if (QFile::exists(to)) { // QFile::copy has no overwrite/force option
+                  QFile::remove(to);
+               }
                QFile::copy(path, to);
             }
          }
