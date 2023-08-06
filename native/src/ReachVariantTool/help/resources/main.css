@@ -44,6 +44,7 @@ main header{margin-bottom:1rem}
    #toc li{margin:0;padding:.1em 0}
    #toc li+li{border-top:1px solid #E0E0E0}
 
+p {margin:1rem 0}
 p, h1, h2, h3, h4, h5, h6{margin:1rem 0}
 /* manage initial/final margins: */
 h1:first-child,
@@ -60,6 +61,10 @@ h4:last-child,
 h5:last-child,
 h6:last-child,
 p:last-child{margin-bottom:0}
+
+section + section > :is(h1,h2,h3,h4,h5,h6,p) {
+   margin-top: 1rem;
+}
 
 .header-permalink{margin-left:1em;font-size:1rem;font-weight:normal}
    .header-permalink::before{content:"🔗"}
@@ -99,3 +104,15 @@ a:visited{color:#938}
 a:link:hover{text-decoration:underline}
 #sidebar a:link:hover{color:#36F;text-decoration:none}
 #sidebar a:visited:hover{color:#B5A}
+
+table{border:1px solid #333;background:#CCC}
+   td, th{padding:.25em .5em;border:1px solid #666;background:#FFF}
+   td{background:#FFF}
+   th{text-align:left;background:#444;color:#FFF;border-color:#EEE #000 #000 #EEE}
+   tr:nth-of-type(2n)>:is(td, th) {background:#EEE}
+
+table{width:80%;margin:0 auto}
+figure table{width:auto}
+
+figure {display:flex;flex-flow:column nowrap;align-items:center;gap:1em;width:80%;margin:1em auto}
+figcaption {}

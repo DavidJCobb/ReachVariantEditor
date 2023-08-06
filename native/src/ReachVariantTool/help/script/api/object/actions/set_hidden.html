@@ -152,7 +152,30 @@
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"hide</span>" <span class="keyword">do</span>
    current_object.set_hidden(true)
 <span class="keyword">end</span></pre>
-
+<h2>Notes</h2>
+<ul>
+   <li>
+               <p>
+                  Hiding an object will also hide all of the other objects attached to them. Calling 
+                  <code>set_hidden(false)</code> on the attached objects will not override this and 
+                  make them visible again, at least while they're still attached.
+               </p>
+               <p>
+                  The reverse is not true: attaching a hidden object to a non-hidden object will not 
+                  un-hide the former.
+               </p>
+            </li>
+   <li><p>
+               Objects' "hidden" states are tracked independently. If you attach a hidden object to 
+               another, non-hidden object, and then hide and unhide the parent object, the child 
+               object remains hidden.
+            </p></li>
+   <li><p>
+               If an object is hidden because it is attached to an invisible object, such as a Hill 
+               Marker, then calling <code>set_hidden(false)</code> on the attached object will not 
+               override this and reveal the object.
+            </p></li>
+</ul>
       </main>
       <script src="resources/sidebar.js"></script>
       <script src="resources/header-links.js"></script>
