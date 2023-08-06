@@ -42,7 +42,7 @@ WizardStyle=modern
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "{#CppBuildResultPath}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "\themes\*.qss" 
+Source: "{#CppBuildResultPath}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "\themes\*.qss,ReachVariantTool.ini" 
 Source: "{#CppProjectPath}LICENSES\*"; DestDir: "{app}\LICENSES\"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#CppProjectPath}help\*"; DestDir: "{app}\help\"; Flags: ignoreversion recursesubdirs createallsubdirs; Permissions: users-modify
 Source: "{#CppProjectPath}themes\*"; DestDir: "{app}\themes\"; Flags: ignoreversion; Permissions: users-modify
