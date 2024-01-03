@@ -198,7 +198,7 @@
          There are sixteen global object variables, numbered from 0 to 15, which can
          be accessed as <code>global.object[<var>n</var>]</code>.
       </p>
-   <p>This type contains nested variables. There are 8 nested <a href="script/api/number.html">numbers</a>, 4 nested <a href="script/api/object.html">objects</a>, 4 nested <a href="script/api/player.html">players</a>, 2 nested <a href="script/api/team.html">teams</a>, and 0 nested <a href="script/api/timer.html">timers</a> available. 
+   <p>This type contains nested variables. There are 8 nested <a href="script/api/number.html">numbers</a>, 4 nested <a href="script/api/object.html">objects</a>, 4 nested <a href="script/api/player.html">players</a>, 2 nested <a href="script/api/team.html">teams</a>, and 4 nested <a href="script/api/timer.html">timers</a> available. 
       Note that only 256 objects on the map can have variables at a time; if you try to
       set variables on objects past that limit, Megalo may fail to set variables on the
       new objects, or it may clear variables off of the old objects.
@@ -292,7 +292,8 @@
 <dt><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></dt>
    <dd><p>Adjust which players can pick up a weapon.</p></dd>
 <dt><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></dt>
-   <dd><p>Set whether an object displays a progress bar, and who should be able to see it.</p></dd>
+   <dd><p>Set whether an object displays a progress bar to certain players when they're 
+            inside of the object's shape volume, and sets which players are eligible to see it.</p></dd>
 <dt><a href="script/api/object/actions/set_scale.html">set_scale</a></dt>
    <dd><p>Resize an object.</p></dd>
 <dt><a href="script/api/object/actions/set_shape.html">set_shape <span class="a-k-a">a.k.a.</span> set_boundary</a></dt>
