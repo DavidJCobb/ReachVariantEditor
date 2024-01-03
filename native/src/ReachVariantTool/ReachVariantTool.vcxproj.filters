@@ -1258,6 +1258,7 @@
     <None Include="docs\design flaws\df001 - representation of megalo references.md" />
     <None Include="docs\design flaws\df002 - mapping between script identifiers and compiled references.md" />
     <None Include="docs\design flaws\df003 - handling of variant string IDs.md" />
+    <None Include="Directory.build.props" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player.xml" />

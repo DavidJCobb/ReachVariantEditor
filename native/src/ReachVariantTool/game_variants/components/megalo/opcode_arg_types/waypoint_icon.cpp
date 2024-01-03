@@ -3,6 +3,7 @@
 
 namespace Megalo {
    namespace enums {
+      // This is tag `ui\chud\bitmaps\waypoints.bitmap`, sequence 0, different frame values
       auto waypoint_icon = DetailedEnum({
          //
          // "none", // -1
@@ -17,7 +18,7 @@ namespace Megalo {
          DetailedEnumValue("skull"),
          DetailedEnumValue("crown"), // KOTH
          DetailedEnumValue("vip"),
-         DetailedEnumValue("padlock"),
+         DetailedEnumValue("padlock"), // 10
          DetailedEnumValue("territory_a",
             DetailedEnumValueInfo::make_friendly_name("numeric"),
             DetailedEnumValueInfo::make_description("Displays the value of a number variable, truncated to the lowest significant digit.") // should we rename it, then?
@@ -54,11 +55,11 @@ namespace Megalo {
             DetailedEnumValueInfo::make_friendly_name("territory I"),
             DetailedEnumValueInfo::make_description("Displays the number 9.")
          ),
-         DetailedEnumValue("supply"),
+         DetailedEnumValue("supply"), // 20
          DetailedEnumValue("supply_health",   DetailedEnumValueInfo::make_friendly_name("supply (health)")),
          DetailedEnumValue("supply_air_drop", DetailedEnumValueInfo::make_friendly_name("supply (air drop)")),
          DetailedEnumValue("supply_ammo",     DetailedEnumValueInfo::make_friendly_name("supply (ammo)")),
-         DetailedEnumValue("arrow"),
+         DetailedEnumValue("arrow"), // 24
          DetailedEnumValue("defend"),
          DetailedEnumValue("ordnance"),
          DetailedEnumValue("inward"),
@@ -73,7 +74,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueWaypointIcon>,
       enums::waypoint_icon
-   );
+   ).import_names({ "attack" });
    //
    bool OpcodeArgValueWaypointIcon::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->icon = stream.read_bits(enums::waypoint_icon.index_bits()) - 1; // 5 bits
@@ -146,6 +147,9 @@ namespace Megalo {
       if (word.compare("none", Qt::CaseInsensitive) == 0) {
          this->icon = -1;
          return arg_compile_result::success();
+      }
+      if (word.compare("attack", Qt::CaseInsensitive) == 0) { // HACK: synonym, to match usage of this graphic in other enums
+         word = "ordnance";
       }
       auto index = enums::waypoint_icon.lookup(word);
       if (index < 0)

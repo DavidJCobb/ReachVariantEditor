@@ -62,7 +62,7 @@ namespace content {
                      this->scope.players = count;
                   else if (name == "teams")
                      this->scope.teams   = count;
-                  else if (name == "tcountmers")
+                  else if (name == "timers")
                      this->scope.timers  = count;
                }
             }

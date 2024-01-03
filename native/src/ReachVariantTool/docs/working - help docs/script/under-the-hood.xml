@@ -52,7 +52,7 @@
          </p>
          <p>
             (This is all part of the overall design for game variant data: nothing inside of a 
-            game varant is heap-allocated, and there don't appear to be any internal pointers. 
+            game variant is heap-allocated, and there don't appear to be any internal pointers. 
             All lists are stored in fixed-size memory regions. This extends even to the string 
             table: the max uncompressed size is 0x4C00 bytes, and so there's a region that 
             large within the in-memory game variant struct.)

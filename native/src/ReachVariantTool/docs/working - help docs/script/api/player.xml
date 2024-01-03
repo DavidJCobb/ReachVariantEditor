@@ -1391,7 +1391,7 @@
          <related context="object" type="property" name="team" />
       </property>
       <property name="money" type="number">
-         <blurb>The player's money, to spend on requisitings as part of an unimplemented gameplay system.</blurb>
+         <blurb>The player's money, to spend on requisitions as part of an unimplemented gameplay system.</blurb>
          <description>
             <p>
                This value is limited to the range [-32,768, 32,767] and represents how much 

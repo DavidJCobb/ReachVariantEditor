@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+     <EnableStdModules>false</EnableStdModules>
+  </PropertyGroup>
+</Project>
+<!-- https://developercommunity.visualstudio.com/t/msb3191-when-compiling-C-when-setting-/10437818 -->
