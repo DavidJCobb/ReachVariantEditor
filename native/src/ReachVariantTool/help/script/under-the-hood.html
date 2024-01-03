@@ -239,7 +239,7 @@
          </p>
          <p>
             (This is all part of the overall design for game variant data: nothing inside of a 
-            game varant is heap-allocated, and there don't appear to be any internal pointers. 
+            game variant is heap-allocated, and there don't appear to be any internal pointers. 
             All lists are stored in fixed-size memory regions. This extends even to the string 
             table: the max uncompressed size is 0x4C00 bytes, and so there's a region that 
             large within the in-memory game variant struct.)
@@ -661,14 +661,14 @@ class integer_reference {
          <p>
             ReachVariantTool uses a mostly-single-pass compiler for its Megalo dialect. Parsing 
             and compilation are done as a single step, and the resulting grammar is 
-            <a href="https://en.wikipedia.org/wiki/Context-sensitive_grammar" target="_blank">context-dependent</a> 
-            rather than <a href="https://en.wikipedia.org/wiki/Context-free_grammar" target="_blank">context-free</a>. 
+            <a target="_blank" href="https://en.wikipedia.org/wiki/Context-sensitive_grammar">context-dependent</a> 
+            rather than <a target="_blank" href="https://en.wikipedia.org/wiki/Context-free_grammar">context-free</a>. 
             There is not any formal grammar; rather, the grammar is entirely a side-effect of 
             how the parser is implemented.</p>
          <p>
             (This is not a terribly good way to design or implement a scripting language, but 
             in my defense, I had never come across Robert Nystrom's excellent book 
-            <a href="https://craftinginterpreters.com/contents.html" target="_blank"><i>Crafting Interpreters</i></a> 
+            <a target="_blank" href="https://craftinginterpreters.com/contents.html"><i>Crafting Interpreters</i></a> 
             before.)
          </p>
          <p>
