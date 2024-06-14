@@ -1,8 +1,9 @@
 #include "ini.h"
+#include <QApplication>
 
 namespace ReachINI {
    extern cobb::qt::ini::file& getForQt() {
-      static cobb::qt::ini::file instance = cobb::qt::ini::file(L"ReachVariantTool.ini");
+      static cobb::qt::ini::file instance = cobb::qt::ini::file();
       return instance;
    }
    extern cobb::ini::file& get() {

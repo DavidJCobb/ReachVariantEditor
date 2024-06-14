@@ -238,13 +238,13 @@ namespace cobb {
    namespace steam {
       bool get_steam_directory(std::wstring& out) {
          HKEY    key;
-         LSTATUS status = RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Valve\\Steam\\", 0, KEY_WOW64_32KEY | KEY_QUERY_VALUE, &key);
+         LSTATUS status = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Valve\\Steam\\", 0, KEY_WOW64_32KEY | KEY_QUERY_VALUE, &key);
          if (status == ERROR_SUCCESS) {
             DWORD valueType = REG_SZ;
             //
-            TCHAR buffer[1024];
-            DWORD length = sizeof(buffer);
-            status = RegQueryValueEx(key, L"InstallPath", 0, &valueType, (LPBYTE)buffer, &length);
+            wchar_t buffer[1024];
+            DWORD   length = sizeof(buffer);
+            status = RegQueryValueExW(key, L"InstallPath", 0, &valueType, (LPBYTE)buffer, &length);
             //while (status == ERROR_MORE_DATA) { // buffer not long enough
             //}
             if (status == ERROR_SUCCESS) {
