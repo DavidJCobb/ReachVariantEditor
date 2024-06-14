@@ -5,6 +5,7 @@
 
 namespace {
    static constexpr int ce_gametypeCategoryIndexActionSack = 16;
+   static constexpr int ce_gametypeCategoryIndexPreGame    = 31; // doesn't currently display when picking game variants to play in Customs, so not usable
 }
 
 PageMPMetadata::PageMPMetadata(QWidget* parent) : QWidget(parent) {

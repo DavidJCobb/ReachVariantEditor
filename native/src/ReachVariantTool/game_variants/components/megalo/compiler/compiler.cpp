@@ -809,26 +809,19 @@ namespace Megalo {
       this->already_compiled_blocks.clear();
    }
 
-   size_t Compiler::get_new_forge_label_count() const {
-      size_t count = 0;
-      //
+   QVector<QString> Compiler::get_new_forge_label_names() const {
       QVector<QString> seen;
-      for (auto& item : this->triggers_pending_forge_labels) {
-         if (!seen.contains(item.label_name)) {
-            ++count;
+
+      for (auto& item : this->triggers_pending_forge_labels)
+         if (!seen.contains(item.label_name))
             seen.push_back(item.label_name);
-         }
-      }
-      for (auto& item : this->opcodes_pending_forge_labels) {
-         for (auto& entry : item.labels) {
-            if (!seen.contains(entry.label_name)) {
-               ++count;
+
+      for (auto& item : this->opcodes_pending_forge_labels)
+         for (auto& entry : item.labels)
+            if (!seen.contains(entry.label_name))
                seen.push_back(entry.label_name);
-            }
-         }
-      }
-      //
-      return count;
+
+      return seen;
    }
    bool Compiler::new_forge_label_not_yet_tracked(const QString& name) const {
       for (auto& item : this->triggers_pending_forge_labels)
@@ -1382,12 +1375,23 @@ namespace Megalo {
          {  // Ensure that we're under the limits for new Forge labels.
             auto& mp     = this->variant;
             auto& labels = mp.scriptContent.forgeLabels;
-            if (labels.size() + this->get_new_forge_label_count() > Megalo::Limits::max_script_labels) {
+            auto  names  = this->get_new_forge_label_names();
+            if (labels.size() + names.size() > Megalo::Limits::max_script_labels) {
                this->raise_error(
                   QString("The existing game variant contains %1 Forge labels, and the compiled script contains %2 unrecognized Forge labels. We cannot create these labels, as only a total of %3 are allowed.")
                      .arg(labels.size())
-                     .arg(this->get_new_forge_label_count())
+                     .arg(names.size())
                      .arg(Limits::max_script_labels)
+               );
+            }
+
+            const auto& string_table = this->variant.as_multiplayer()->scriptData.strings;
+            if (string_table.strings.size() + names.size() > string_table.capacity()) {
+               this->raise_error(
+                  QString("The existing game variant contains %1 strings, and the compiled script contains %2 unrecognized Forge labels. We cannot create these labels, as this would exceed the maximum allowed string count (%3).")
+                     .arg(string_table.strings.size())
+                     .arg(names.size())
+                     .arg(string_table.capacity())
                );
             }
          }

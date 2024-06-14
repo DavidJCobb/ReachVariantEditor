@@ -93,7 +93,7 @@ namespace Megalo {
       auto  size = list.size();
       if (index >= size) {
          if (size)
-            return arg_compile_result::failure(QString("You specified player trait set index %1, but the maximum defined index is %2.").arg(index).arg(size));
+            return arg_compile_result::failure(QString("You specified player trait set index %1, but the maximum defined index is %2.").arg(index).arg(size - 1));
          return arg_compile_result::failure(QString("You specified player trait set index %1, but no scripted player traits are defined.").arg(index));
       }
       this->value = &list[index];

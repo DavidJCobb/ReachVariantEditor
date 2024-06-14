@@ -669,9 +669,9 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('scen', "")
          ),
          DetailedEnumValue("phantom",
-            DetailedEnumValueInfo::make_unused_sentinel(),
+            DetailedEnumValueInfo::make_flags(DetailedEnumValueInfo::flags::is_thorage),
             DetailedEnumValueInfo::make_friendly_name("Phantom (Vehicle)"),
-            DetailedEnumValueInfo::make_map_tag('vehi', "")
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/phantom/phantom_mp")
          ),
          DetailedEnumValue("pelican",
             DetailedEnumValueInfo::make_unused_sentinel(),

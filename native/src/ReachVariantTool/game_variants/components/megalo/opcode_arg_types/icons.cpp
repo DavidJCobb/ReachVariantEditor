@@ -57,6 +57,8 @@ namespace Megalo {
          DetailedEnumValue("recent_games"),
          DetailedEnumValue("file_share"),
       });
+
+      // Most likely tag `ui\chud\bitmaps\variant_items\gametypes.bitmap`
       extern DetailedEnum hud_widget_icon = DetailedEnum({
          DetailedEnumValue("flag"),
          DetailedEnumValue("slayer"),
@@ -68,7 +70,7 @@ namespace Megalo {
          DetailedEnumValue("infection"),
          DetailedEnumValue("vip"),
          DetailedEnumValue("invasion"),
-         DetailedEnumValue("invasion_slayer"),
+         DetailedEnumValue("invasion_slayer"), // 10
          DetailedEnumValue("stockpile"),
          DetailedEnumValue("action_sack"),
          DetailedEnumValue("race"),
@@ -78,7 +80,7 @@ namespace Megalo {
          DetailedEnumValue("headhunter"),
          DetailedEnumValue("crosshair"),
          DetailedEnumValue("wheel"),
-         DetailedEnumValue("swirl"),
+         DetailedEnumValue("swirl"), // 20
          DetailedEnumValue("bunker"),
          DetailedEnumValue("health_pack"),
          DetailedEnumValue("castle_defense"),
@@ -88,7 +90,7 @@ namespace Megalo {
          DetailedEnumValue("eight_ball"),
          DetailedEnumValue("noble"),
          DetailedEnumValue("covenant"),
-         DetailedEnumValue("attack"),
+         DetailedEnumValue("attack"), // 30
          DetailedEnumValue("defend"),
          DetailedEnumValue("ordnance"),
          DetailedEnumValue("circle"),
@@ -96,7 +98,7 @@ namespace Megalo {
          DetailedEnumValue("recover"),
          DetailedEnumValue("ammo"),
          DetailedEnumValue("skull"),
-         DetailedEnumValue("forge"),
+         DetailedEnumValue("forge"), // 38
       });
    }
    

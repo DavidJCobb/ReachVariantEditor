@@ -584,14 +584,12 @@ void ReachVariantTool::regenerateNavigation() {
                _makeNavItem(options, tr("General Settings", disambig), _page::cg_options_general);
                _makeNavItem(options, tr("Social Settings", disambig), _page::cg_options_social);
                //
+               auto map = _makeNavItem(options, tr("Map and Game Settings", disambig), _page::cg_options_map);
+               _makeNavItemMPTraits(map, tr("Base Player Traits", disambig), _traits_builtin::base);
                if (!hide_no_ops) {
-                  auto map = _makeNavItem(options, tr("Map and Game Settings", disambig), _page::cg_options_map);
-                  _makeNavItemMPTraits(map, tr("Base Player Traits", disambig), _traits_builtin::base);
                   _makeNavItemMPTraits(map, tr("Red Powerup Traits", disambig), _traits_builtin::powerup_red);
                   _makeNavItemMPTraits(map, tr("Blue Powerup Traits", disambig), _traits_builtin::powerup_blue);
                   _makeNavItemMPTraits(map, tr("Yellow Powerup Traits", disambig), _traits_builtin::powerup_yellow);
-               } else {
-                  _makeNavItemMPTraits(options, tr("Base Player Traits", disambig), _traits_builtin::base);
                }
                //
                auto team = _makeNavItem(options, tr("Team Settings", disambig), _page::cg_options_team);

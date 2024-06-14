@@ -7,6 +7,21 @@
 #include <QDebug>
 
 namespace {
+   constexpr const std::array<std::pair<int, const char*>, 10> _team_designators = {
+      std::pair{  0, "Defenders (Red)" },
+      std::pair{  1, "Attackers (Blue)" },
+      std::pair{  2, "Team 3 (Green)" },
+      std::pair{  3, "Team 4 (Orange)" },
+      std::pair{  4, "Team 5 (Purple)" },
+      std::pair{  5, "Team 6 (Gold)" },
+      std::pair{  6, "Team 7 (Brown)" },
+      std::pair{  7, "Team 8 (Pink)" },
+      std::pair{  8, "Neutral Team" },
+      std::pair{ -1, "None" },
+   };
+}
+
+namespace {
    QColor _colorFromReach(uint32_t c, bool use_alpha = false) {
       int a = use_alpha ? (c >> 0x18) : 255;
       return QColor((c >> 0x10) & 0xFF, (c >> 0x08) & 0xFF, c & 0xFF, a);
@@ -74,7 +89,23 @@ PageMPSettingsTeamSpecific::PageMPSettingsTeamSpecific(QWidget* parent) : QWidge
    reach_main_window_setup_flag_checkbox(multiplayerTeam, this->ui.fieldEnableColorText,      flags, ReachTeamData::Flags::override_color_text);
    reach_main_window_setup_combobox(multiplayerTeam,      this->ui.fieldSpecies,              spartanOrElite);
    reach_main_window_setup_spinbox(multiplayerTeam,       this->ui.fieldFireteamCount,        fireteamCount);
-   reach_main_window_setup_combobox(multiplayerTeam,      this->ui.fieldInitialDesignator,    initialDesignator);
+
+   this->ui.fieldInitialDesignator->clear();
+   for (auto& dfn : _team_designators) {
+      this->ui.fieldInitialDesignator->addItem(tr(dfn.second, "team designator names"), dfn.first);
+   }
+   QObject::connect(
+      this->ui.fieldInitialDesignator,
+      QOverload<int>::of(&QComboBox::currentIndexChanged),
+      [this](int index) {
+         auto  item_data = this->ui.fieldInitialDesignator->currentData().toInt();
+         auto* team_data = ReachEditorState::get().multiplayerTeam();
+         if (!team_data)
+            return;
+         team_data->initialDesignator = item_data;
+      }
+   );
+
    QObject::connect(this->ui.fieldButtonColorPrimary,   &QPushButton::clicked, [this]() {
       auto& editor = ReachEditorState::get();
       auto  team   = editor.multiplayerTeam();
@@ -130,7 +161,17 @@ void PageMPSettingsTeamSpecific::updateFromVariant(GameVariant* variant, int8_t 
    reach_main_window_update_flag_checkbox(this->ui.fieldEnableColorText,      flags, ReachTeamData::Flags::override_color_text);
    reach_main_window_update_combobox(this->ui.fieldSpecies,           spartanOrElite);
    reach_main_window_update_spinbox(this->ui.fieldFireteamCount,     fireteamCount);
-   reach_main_window_update_combobox(this->ui.fieldInitialDesignator, initialDesignator);
+   {
+      auto* widget = this->ui.fieldInitialDesignator;
+      const QSignalBlocker blocker(widget);
+
+      auto value = (int)data->initialDesignator;
+      auto index = widget->findData(value);
+      if (index >= 0)
+         widget->setCurrentIndex(index);
+      else
+         widget->setCurrentIndex(widget->findData(-1));
+   };
    #include "widget_macros_update_end.h"
    this->updateTeamColor(data);
 }
