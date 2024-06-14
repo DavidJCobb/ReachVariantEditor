@@ -15,7 +15,7 @@ namespace reach {
       unchanged,
       normal,
       deaf,
-      sharp,
+      sharp, // hearing range doubled
    };
    enum class ai_luck {
       unchanged,

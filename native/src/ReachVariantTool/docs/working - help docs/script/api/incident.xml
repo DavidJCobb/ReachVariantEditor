@@ -23,8 +23,27 @@
          to have been intended for a particular purpose, it may be best to use it 
          primarily for that purpose.
       </p>
+      
+      <h2>Under the hood</h2>
       <p>
-         Internally, incidents and their effects are defined within each *.MAP file. 
+         Internally, incidents and their effects are defined within each *.MAP file, in 
+         the <code>incident_globals_definition</code> (<code>ingd</code>) tags; each tag 
+         is a list of incident definitions. Each incident in that list defines a name 
+         and a variety of other properties, including the game modes, lobby types, and 
+         Campaign/Firefight difficulties the incident is disallowed from. The actual 
+         <em>behaviors</em> of the incidents, however, are defined elsewhere. Incidents 
+         can define any number of <dfn>responses</dfn>, and each response can specify 
+         the internal name of a "game engine event," medal, achievement, or Haloscript 
+         file; responses can also limit what game/lobby/difficulties they're allowed in 
+         (so incidents blacklist, and responses can optionally whitelist).
+      </p>
+      <p>
+         When a response specifies a game engine event name, the event itself is defined 
+         in the <code>gegl</code> tag. Each event can specify a variety of properties 
+         including kill feed messages and announcer voiceovers to play. Medals, in turn, 
+         are defined in the <code>gmeg</code> tag.
+      </p>
+      <p>
          The <code>ingd</code> (incident globals definition) tags define the incidents 
          themselves. When an incident has an event name listed, that name is one of 
          the "Engine Events" listed in the map's <code>gegl</code> (game engine globals) 
@@ -34,11 +53,60 @@
          incidents all trigger automatically when <code>wingman_spawn</code> has occurred 
          a certain number of times.
       </p>
+      <p>
+         Incidents can be set to trigger automatically in response to other incidents 
+         occurring a given number of times. For example, <code>multikill_x5</code> is 
+         set to occur if <code>kill</code> occurs five times, resetting the count if 
+         four seconds (the standard multi-kill delay) pass without a <code>kill</code>. 
+         In turn, <code>multikill_x5</code> is set to send the <code>multikill_x5</code> 
+         game engine event (which shows kill feed messages and announcer voiceovers) 
+         and award the <code>medal_multikill_5</code> medal (which is basically just a 
+         medal graphic and associated stat-tracking in the Post-Game Carnage Report).
+      </p>
+      
+      <h2>Firefight incidents</h2>
+      <p>
+         There are two <code>ingd</code> lists: one for Multiplayer and one for Firefight. 
+         When you refer to an incident in Megalo, what gets compiled into the gametype is 
+         the index of an incident in the Multiplayer list. If a gametype specifies an index 
+         that extends past the end of the Multiplayer list, then the gametype will index 
+         into the Firefight list. To give an example: as of this writing, the highest 
+         defined Multiplayer incident is 391, so "incident 392" is actually Firefight's 
+         "incident 0."
+      </p>
+      <p>
+         This means that you can use Firefight-exclusive incidents in Megalo. However, the 
+         vast majority of these incidents were configured to only have any effect in 
+         Firefight. The two known exceptions are <code>survival_5_ai_remaining</code> and 
+         <code>survival_2_ai_remaining</code>, which play the "Five enemies remaining" and 
+         "Two enemies remaining!" announcer lines. These work in Custom Games.
+      </p>
+      <p>
+         There is one problem with using Firefight incidents: Bungie and 343 Industries 
+         treat the game's two incident lists as separate, even if the underlying game 
+         engine doesn't. During <i>Halo: Reach</i>'s development, Bungie added incidents 
+         onto the end of the multiplayer incident list, displacing the Firefight incidents. 
+         343 Industries have done the same in the <i>Master Chief Collection</i> build of 
+         the game, adding two incidents (unused and apparently intended for the "pre-game" 
+         play session in the Custom Game Browser) to the end of the multiplayer list. If 
+         343i ever adds more multiplayer incidents, then any gametypes that try to access 
+         Firefight incidents will, in effect, have the Firefight list shifted out from 
+         under them, and they'll access Firefight incidents other than the ones they meant 
+         to access.
+      </p>
       
       <style>
          .incidents dt[data-internal]::after{content:" (internally: " attr(data-internal) ")";margin-left:1em;color:#666}
+         
+         .incidents.firefight :is(dt, dd) {
+            opacity: 0.8
+         }
+         .incidents.firefight dt.usable-in-customs,
+         .incidents.firefight dt.usable-in-customs+dd {
+            opacity: 1
+         }
       </style>
-      <h2>All incidents</h2>
+      <h2>All multiplayer incidents</h2>
       <dl class="incidents">
          <dt>kill</dt>
             <dd>The cause player has killed the target player.</dd>
@@ -1025,6 +1093,291 @@
             is intended to be awarded for earning a kill in a Rocket (Hog) Race match.</dd>
          <dt><i>[unused]</i></dt>
             <dd>This incident ID is unused.</dd>
+         <dt>dlc_achieve_11</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_12</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_13</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_14</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_15</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_16</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_17</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_18</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_19</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_20</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_21</dt>
+            <dd>No description available.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>racer_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>dj_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>madrigal_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>pelican_phantom_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>errera_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>moa_burgers_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>secret_balcony_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>teddy_bear_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>hidden_banshees_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>tribute_room_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>bxr_mining_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>pre_game_start</dt>
+            <dd>Added in the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i>. Apparently 
+            unused. Plays a "Training" announcer voiceover in the style of other gametype intro voice lines. 
+            Based on its name, it may have been intended for the Custom Game Browser.</dd>
+         <dt>pre_game_over</dt>
+            <dd>Added in the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i>. Apparently 
+            unused. Based on its name, it may have been intended for the Custom Game Browser.</dd>
+      </dl>
+      
+      <h2>Firefight incidents</h2>
+      <dl class="incidents firefight">
+         <dt>survival_welcome</dt>
+            <dd>No description available.</dd>
+         <dt>survival_new_set</dt>
+            <dd>No description available.</dd>
+         <dt>survival_end_set</dt>
+            <dd>No description available.</dd>
+         <dt>survival_new_round</dt>
+            <dd>No description available.</dd>
+         <dt>survival_end_round</dt>
+            <dd>No description available.</dd>
+         <dt>survival_new_wave</dt>
+            <dd>No description available.</dd>
+         <dt>survival_end_wave</dt>
+            <dd>No description available.</dd>
+         <dt>survival_bonus_round</dt>
+            <dd>No description available.</dd>
+         <dt>survival_bonus_lives_awarded</dt>
+            <dd>No description available.</dd>
+         <dt>survival_bonus_round_over</dt>
+            <dd>No description available.</dd>
+         <dt>survival_awarded_lives</dt>
+            <dd>No description available.</dd>
+         <dt>survival_awarded_weapon</dt>
+            <dd>No description available.</dd>
+         <dt>survival_awarded_equipment</dt>
+            <dd>No description available.</dd>
+         <dt>sur_cla_unsc_start</dt>
+            <dd>No description available.</dd>
+         <dt>sur_cla_unsc_fail</dt>
+            <dd>No description available.</dd>
+         <dt>sur_gen_unsc_start</dt>
+            <dd>No description available.</dd>
+         <dt>sur_gen_unsc_fail</dt>
+            <dd>No description available.</dd>
+         <dt>sur_gen_unsc_win</dt>
+            <dd>No description available.</dd>
+         <dt>sur_unsc_timeout</dt>
+            <dd>No description available.</dd>
+         <dt>sur_cla_cov_start</dt>
+            <dd>No description available.</dd>
+         <dt>sur_cla_cov_fail</dt>
+            <dd>No description available.</dd>
+         <dt>sur_gen_cov_start</dt>
+            <dd>No description available.</dd>
+         <dt>sur_gen_cov_fail</dt>
+            <dd>No description available.</dd>
+         <dt>sur_cov_win</dt>
+            <dd>No description available.</dd>
+         <dt>sur_cov_timeout</dt>
+            <dd>No description available.</dd>
+         <dt>gen_alpha_locked</dt>
+            <dd>Triggers the kill feed messages and announcer voiceovers for when Generator A is locked down by the defenders.</dd>
+         <dt>gen_bravo_locked</dt>
+            <dd>Triggers the kill feed messages and announcer voiceovers for when Generator B is locked down by the defenders.</dd>
+         <dt>gen_charlie_locked</dt>
+            <dd>Triggers the kill feed messages and announcer voiceovers for when Generator C is locked down by the defenders.</dd>
+         <dt>survival_generator_destroyed</dt>
+            <dd>No description available.</dd>
+         <dt>survival_round_over</dt>
+            <dd>No description available.</dd>
+         <dt>survival_obj_complete</dt>
+            <dd>No description available.</dd>
+         <dt>survival_obj_failed</dt>
+            <dd>No description available.</dd>
+         <dt>survival_out_of_lives</dt>
+            <dd>No description available.</dd>
+         <dt>survival_generator_lost</dt>
+            <dd>No description available.</dd>
+         <dt>survival_alpha_under_attack</dt>
+            <dd>No description available.</dd>
+         <dt>survival_bravo_under_attack</dt>
+            <dd>No description available.</dd>
+         <dt>survival_charlie_under_attack</dt>
+            <dd>No description available.</dd>
+         <dt>survival_spartans_win</dt>
+            <dd>No description available.</dd>
+         <dt>survival_elites_win</dt>
+            <dd>No description available.</dd>
+         <dt>survival_sudden_death_over</dt>
+            <dd>No description available.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>hero</dt>
+            <dd>Incident for the Hero medal.</dd>
+         <dt>survival_last_man_standing</dt>
+            <dd>Plays the Firefight "Last man standing" voiceover (not to be confused with the Infection one) and shows the associated kill feed message, for the cause team.</dd>
+         <dt>survival_skull_thunderstorm</dt>
+            <dd>Used to announce activation of the Thunderstorm skull.</dd>
+         <dt>survival_skull_famine</dt>
+            <dd>Used to announce activation of the Famine skull.</dd>
+         <dt>survival_skull_tilt</dt>
+            <dd>Used to announce activation of the Tilt skull.</dd>
+         <dt>survival_skull_mythic</dt>
+            <dd>Used to announce activation of the Mythic skull.</dd>
+         <dt>survival_skull_catch</dt>
+            <dd>Used to announce activation of the Catch skull.</dd>
+         <dt>survival_skull_black_eye</dt>
+            <dd>Used to announce activation of the Black Eye skull.</dd>
+         <dt>survival_skull_tough_luck</dt>
+            <dd>Used to announce activation of the Tough Luck skull.</dd>
+         <dt>survival_skull_iron</dt>
+            <dd>Used to announce activation of the Iron skull.</dd>
+         <dt>survival_skull_assassin</dt>
+            <dd>No description available.</dd>
+         <dt>survival_skull_fog</dt>
+            <dd>Used to announce activation of the Fog skull.</dd>
+         <dt>survival_skull_blind</dt>
+            <dd>No description available.</dd>
+         <dt>survival_skull_superman</dt>
+            <dd>Intended to announce the activation of a skull (Cowbell?), but there's no kill feed message or announcer voiceover 
+            hooked up to the incident response.</dd>
+         <dt>survival_skull_grunt_birthday_party</dt>
+            <dd>Used to announce activation of the Grunt Birthday Party skull. There is a kill feed message, but no voiceover.</dd>
+         <dt>survival_skull_iwhbyd</dt>
+            <dd>Intended to announce the activation of the IWHBYD skull, but there's no kill feed message or announcer voiceover 
+            hooked up to the incident response.</dd>
+         <dt>survival_skull_blue</dt>
+            <dd>Used to announce activation of the Blue skull defined by a custom Firefight game variant.</dd>
+         <dt>survival_skull_yellow</dt>
+            <dd>Used to announce activation of the Yellow skull defined by a custom Firefight game variant.</dd>
+         <dt>survival_skull_red</dt>
+            <dd>Used to announce activation of the Red skull defined by a custom Firefight game variant.</dd>
+         <dt>survival_skulls_multiple</dt>
+            <dd>Plays the "Skulls on" announcer voiceover.</dd>
+         <dt>survival_skull_single</dt>
+            <dd>Plays the "Skull on" announcer voiceover.</dd>
+         <dt>survival_5_lives_left</dt>
+            <dd>Displays a kill feed message and plays an announcer voiceover telling the cause team that they have five lives left.</dd>
+         <dt>survival_1_life_left</dt>
+            <dd>Displays a kill feed message and plays an announcer voiceover telling the cause team that they have one life left.</dd>
+         <dt>survival_0_lives_left</dt>
+            <dd>Displays a kill feed message and plays an announcer voiceover telling the cause team that they have no lives left.</dd>
+         <dt>survival_game_over</dt>
+            <dd>No description available.</dd>
+         <dt class="usable-in-customs">survival_5_ai_remaining</dt>
+            <dd>Displays a kill feed message and plays the "Five enemies remaining" voiceover for the cause team.</dd>
+         <dt class="usable-in-customs">survival_2_ai_remaining</dt>
+            <dd>Displays a kill feed message and plays the "Two enemies remaining" voiceover for the cause team.</dd>
+         <dt>survival_1_ai_remaining</dt>
+            <dd>Displays a kill feed message and plays the "Last enemy" voiceover for the cause team.</dd>
+         <dt>survival_reinforcements</dt>
+            <dd>Triggers the "Reinforcements" announcer voiceover.</dd>
+         <dt>survival_skull_all</dt>
+            <dd>Unknown. This may have been meant to play a voiceover along the lines of, "All skulls on," but it specifies a 
+            non-existent game engine event (<code>survival_skull_all</code>).</dd>
+         <dt>survival_skull_activation_finished</dt>
+            <dd>Bungie experimented with recording "bunched" announceover voiceovers for skull combinations, e.g. "Tilt and Famine 
+            on," but they quickly abandoned this idea, leaving only a few such voiceovers in the game files. They eventually settled 
+            for having the announcer read out the skulls one by one in separate voice lines, and then say, "on." This incident is 
+            responsible for triggering the "on" voiceover.</dd>
+         <dt>survival_incredible_round</dt>
+            <dd>Unknown. The incident specifies a non-existent game engine event (<code>survival_incredible_round</code>).</dd>
+         <dt>survival_superb_set</dt>
+            <dd>Unknown. The incident specifies a non-existent game engine event (<code>survival_superb_set</code>).</dd>
+         <dt>survival_bonus_information</dt>
+            <dd>Unknown. The incident's game engine event specifies the cause team as its audience, but there's no kill feed text, 
+            sound, or anything else for the cause team to be an audience <em>to.</em></dd>
+         <dt>survival_next_round_timer</dt>
+            <dd>No description available.</dd>
+         <dt>survival_next_set_timer</dt>
+            <dd>No description available.</dd>
+         <dt>survival_bonus_skull_all</dt>
+            <dd>No description available.</dd>
+         <dt>survival_10_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>survival_20_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>survival_30_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>survival_40_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>survival_50_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>survival_100_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>survival_500_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>survival_1000_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>survival_10_aura</dt>
+            <dd>Unknown. The incident is set to trigger automatically when a player causes 11 or more 
+            <code>kill</code> incidents without dying, but the incident doesn't define any responses.</dd>
+         <dt>survival_20_aura</dt>
+            <dd>Unknown. The incident is set to trigger automatically when a player causes 21 or more 
+            <code>kill</code> incidents without dying, but the incident doesn't define any responses.</dd>
+         <dt>survival_30_aura</dt>
+            <dd>Unknown. The incident is set to trigger automatically when a player causes 31 or more 
+            <code>kill</code> incidents without dying, but the incident doesn't define any responses.</dd>
+         <dt>survival_40_aura</dt>
+            <dd>Unknown. The incident is set to trigger automatically when a player causes 41 or more 
+            <code>kill</code> incidents without dying, but the incident doesn't define any responses.</dd>
+         <dt>survival_50_aura</dt>
+            <dd>Unknown. The incident is set to trigger automatically when a player causes 51 or more 
+            <code>kill</code> incidents without dying, but the incident doesn't define any responses.</dd>
+         <dt>survival_100_aura</dt>
+            <dd>Unknown. The incident is set to trigger automatically when a player causes 101 or more 
+            <code>kill</code> incidents without dying, but the incident doesn't define any responses.</dd>
+         <dt>survival_500_aura</dt>
+            <dd>Unknown. The incident is set to trigger automatically when a player causes 501 or more 
+            <code>kill</code> incidents without dying, but the incident doesn't define any responses.</dd>
+         <dt>survival_1000_aura</dt>
+            <dd>Unknown. The incident is set to trigger automatically when a player causes 1001 or more 
+            <code>kill</code> incidents without dying, but the incident doesn't define any responses.</dd>
+         <dt class="usable-in-customs">team_generator_kill</dt>
+            <dd>Unknown. The incident has no data: it isn't automatically triggered, has no restrictions, 
+            and defines no responses.</dd>
+         <dt>sur_airstrike_refill</dt>
+            <dd>Based on inspection of the incident data, this would play a Target Locator "ready" sound 
+            effect for the cause team.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>survival_mm_game_complete</dt>
+            <dd>The incident's response is limited to matchmade Firefight games, but the response doesn't 
+            do anything visible. The incident may be used internally.</dd>
+         <dt>score_silver</dt>
+            <dd>Apparently linked to the Firestarter achievement, for getting 50,000 points in a Firefight 
+            game.</dd>
+         <dt>score_gold</dt>
+            <dd>Apparently linked to the Blaze of Glory achievement, for getting 100,000 points in a Firefight 
+            game.</dd>
+         <dt>score_onyx</dt>
+            <dd>Apparently linked to the Heat in the Pipe achievement, for getting 1,000,000 points in a Firefight 
+            game.</dd>
+         <dt>mm_score_achieve</dt>
+            <dd>Apparently linked to the Score Attack achievement, for getting 15,000 points in Firefight 
+            Matchmaking.</dd>
       </dl>
    </description>
 </script-type>

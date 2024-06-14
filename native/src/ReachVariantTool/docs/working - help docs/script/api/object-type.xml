@@ -566,8 +566,8 @@
          <dt data-thorage="true" data-tag="scen:.../pelican_scenery"><code>pelican_scenery</code> (Pelican, Scenery)</dt>
             <dd>A non-animated Pelican.</dd>
             
-         <dt data-unused="true" data-tag="vehi:"><code>phantom</code> (Phantom, Vehicle)</dt>
-            <dd>&unused-object; A drivable Phantom.</dd>
+         <dt data-tag="vehi:objects/vehicles/covenant/phantom/phantom_mp"><code>phantom</code> (Phantom, Vehicle)</dt>
+            <dd>A Phantom. It's meant to be drivable, but only the Plasma Cannons on the side doors are operable by players, even with the "force into vehicle" script action.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>pelican</code> (Pelican)</dt>
             <dd>&unused-object;</dd>

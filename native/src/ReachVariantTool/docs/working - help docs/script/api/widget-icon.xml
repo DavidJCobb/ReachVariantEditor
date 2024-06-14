@@ -52,9 +52,9 @@
          <dt>swirl</dt>
             <dd>A swirl icon &mdash; the same icon used for what is called "Insane" in legacy Reach and "Action Sack" in MCC.</dd>
          <dt>bunker</dt>
-            <dd>...</dd>
+            <dd>A drawing of a small pillbox bunker, with stylized zoom lines around it.</dd>
          <dt>health_pack</dt>
-            <dd>...</dd>
+            <dd>A small plus-sign inscribed in a hexagon.</dd>
          <dt>castle_defense</dt>
             <dd>A filled-in shield shape, with the silhouette of a castle tower cut out of the middle.</dd>
          <dt>return</dt>
@@ -74,18 +74,19 @@
             <dd>A rounded diamond shape, inside of which is a downward-pointing arrow. Beneath the 
             arrow, between it and the diamond, is a bent line following the diamond's shape.</dd>
          <dt>defend</dt>
-            <dd>...</dd>
+            <dd>A shield with a diagonal crossbar, all wrapped in a circle.</dd>
          <dt>ordnance</dt>
-            <dd>...</dd>
+            <dd>Line-art of a 3D cube, wrapped in a broader outline.</dd>
          <dt>circle</dt>
             <dd>A downward-pointing triangle outline with a small circle drawn inside.</dd>
          <dt>recon</dt>
             <dd>A rounded rectangle, with a targeting reticle drawn inside: four corners of a 
             non-rounded rectangle, and a plus symbol at the center.</dd>
          <dt>recover</dt>
-            <dd>...</dd>
+            <dd>An upward-pointing triangle. Inside of this is an arrow pointing top-left; the "tail" 
+            of the arrow bends to form a circle wrapping around the arrow.</dd>
          <dt>ammo</dt>
-            <dd>...</dd>
+            <dd>Three bullets lined up horizontally in a row, inside a square.</dd>
          <dt>skull</dt>
             <dd>A skull icon, of the variety seen in Campaign and Firefight.</dd>
          <dt>forge</dt>

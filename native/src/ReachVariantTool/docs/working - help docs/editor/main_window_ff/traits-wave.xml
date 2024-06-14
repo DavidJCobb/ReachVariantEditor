@@ -18,16 +18,47 @@
             <dd>Scales the amount of damage that NPCs can withstand. Note that this also 
             scales the strength of breakable enemy armor, such as Grunt Ultras' helmets.</dd>
          <dt>Vision</dt>
-            <dd>Controls how likely an NPC is to notice an enemy within its line of sight.</dd>
+            <dd>
+               <p>Controls how likely an NPC is to notice an enemy within its line of sight.</p>
+               <p>The "Nearsighted" option reduces an NPC's sight range to 20% and reduces 
+               their field of view (i.e. vision cone angle) to 80%. The "Eagle Eye" option 
+               boosts their sight range to 150% and their field of view to 120%.</p>
+            </dd>
          <dt>Hearing</dt>
-            <dd>Controls how likely an NPC is to notice enemies that are making noise.</dd>
+            <dd>Controls how likely an NPC is to notice enemies that are making noise. 
+            The "Sharp" option doubles the NPC's hearing range.</dd>
          <dt>Luck</dt>
-            <dd>Controls how likely an NPC is to dodge grenades and needles, versus how 
-            likely an NPC Grunt is to flee or attempt a suicide bombing.</dd>
+            <dd>
+               <p>Controls how likely an NPC is to dodge grenades and needles, versus how 
+               likely an NPC Grunt is to flee or attempt a suicide bombing.</p>
+               <dl>
+                  <dt>Unlucky</dt>
+                     <dd>Never evades fire, dives away from grenades, or attempts a suicide 
+                     bombing. Always retreats after diving. Never goes berserk after shields 
+                     pop. Leaders don't go berserk after their followers are all killed.</dd>
+                  <dt>Normal</dt>
+                     <dd>No changes are made to the base AI data.</dd>
+                  <dt>Lucky</dt>
+                     <dd>75% more likely to evade fire and dive away from grenades. Never 
+                     retreats after diving. The delays between successive melee attacks, 
+                     and successive grenade throws, are halved. Twice as likely to melee.</dd>
+                  <dt>Leprechaun</dt>
+                     <dd>Evades fire and dives away from grenades as often as is physically 
+                     possible. Never retreats after diving. Always attempts a suicide bombing 
+                     when "broken." Always retreats when their leader dies. Always goes berserk 
+                     when their shields pop. Leaders always go berserk when their followers are 
+                     all killed. The delays between successive melee attacks, and successive 
+                     grenade throws, are halved. Always melees when it is possible to do so.</dd>
+               </dl>
+            </dd>
          <dt>Shootiness</dt>
-            <dd>Controls NPCs' accuracy and tendency to fire excess shots.</dd>
+            <dd>
+               <p>Controls NPCs' accuracy and tendency to fire excess shots.</p>
+            </dd>
          <dt>Grenades</dt>
-            <dd>Controls how often NPCs use grenades.</dd>
+            <dd>Controls how often NPCs use grenades. The "Catch" option significantly 
+            increases the NPC's likelihood of throwing grenades, halves the delay between 
+            successive grenade throws, and doubles grenades' outbound velocity.</dd>
          <dt>Don't Drop Equipment on Death</dt>
             <dd>If this option is enabled, then NPCs will not drop weapons or grenades when 
             they die.</dd>
@@ -37,5 +68,31 @@
          <dt>Headshot Immunity</dt>
             <dd>Controls whether NPCs are immune to instant-kill headshots.</dd>
       </dl>
+      <p>
+         All exact stats for AI changes are based on examination of the game data using the 
+         <i>Halo: Reach</i> Editing Kit. Not all behaviors (e.g. "going berserk") may apply 
+         to all NPC types.
+      </p>
+      
+      <h2>Under the hood</h2>
+      <p>The effects of the Vision, Hearing, Luck, and Grenades options are all defined in 
+      the <code>globals\ai_globals.ai_globals</code> tag.</p>
+      <p>The effects of the Shootiness option appear to be defined on <code>character</code> 
+      tags. The <code>tags/ai/generic.character</code> tag defines defaults that can be 
+      overridden by each individual NPC type. Within a character tag, "firing patterns" 
+      (with the same names as the Shootiness option values) can be defined per weapon, and 
+      the parameters associated with a firing pattern include:</p>
+      <ul>
+         <li>How many times per second they pull the trigger</li>
+         <li>How long each burst they fire is</li>
+         <li>How long they wait between bursts</li>
+         <li>The distance by which they are likely to miss their target when they 
+         begin firing a burst (such that they have to correct their aim over time)</li>
+         <li>The maximum angle by which they can miss their target when they begin 
+         firing a burst</li>
+         <li>How well they can track a moving target, in terms of how well they 
+         adjust their aim after they begin firing a burst</li>
+         <li>How well they can lead a moving target, predicting its movement</li>
+      </ul>
    </body>
 </article>

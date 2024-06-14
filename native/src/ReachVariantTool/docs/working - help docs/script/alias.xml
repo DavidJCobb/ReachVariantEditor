@@ -270,5 +270,66 @@
          for the entire rest of the script, preventing any other code from reusing them. One fix for  
          this is to nest your functions in whatever blocks of code actually use them.
       </p>
+      
+      <h2>Rules for alias names</h2>
+      <p>
+         An alias's name can't begin with a numeric digit, and can't contain square brackets or 
+         periods.
+      </p>
+      <p>
+         Broadly speaking, an alias can't shadow anything built-in:
+      </p>
+      <pre>
+         --
+         -- These next few rules apply to both relative and absolute aliases, even though 
+         -- relative aliases wouldn't *always* shadow built-ins in these cases.
+         --
+         
+         -- ERROR: An alias's name can never be the name of a keyword.
+         alias do       = player.number[0] -- relative will fail
+         alias if       = global.number[0] -- absolute will fail
+         alias allocate = allocate temporary number -- fails
+         
+         -- ERROR: An alias's name can never be a namespace name.
+         alias enums = player.number[0] -- relative will fail
+         alias game  = global.number[0] -- absolute will fail
+         
+         -- ERROR: An alias's name can never be the name of a built-in type.
+         alias player        = global.number[0]
+         alias timer         = global.number[0]
+         alias script_traits = global.number[0]
+         alias script_widget = global.number[0]
+         
+         --
+         -- The above rules apply even if the alias is relative. The below rules take into 
+         -- account whether the alias is relative or absolute.
+         --
+         
+         -- ERROR: Shadows non-namespaced built-in values
+         alias none            = global.number[0] -- a value for several different types
+         --
+         alias announce_slayer = global.number[0] -- a  Sound value
+         alias box             = global.number[0] -- a  Shape value
+         alias enemies         = global.number[0] -- a  Player Set value
+         alias warthog         = global.number[0] -- an Object Type value
+         --
+         -- Note that `alias none = player.number[0]` would succeed, because `player.none` 
+         -- doesn't a shadow built-in value name.
+         
+         -- ERROR: Shadows action `rand`
+         alias rand = global.number[0]
+         
+         -- ERROR: Shadows action `object.set_waypoint_visibility`
+         alias set_waypoint_visibility = object.number[0]
+         
+         -- ERROR: Shadows condition `object.shape_contains`
+         alias shape_contains = object.number[0]
+         
+         -- ERROR: Shadows property `player.biped`
+         alias biped = player.number[0]
+         
+         -- ERROR: Shadows access to `player.timer` variables
+         alias timer = player.number[0]
+      </pre>
    </body>
 </article>
