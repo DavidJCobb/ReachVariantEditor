@@ -67,7 +67,7 @@ namespace reach {
       value_150    =  9,
       value_200    = 10,
       value_300    = 11,
-      //instant_kill = 12, // listed in HREK/Foundation, but MCC doesn't seem to recognize it as valid
+      instant_kill = 12,
    };
    enum class damage_resist : uint8_t {
       unchanged    =  0,
