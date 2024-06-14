@@ -3106,6 +3106,9 @@ namespace Megalo {
                   break;
             }
             ++i; // convert from "index of last alias to keep" to "number of aliases to keep"
+            if (i < size) {
+               this->aliases_in_scope.resize(i);
+            }
          }
       }
       {  // The block's contained enums are going out of scope.
