@@ -237,22 +237,24 @@
          <dt data-tag="weap:objects/weapons/rifle/focus_rifle/focus_rifle"><code>focus_rifle</code> (Focus Rifle)</dt>
             <dd>A Covenant weapon that fires a weak particle beam.</dd>
             
-         <dt data-unused="true" data-tag="bloc:"><code>territory_static</code></dt>
-            <dd>&unused-object; A leftover from some point in development before Forge labels were designed and implemented. 
+         <dt data-tag="bloc:"><code>territory_static</code></dt>
+            <dd>A leftover from some point in development before Forge labels were designed and implemented. 
             In Halo 3, a tag with this name was equivalent to a marker with Halo: Reach's <var>TERR_OBJECT</var> 
-            label.</dd>
+            label. Curiously enough, it's defined on Powerhouse, and it reuses the Flag Stand model.</dd>
             
-         <dt data-unused="true" data-tag="bloc:"><code>ctf_flag_return_area</code></dt>
-            <dd>&unused-object; A leftover from some point in development before Forge labels were designed and implemented. 
+         <dt data-tag="bloc:"><code>ctf_flag_return_area</code></dt>
+            <dd>A leftover from some point in development before Forge labels were designed and implemented. 
             In Halo 3, a tag with this name marked where flags needed to be delivered; Halo: Reach's Capture 
             the Flag combines both the flag spawn point and the flag return point into a single 
-            <var>CTF_FLAG_RETURN</var> label.</dd>
+            <var>CTF_FLAG_RETURN</var> label. Curiously enough, this object is defined on Powerhouse, and it 
+            reuses the Capture Plate model.</dd>
             
-         <dt data-unused="true" data-tag="bloc:"><code>ctf_flag_spawn_point</code></dt>
-            <dd>&unused-object; A leftover from some point in development before Forge labels were designed and implemented. 
+         <dt data-tag="bloc:"><code>ctf_flag_spawn_point</code></dt>
+            <dd>A leftover from some point in development before Forge labels were designed and implemented. 
             In Halo 3, a tag with this name marked where flags spawned; Halo: Reach's Capture the Flag 
             combines both the flag spawn point and the flag return point into a single <var>CTF_FLAG_RETURN</var> 
-            label.</dd>
+            label. Curiously enough, this object is defined on Powerhouse, and fittingly enough, it reuses 
+            the Flag Stand model.</dd>
             
          <dt data-tag="scen:objects/multi/spawning/respawn_zone"><code>respawn_zone</code> (Respawn Zone)</dt>
             <dd>A respawn zone marker, of the same variety as those placeable in Forge.</dd>
@@ -285,10 +287,10 @@
             <dd>&unused-object; A development leftover. This may be from development work on Invasion that was done before 
             the Forge label system was implemented.</dd>
             
-         <dt data-unused="true" data-tag="bloc:"><code>oddball_ball_spawn_point</code></dt>
-            <dd>&unused-object; A leftover from some point in development before Forge labels were designed and implemented. 
-            In Halo 3, a tag with this name was equivalent to a marker with Halo: Reach's <var>ODDBALL_BALL</var> 
-            label.</dd>
+         <dt data-tag="bloc:"><code>oddball_ball_spawn_point</code></dt>
+            <dd>A leftover from some point in development before Forge labels were designed and implemented. In Halo 3, a 
+            tag with this name was equivalent to a marker with Halo: Reach's <var>ODDBALL_BALL</var> label. Curiously 
+            enough, this object is defined on Powerhouse, and looks identical to a Capture Plate.</dd>
             
          <dt data-tag="weap:objects/weapons/support_high/plasma_launcher/plasma_launcher"><code>plasma_launcher</code> (Plasma Launcher)</dt>
             <dd>A Covenant weapon which can lock onto targets and fire up to four armed plasma grenades 
@@ -303,7 +305,7 @@
             name "generator_x_large".</dd>
             
          <dt data-unused="true" data-tag="scen:"><code>cov_shield_generator</code></dt>
-            <dd>&unused-object; Unknown.</dd>
+            <dd>&unused-object;</dd>
             
          <dt data-tag="scen:objects/multi/spawning/initial_spawn_point"><code>initial_spawn_point</code> (Initial Spawn Point)</dt>
             <dd>A respawn point that is only used to spawn players in for the first time, at the start of 
@@ -538,20 +540,29 @@
             <dd>Analysis of this object's map tag is inconclusive but suggests that it influences spawning 
             when a shape is set on it.</dd>
             
-         <dt data-unused="true" data-tag="bloc:"><code>teleporter_sender</code></dt>
-            <dd>&unused-object; Testing indicates that this does not correspond to the Sender-Node Teleporters placeable in Forge.</dd>
+         <dt data-tag="bloc:"><code>teleporter_sender</code></dt>
+            <dd>This is a <i>Halo 3</i> sender-node teleporter, available as a development leftover and only 
+            defined on Boardwalk. Its default shape is a cylinder with radius 0.4, top 1, bottom 0.25. These 
+            teleporters spawn on channel Alpha and are interoperable with <i>Halo: Reach</i>-style teleporters 
+            placed in Forge, but there is no way to change the channel via script.</dd>
             
-         <dt data-unused="true" data-tag="bloc:"><code>teleporter_receiver</code></dt>
-            <dd>&unused-object; Testing indicates that this does not correspond to the Receiver-Node Teleporters placeable in Forge.</dd>
+         <dt data-tag="bloc:"><code>teleporter_receiver</code></dt>
+            <dd>This is a <i>Halo 3</i> receiver-node teleporter, available as a development leftover and only 
+            defined on Boardwalk. Its default shape is a cylinder with radius 0.4, top 1, bottom 0.25. These 
+            teleporters spawn on channel Alpha and are interoperable with <i>Halo: Reach</i>-style teleporters 
+            placed in Forge, but there is no way to change the channel via script.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>teleporter_2way</code></dt>
-            <dd>&unused-object; Testing indicates that this does not correspond to the Two-Way-Node Teleporters placeable in Forge.</dd>
+            <dd>&unused-object; This would've been similar to <code>teleporter_sender</code> and 
+            <code>teleporter_receiver</code> &mdash; there is a leftover <i>Halo 3</i> two-way-node teleporter 
+            in the game, available on Boardwalk &mdash; but Bungie mistyped the name when entering it into the 
+            Megalo object type list, so it isn't spawnable.</dd>
             
          <dt data-tag="mach:"><code>data_core_beam</code></dt>
             <dd>A device machine.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>phantom_overwatch</code> (Phantom, Overwatch)</dt>
-            <dd>&unused-object; A device machine with the Phantom model, suitable for scripted animation.</dd>
+            <dd>&unused-object;</dd>
             
          <dt data-tag="mach:objects/vehicles/human/longsword/longsword"><code>longsword</code> (Longsword)</dt>
             <dd>A relatively low-detail static model of a Longsword bomber. The tag is defined on Boneyard.</dd>
@@ -569,11 +580,11 @@
          <dt data-tag="vehi:objects/vehicles/covenant/phantom/phantom_mp"><code>phantom</code> (Phantom, Vehicle)</dt>
             <dd>A Phantom. It's meant to be drivable, but only the Plasma Cannons on the side doors are operable by players, even with the "force into vehicle" script action.</dd>
             
-         <dt data-unused="true" data-tag="mach:"><code>pelican</code> (Pelican)</dt>
-            <dd>&unused-object;</dd>
+         <dt data-unused="true" data-tag="mach:"><code>pelican</code> (Pelican, Device)</dt>
+            <dd>A device machine with the Pelican model, suitable for scripted animation. It is used on Spire.</dd>
             
-         <dt data-unused="true" data-tag="scen:"><code>armory_shelf</code></dt>
-            <dd>&unused-object;</dd>
+         <dt data-unused="true" data-tag="scen:objects\gear\human\military\armory_shelf\armory_shelf"><code>armory_shelf</code></dt>
+            <dd>&unused-object; The object is defined on the "The Package" campaign level.</dd>
             
          <dt data-unused="true" data-tag="scen:"><code>covenant_resupply_capsule</code></dt> <!-- cov_resupply_capsule -->
             <dd>&unused-object;</dd>
@@ -583,8 +594,9 @@
             grey) cylinder with an upward taper, about the diameter of a player model. It has 
             no collision and no apparent function.</dd>
 
-         <dt data-unused="true" data-tag="bloc:"><code>invisible_marker</code></dt>
-            <dd>&unused-object;</dd>
+         <dt data-tag="bloc:"><code>invisible_marker</code></dt>
+            <dd>Defined on Penance, Powerhouse, Reflection, Sword Base, and Zealot. It resembles 
+            a flag stand when viewed in the HREK, but is defined to be invisible outside of Forge.</dd>
             
          <dt data-tag="scen:objects/multi/spawning/weak_respawn_zone"><code>respawn_zone_weak</code> (Respawn Zone, Weak)</dt>
             <dd>A respawn zone with a weak influence, of the same variety as those placeable in Forge.</dd>
@@ -593,7 +605,8 @@
             <dd>A respawn zone with a weak negative influence, of the same variety as those placeable in Forge.</dd>
 
          <dt data-tag="mach:objects/vehicles/covenant/phantom/phantom"><code>phantom_device</code> (Phantom, Device)</dt>
-            <dd></dd>
+            <dd>A device machine with the Phantom model, suitable for scripted animation. It is used on Boneyard 
+            and Breakpoint.</dd>
             
          <dt data-thorage="true" data-tag="scen:objects/gear/human/military/resupply_capsule/resupply_capsule"><code>resupply_capsule</code></dt>
             <dd>A drop pod for a single weapon, like those seen in Firefight; as of this writing, 

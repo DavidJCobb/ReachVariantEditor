@@ -425,24 +425,6 @@
             </example>
             <category id="scoring" />
          </method>
-         <method name="increment_req_money_by" id="38">
-            <args>
-               <arg name="money" type="number">The amount of money to add.</arg>
-            </args>
-            <blurb>A development leftover related to a scrapped Requisition system.</blurb>
-            <description>
-               <p>
-                  This function increments the player's requisition money. This appears to be 
-                  a development leftover for a scrapped design idea.
-               </p>
-            </description>
-            <example>
-               for each player do
-                  current_player.increment_req_money_by(9001)
-               end
-            </example>
-            <category id="player-money" />
-         </method>
          <method name="set_req_purchase_modes" id="39">
             <args>
                <arg name="modes">
@@ -1390,7 +1372,7 @@
          </example>
          <related context="object" type="property" name="team" />
       </property>
-      <property name="money" type="number">
+      <property name="money" type="number" setter-is-accessor="true">
          <blurb>The player's money, to spend on requisitions as part of an unimplemented gameplay system.</blurb>
          <description>
             <p>
