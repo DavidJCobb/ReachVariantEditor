@@ -419,16 +419,19 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
    //  - Toggles 0320 - 0478 contain all player traits?
    //
    //     - Toggles 0361 - 0399 contain all of the "defense" player traits.
-   //
-   //  - Toggles 0956 - 1114 contain Spartan Tier 1 loadouts 1, 2, and 3, as well as all 
-   //    settings except grenade count in loadout 4.
-   //
-   //  - Toggles 1115 - 1271 contain Spartan Tier 1 loadout 4's grenade count, all of 
-   //    loadout 5, and all other loadouts for Spartans and Elites EXCEPT the grenade 
-   //    count for Elite Tier 3 loadout 5.
+   // 
+   //  - Toggles [1092, 1272] are loadout options except for 1182, located exactly between 
+   //    the Spartan and Elite loadouts, which doesn't correspond to anything known.
    //
    //     - Each loadout has six flags. That's 30 flags per loadout palette, for a total 
    //       of 180 flags for all loadouts.
+   // 
+   // In MegaloEdit, you define whether options are hidden or locked at the same time 
+   // that you set their values. As such, `c_game_engine_custom_variant.ReadOverrideOption` 
+   // does double-duty, pulling the specified value from your script AND returning the ID 
+   // of the option -- that ID being used as the index in the option toggle bitsets. However, 
+   // the function doesn't return an ID for every option (e.g. things inside of traits, 
+   // loadouts, or other struct-like options).
    //
 
    static constexpr const char* disambig = "engine option toggles";
@@ -440,33 +443,36 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
       parent->appendChild(new OptionToggleModelItem(0, tr("Score to Win",  disambig)));
       parent->appendChild(new OptionToggleModelItem(1, tr("Teams Enabled", disambig)));
       parent->appendChild(new OptionToggleModelItem(3, tr("Round Time Limit", disambig)));
-      parent->appendChild(new OptionToggleModelItem(4, tr("Sudden Death", disambig)));
+      parent->appendChild(new OptionToggleModelItem(4, tr("Sudden Death Time", disambig)));
+      parent->appendChild(new OptionToggleModelItem(5, tr("Perfection Enabled", disambig)));
       parent->appendChild(new OptionToggleModelItem(6, tr("Number of Rounds", disambig)));
+      parent->appendChild(new OptionToggleModelItem(7, tr("Rounds to Win", disambig)));
    }
    {
       auto parent = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Respawn Settings", disambig));
       model->invisibleRootItem()->appendChild(parent);
       //
       parent->appendChild(new OptionToggleModelItem(8, tr("Synchronize with Team", disambig)));
+      // 9, 10, and 11 may be Respawn with Teammate, Respawn at Location, and Respawn on Kills
       parent->appendChild(new OptionToggleModelItem(12, tr("Lives per Round", disambig)));
+      parent->appendChild(new OptionToggleModelItem(13, tr("Team Lives per Round", disambig)));
       parent->appendChild(new OptionToggleModelItem(14, tr("Respawn Time", disambig)));
       parent->appendChild(new OptionToggleModelItem(15, tr("Suicide Penalty", disambig)));
       parent->appendChild(new OptionToggleModelItem(16, tr("Betrayal Penalty", disambig)));
       parent->appendChild(new OptionToggleModelItem(17, tr("Respawn Time Growth", disambig)));
+      parent->appendChild(new OptionToggleModelItem(18, tr("Loadout Camera Time", disambig)));
       parent->appendChild(new OptionToggleModelItem(19, tr("Respawn Traits Duration", disambig)));
    }
    {
       auto parent = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Social Settings", disambig));
       model->invisibleRootItem()->appendChild(parent);
       //
+      parent->appendChild(new OptionToggleModelItem(56, tr("Team Changing", disambig)));
       parent->appendChild(new OptionToggleModelItem(57, tr("Friendly Fire", disambig)));
       parent->appendChild(new OptionToggleModelItem(58, tr("Betrayal Booting", disambig)));
-   }
-   {
-      auto parent = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Team Settings", disambig));
-      model->invisibleRootItem()->appendChild(parent);
-      //
-      parent->appendChild(new OptionToggleModelItem(56, tr("Team Changing", disambig)));
+      parent->appendChild(new OptionToggleModelItem(59, tr("Proximity Voice", disambig)));
+      parent->appendChild(new OptionToggleModelItem(60, tr("Don't Team-Restrict Voice Chat", disambig)));
+      parent->appendChild(new OptionToggleModelItem(61, tr("Allow Dead Players to Talk", disambig)));
    }
    {
       auto parent = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Map and Game Settings", disambig));
@@ -475,12 +481,16 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
       parent->appendChild(new OptionToggleModelItem(62, tr("Grenades on Map", disambig)));
       parent->appendChild(new OptionToggleModelItem(63, tr("Abilities on Map", disambig)));
       parent->appendChild(new OptionToggleModelItem(64, tr("Turrets on Map", disambig)));
+      parent->appendChild(new OptionToggleModelItem(65, tr("Shortcuts on Map", disambig)));
       parent->appendChild(new OptionToggleModelItem(66, tr("Powerups on Map", disambig)));
       parent->appendChild(new OptionToggleModelItem(67, tr("Indestructible Vehicles", disambig)));
       parent->appendChild(new OptionToggleModelItem(80, tr("Primary Weapon", disambig)));
       parent->appendChild(new OptionToggleModelItem(81, tr("Secondary Weapon", disambig)));
       parent->appendChild(new OptionToggleModelItem(103, tr("Weapon Set", disambig)));
       parent->appendChild(new OptionToggleModelItem(104, tr("Vehicle Set", disambig)));
+      parent->appendChild(new OptionToggleModelItem(210, tr("Red Powerup Duration", disambig)));
+      parent->appendChild(new OptionToggleModelItem(211, tr("Blue Powerup Duration", disambig)));
+      parent->appendChild(new OptionToggleModelItem(212, tr("Custom Powerup Duration", disambig)));
    }
    {
       auto base = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Loadouts", disambig));
@@ -570,6 +580,7 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
          parent->appendChild(new OptionToggleModelItem(395, tr("Shield Recharge Rate", disambig)));
          parent->appendChild(new OptionToggleModelItem(397, tr("Headshot Immunity", disambig)));
          parent->appendChild(new OptionToggleModelItem(398, tr("Assassination Immunity", disambig)));
+         // are 399 and 400 "shield vampirism" and "deathless?" and if so, which is which?
       }
       {
          auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Offense", disambig));
@@ -581,9 +592,11 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
          parent->appendChild(new OptionToggleModelItem(404, tr("Secondary Weapon", disambig)));
          parent->appendChild(new OptionToggleModelItem(405, tr("Armor Ability", disambig)));
          parent->appendChild(new OptionToggleModelItem(406, tr("Grenade Count", disambig)));
-         parent->appendChild(new OptionToggleModelItem(408, tr("Infinite Ammo", disambig)));
+         // is 407 "grenade regeneration?"
          parent->appendChild(new OptionToggleModelItem(410, tr("Weapon Pickup", disambig)));
+         parent->appendChild(new OptionToggleModelItem(408, tr("Infinite Ammo", disambig)));
          parent->appendChild(new OptionToggleModelItem(411, tr("Ability Usage", disambig)));
+         // are 409 and 412 "infinite abilities" and "abilities drop on death?" and if so, which is which?
       }
       {
          auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Movement", disambig));
@@ -593,6 +606,7 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
          parent->appendChild(new OptionToggleModelItem(414, tr("Player Gravity", disambig)));
          parent->appendChild(new OptionToggleModelItem(415, tr("Vehicle Use", disambig)));
          parent->appendChild(new OptionToggleModelItem(416, tr("Jump Height", disambig)));
+         // is 417 "double jump?"
       }
       {
          auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Appearance", disambig));
@@ -602,6 +616,7 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
          parent->appendChild(new OptionToggleModelItem(421, tr("Visible Waypoint", disambig)));
          parent->appendChild(new OptionToggleModelItem(425, tr("Visible Name", disambig)));
          parent->appendChild(new OptionToggleModelItem(424, tr("Forced Color", disambig)));
+         // is 423 "aura?"
       }
       {
          auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Sensors", disambig));
@@ -609,6 +624,7 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
          //
          parent->appendChild(new OptionToggleModelItem(418, tr("Motion Tracker Mode",  disambig)));
          parent->appendChild(new OptionToggleModelItem(419, tr("Motion Tracker Range", disambig)));
+         // is 420 "directional damage indicator?"
       }
    }
    model_type::item_type* unknownRoot = nullptr;

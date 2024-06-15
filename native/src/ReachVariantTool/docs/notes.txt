@@ -1,0 +1,45 @@
+
+This information might be useful for refactoring the program.
+
+== Format strings ==
+
+The various format string codes seem to always work in-game, but MegaloEdit seems to intend that they 
+match the parameter types, e.g. %n is specifically for numbers and %t, for teams. Maybe MegaloEdit 
+checks the strings at compile-time to ensure the parameters match?
+
+== Actions ==
+
+=== Useful places in MegaloEdit to reverse-engineer ===
+
+* `c_action.describe`
+** Lists mangled names (as in, C++ mangling) for each action opcode's parameter struct
+** Some enum or flags-mask parameters have their allowed values embedded in the mangled strings
+
+
+== Action limits ==
+
+* From MegaloEdit:
+** `c_action.executable_on_client`
+** `c_action.executable_pregame`
+
+=== Executable in pre-game ===
+
+MegaloEdit only allows the following actions in a pre-game trigger:
+
+   0     no-op
+   9     modify variable
+   20    run nested trigger
+   99    run nested inline trigger
+
+
+== Other constraints ==
+
+* From MegaloEdit:
+** `c_explicit_object.is_networked`
+** `c_explicit_object.is_writeable`
+** `c_explicit_player.is_networked`
+** `c_explicit_player.is_writeable`
+** `c_explicit_team.is_networked`
+** `c_explicit_team.is_writeable`
+** `c_player_reference.is_networked`
+** `c_player_reference.is_writeable`
