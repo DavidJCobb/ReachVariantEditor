@@ -329,7 +329,7 @@ namespace Megalo {
          bool handle_unresolved_string_references(); // handles any strings with an action set; returns success bool (failure if any unresolved remain)
          inline unresolved_str_list& get_unresolved_string_references() noexcept { return this->results.unresolved_strings; }
          //
-         size_t get_new_forge_label_count() const;
+         QVector<QString> get_new_forge_label_names() const;
          bool new_forge_label_not_yet_tracked(const QString& name) const;
          
          inline bool has_errors() const noexcept { return !this->errors.empty() || !this->fatal_errors.empty(); }

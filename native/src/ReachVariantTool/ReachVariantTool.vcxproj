@@ -178,7 +178,8 @@
     <ClCompile Include="helpers\bytewriter.cpp" />
     <ClCompile Include="helpers\endianness.cpp" />
     <ClCompile Include="helpers\files.cpp" />
-    <ClCompile Include="helpers\ini.cpp" />
+    <ClCompile Include="helpers\ini\file.cpp" />
+    <ClCompile Include="helpers\ini\setting.cpp" />
     <ClCompile Include="helpers\int128.cpp" />
     <ClCompile Include="helpers\memory.cpp" />
     <ClCompile Include="helpers\miscellaneous.cpp" />
@@ -352,6 +353,11 @@
     <ClInclude Include="game_variants\types\firefight.h" />
     <ClInclude Include="game_variants\warnings.h" />
     <ClInclude Include="helpers\bitarray.h" />
+    <ClInclude Include="helpers\ini\change_callback.h" />
+    <ClInclude Include="helpers\ini\file.h" />
+    <ClInclude Include="helpers\ini\setting.h" />
+    <ClInclude Include="helpers\ini\setting_type.h" />
+    <ClInclude Include="helpers\ini\setting_value_union.h" />
     <ClInclude Include="helpers\int128.h" />
     <ClInclude Include="helpers\iterators\pointer_based.h" />
     <ClInclude Include="helpers\indexed_list.h" />
@@ -554,6 +560,7 @@
     <Image Include="Resources\icon_128px.png" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="docs\notes.txt" />
     <Text Include="docs\plans - true else(if) statements.txt" />
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="docs\temporary variables.txt" />
@@ -572,6 +579,7 @@
     <None Include="docs\design flaws\df002 - mapping between script identifiers and compiled references.md" />
     <None Include="docs\design flaws\df003 - handling of variant string IDs.md" />
     <None Include="docs\design flaws\README.md" />
+    <None Include="docs\option toggle indices.md" />
     <None Include="docs\working - help docs\script\api\object\actions\face_toward\calculator.js" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.cpp.bak" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.h.bak" />

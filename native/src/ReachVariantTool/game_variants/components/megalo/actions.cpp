@@ -408,12 +408,13 @@ namespace Megalo {
       ActionFunction( // 38
          "Modify Player Requisition Money",
          "Modifies the amount of money a player has available to spend on requisitions.",
-         "Increment %1's requisition money by %2.",
+         "Modify %1's requisition money: %2 %3.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::typeinfo),
             OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("increment_req_money_by", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_setter("money", 0, 1)
       ),
       ActionFunction( // 39
          "Set Player Requisition Purchase Modes",

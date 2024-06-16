@@ -30,7 +30,7 @@ class PlayerTraitDamageMultCombobox : public QComboBox {
          this->addItem(tr("150%", "Player Damage Mult"));
          this->addItem(tr("200%", "Player Damage Mult"));
          this->addItem(tr("300%", "Player Damage Mult"));
-         //this->addItem(tr("Instant Kill", "Player Damage Mult")); // listed in HREK/Foundation, but MCC doesn't seem to recognize it as valid
+         this->addItem(tr("Instant Kill", "Player Damage Mult"));
       }
 };
 

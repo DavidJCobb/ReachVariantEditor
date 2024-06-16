@@ -985,10 +985,169 @@ namespace Megalo {
             DetailedEnumValueInfo::make_friendly_name("dlc_achieve_9")
          ),
          DetailedEnumValue("dlc_achieve_10",
-            DetailedEnumValueInfo::make_friendly_name("dlc_achieve_10")
+            DetailedEnumValueInfo::make_friendly_name("dlc_achieve_10") // 365
          ),
-         DetailedEnumValue("", DetailedEnumValueInfo::make_unused_sentinel())
+         DetailedEnumValue("", DetailedEnumValueInfo::make_unused_sentinel()), // 366
+         DetailedEnumValue("dlc_achieve_11"), // 367
+         DetailedEnumValue("dlc_achieve_12"), // 368
+         DetailedEnumValue("dlc_achieve_13"), // 369
+         DetailedEnumValue("dlc_achieve_14"), // 370
+         DetailedEnumValue("dlc_achieve_15"),
+         DetailedEnumValue("dlc_achieve_16"),
+         DetailedEnumValue("dlc_achieve_17"),
+         DetailedEnumValue("dlc_achieve_18"),
+         DetailedEnumValue("dlc_achieve_19"),
+         DetailedEnumValue("dlc_achieve_20"),
+         DetailedEnumValue("dlc_achieve_21"), // 377
+         DetailedEnumValue("", DetailedEnumValueInfo::make_unused_sentinel()), // 378
+
+         // DLC campaign achievements
+         DetailedEnumValue("racer_achieve"),
+         DetailedEnumValue("dj_achieve"), // 380
+         DetailedEnumValue("madrigal_achieve"),
+         DetailedEnumValue("pelican_phantom_achieve"),
+         DetailedEnumValue("errera_achieve"),
+         DetailedEnumValue("moa_burgers_achieve"),
+         DetailedEnumValue("secret_balcony_achieve"),
+         DetailedEnumValue("teddy_bear_achieve"),
+         DetailedEnumValue("hidden_banshees_achieve"),
+         DetailedEnumValue("tribute_room_achieve"),
+         DetailedEnumValue("bxr_mining_achieve"), // 389
+
+         DetailedEnumValue("pre_game_start"), // 390
+         DetailedEnumValue("pre_game_over"), // 391
+
+         // Incident IDs past the end of the Multiplayer list index into Firefight incidents.
+         // This means that if 343i adds any new Multiplayer incidents, they will displace all
+         // [Megalo-accessible] IDs for the Firefight incidents!
+         //
+         // For example, `survival_welcome` is Firefight incident 0. As of 6/14/2024, the 
+         // highest-defined multiplayer incident is 391, so "incident 392" is functionally the
+         // `survival_welcome` incident.
+         //
+         // Comments below denote the Firefight-relative incident IDs.
+
+         DetailedEnumValue("survival_welcome"), // 0
+         DetailedEnumValue("survival_new_set"),
+         DetailedEnumValue("survival_end_set"),
+         DetailedEnumValue("survival_new_round"),
+         DetailedEnumValue("survival_end_round"),
+         DetailedEnumValue("survival_new_wave"), // 5
+         DetailedEnumValue("survival_end_wave"),
+         DetailedEnumValue("survival_bonus_round"),
+         DetailedEnumValue("survival_bonus_lives_awarded"),
+         DetailedEnumValue("survival_bonus_round_over"),
+         DetailedEnumValue("survival_awarded_lives"), // 10
+         DetailedEnumValue("survival_awarded_weapon"),
+         DetailedEnumValue("survival_awarded_equipment"),
+         DetailedEnumValue("sur_cla_unsc_start"),
+         DetailedEnumValue("sur_cla_unsc_fail"),
+         DetailedEnumValue("sur_gen_unsc_start"),
+         DetailedEnumValue("sur_gen_unsc_fail"),
+         DetailedEnumValue("sur_gen_unsc_win"),
+         DetailedEnumValue("sur_unsc_timeout"),
+         DetailedEnumValue("sur_cla_cov_start"),
+         DetailedEnumValue("sur_cla_cov_fail"),
+         DetailedEnumValue("sur_gen_cov_start"),
+         DetailedEnumValue("sur_gen_cov_fail"),
+         DetailedEnumValue("sur_cov_win"),
+         DetailedEnumValue("sur_cov_timeout"),
+         DetailedEnumValue("gen_alpha_locked"),
+         DetailedEnumValue("gen_bravo_locked"),
+         DetailedEnumValue("gen_charlie_locked"),
+         DetailedEnumValue("survival_generator_destroyed"),
+         DetailedEnumValue("survival_round_over"),
+         DetailedEnumValue("survival_obj_complete"),
+         DetailedEnumValue("survival_obj_failed"),
+         DetailedEnumValue("survival_out_of_lives"),
+         DetailedEnumValue("survival_generator_lost"),
+         DetailedEnumValue("survival_alpha_under_attack"),
+         DetailedEnumValue("survival_bravo_under_attack"),
+         DetailedEnumValue("survival_charlie_under_attack"),
+         DetailedEnumValue("survival_spartans_win"),
+         DetailedEnumValue("survival_elites_win"),
+         DetailedEnumValue("survival_sudden_death_over"),
+         DetailedEnumValue("", DetailedEnumValueInfo::make_unused_sentinel()),
+         DetailedEnumValue("hero"),
+         DetailedEnumValue("survival_last_man_standing"),
+         DetailedEnumValue("survival_skull_thunderstorm"),
+         DetailedEnumValue("survival_skull_famine"),
+         DetailedEnumValue("survival_skull_tilt"),
+         DetailedEnumValue("survival_skull_mythic"),
+         DetailedEnumValue("survival_skull_catch"),
+         DetailedEnumValue("survival_skull_black_eye"),
+         DetailedEnumValue("survival_skull_tough_luck"),
+         DetailedEnumValue("survival_skull_iron"),
+         DetailedEnumValue("survival_skull_assassin"),
+         DetailedEnumValue("survival_skull_fog"),
+         DetailedEnumValue("survival_skull_blind"),
+         DetailedEnumValue("survival_skull_superman"),
+         DetailedEnumValue("survival_skull_grunt_birthday_party"),
+         DetailedEnumValue("survival_skull_iwhbyd"),
+         DetailedEnumValue("survival_skull_blue"),
+         DetailedEnumValue("survival_skull_yellow"),
+         DetailedEnumValue("survival_skull_red"),
+         DetailedEnumValue("survival_skulls_multiple"),
+         DetailedEnumValue("survival_skull_single"),
+         DetailedEnumValue("survival_5_lives_left"),
+         DetailedEnumValue("survival_1_life_left"),
+         DetailedEnumValue("survival_0_lives_left"),
+         DetailedEnumValue("survival_game_over"),
+         DetailedEnumValue("survival_5_ai_remaining"), // Bungie forgot to restrict this to Firefight. You can use this announcer clip in Customs.
+         DetailedEnumValue("survival_2_ai_remaining"), // Bungie forgot to restrict this to Firefight. You can use this announcer clip in Customs.
+         DetailedEnumValue("survival_1_ai_remaining"),
+         DetailedEnumValue("survival_reinforcements"),
+         DetailedEnumValue("survival_skull_all"),
+         DetailedEnumValue("survival_skull_activation_finished"),
+         DetailedEnumValue("survival_incredible_round"),
+         DetailedEnumValue("survival_superb_set"),
+         DetailedEnumValue("survival_bonus_information"),
+         DetailedEnumValue("survival_next_round_timer"),
+         DetailedEnumValue("survival_next_set_timer"),
+         DetailedEnumValue("survival_bonus_skull_all"),
+         DetailedEnumValue("survival_10_in_a_row"),
+         DetailedEnumValue("survival_20_in_a_row"),
+         DetailedEnumValue("survival_30_in_a_row"),
+         DetailedEnumValue("survival_40_in_a_row"),
+         DetailedEnumValue("survival_50_in_a_row"),
+         DetailedEnumValue("survival_100_in_a_row"),
+         DetailedEnumValue("survival_500_in_a_row"),
+         DetailedEnumValue("survival_1000_in_a_row"),
+         DetailedEnumValue("survival_10_aura"),
+         DetailedEnumValue("survival_20_aura"),
+         DetailedEnumValue("survival_30_aura"),
+         DetailedEnumValue("survival_40_aura"),
+         DetailedEnumValue("survival_50_aura"),
+         DetailedEnumValue("survival_100_aura"),
+         DetailedEnumValue("survival_500_aura"),
+         DetailedEnumValue("survival_1000_aura"),
+         DetailedEnumValue("team_generator_kill"),
+         DetailedEnumValue("sur_airstrike_refill"),
+         DetailedEnumValue("", DetailedEnumValueInfo::make_unused_sentinel()),
+         DetailedEnumValue("", DetailedEnumValueInfo::make_unused_sentinel()),
+         DetailedEnumValue("survival_mm_game_complete"),
+         DetailedEnumValue("score_silver"),
+         DetailedEnumValue("score_gold"),
+         DetailedEnumValue("score_onyx"),
+         DetailedEnumValue("mm_score_achieve"), // 102
       });
+   }
+
+   namespace {
+      size_t _compute_survival_incidents_start_at() {
+         const auto& enumeration = enums::incident;
+         for (size_t i = 0; i < enumeration.values.size(); ++i) {
+            const auto& item = enumeration.values[i];
+            if (item.name == "survival_welcome")
+               return i;
+         }
+         return -1;
+      }
+
+      size_t _survival_incidents_start_at() {
+         static size_t value = _compute_survival_incidents_start_at();
+         return value;
+      }
    }
    
    OpcodeArgTypeinfo OpcodeArgValueIncident::typeinfo = OpcodeArgTypeinfo(
@@ -1064,6 +1223,35 @@ namespace Megalo {
             return arg_compile_result::failure(QString("Value \"%1\" is not a recognized incident name.").arg(word));
       }
       this->value = value;
+      if (value >= _survival_incidents_start_at()) {
+         QString name;
+         if (value >= 0 && value <= enums::incident.values.size()) {
+            name = QString::fromStdString(enums::incident.values[value].name);
+         }
+
+         if (name.isEmpty()) {
+            compiler.raise_warning(
+               QString(
+                  "Incident ID %1 is a Firefight incident. If 343 Industries adds additional Multiplayer "
+                  "(i.e. non-Firefight) incidents, then all Firefight incidents will shift, and gametypes "
+                  "that referred to Firefight IDs will end up referring to the wrong incidents. Refer to "
+                  "the help manual's page on incidents for more information."
+               )
+                  .arg(value)
+            );
+         } else {
+            compiler.raise_warning(
+               QString(
+                  "Incident %2 (ID %1) is a Firefight incident. If 343 Industries adds additional Multiplayer "
+                  "(i.e. non-Firefight) incidents, then all Firefight incidents will shift, and gametypes "
+                  "that referred to Firefight IDs will end up referring to the wrong incidents. Refer to "
+                  "the help manual's page on incidents for more information."
+               )
+                  .arg(value)
+                  .arg(name)
+            );
+         }
+      }
       return arg_compile_result::success();
    }
    void OpcodeArgValueIncident::copy(const OpcodeArgValue* other) noexcept {

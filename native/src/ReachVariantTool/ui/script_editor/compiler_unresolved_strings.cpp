@@ -144,7 +144,7 @@ void CompilerUnresolvedStringsDialog::updateStatus() {
    auto& mp    = this->_compiler->get_variant();
    auto& table = mp.scriptData.strings;
    //
-   int32_t remaining = table.max_count - table.size() - this->_compiler->get_new_forge_label_count();
+   int32_t remaining = table.max_count - table.size() - this->_compiler->get_new_forge_label_names().size();
    //
    auto&  list      = this->_compiler->get_unresolved_string_references();
    auto&  keys      = this->_keys;

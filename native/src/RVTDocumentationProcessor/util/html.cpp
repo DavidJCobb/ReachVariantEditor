@@ -4,8 +4,9 @@
 
 namespace util {
    extern QString serialize_element(QDomElement root, html_serialize_options options) {
-      bool is_pre_tag   = root.nodeName().compare("pre", Qt::CaseInsensitive) == 0;
-      bool is_hyperlink = root.nodeName().compare("a",   Qt::CaseInsensitive) == 0;
+      bool is_pre_tag   = root.nodeName().compare("pre",   Qt::CaseInsensitive) == 0;
+      bool is_hyperlink = root.nodeName().compare("a",     Qt::CaseInsensitive) == 0;
+      bool is_style_tag = root.nodeName().compare("style", Qt::CaseInsensitive) == 0;
       //
       QString out;
       QString tag = root.nodeName();
@@ -40,14 +41,18 @@ namespace util {
       bool wrapping_in_paragraph = false;
       for (auto node : cobb::qt::xml::const_iterable_node_list(root.childNodes())) {
          if (node.isText()) {
-            auto text = xml_encode(node.nodeValue());
+            xml_encode_options enc_options;
+            if (is_style_tag) {
+               enc_options.escape_brackets = false;
+            }
+            auto text = xml_encode(node.nodeValue(), enc_options);
             if (is_pre_tag) {
                if (options.adapt_indented_pre_tags)
                   text = minimize_indent(text);
                if (options.pre_tag_content_tweak)
                   (options.pre_tag_content_tweak)(root, text);
             }
-            if (!wrapping_in_paragraph) {
+            if (!is_style_tag && !wrapping_in_paragraph) {
                wrapping_in_paragraph = options.wrap_bare_text_in_paragraphs && !options._is_recursing && !text.trimmed().isEmpty();
                if (wrapping_in_paragraph)
                   out += "<p>";
@@ -87,17 +92,19 @@ namespace util {
       out.reserve(size);
       for (int i = 0; i < size; ++i) {
          QChar c = text[i];
-         if (c == '&') {
-            out += "&amp;";
-            continue;
-         }
-         if (c == '<') {
-            out += "&lt;";
-            continue;
-         }
-         if (c == '>') {
-            out += "&gt;";
-            continue;
+         if (options.escape_brackets) {
+            if (c == '&') {
+               out += "&amp;";
+               continue;
+            }
+            if (c == '<') {
+               out += "&lt;";
+               continue;
+            }
+            if (c == '>') {
+               out += "&gt;";
+               continue;
+            }
          }
          switch (c.unicode()) { // spaces
             case 0xA0: // nbsp

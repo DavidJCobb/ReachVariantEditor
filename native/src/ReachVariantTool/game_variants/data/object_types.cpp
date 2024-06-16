@@ -249,16 +249,19 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('weap', "objects/weapons/rifle/focus_rifle/focus_rifle")
          ),
          DetailedEnumValue("territory_static", // Halo 3 leftover from before Forge labels were invented
-            DetailedEnumValueInfo::make_unused_sentinel(),
-            DetailedEnumValueInfo::make_map_tag('bloc', "")
+            DetailedEnumValueInfo::make_friendly_name("Scrapped Territory Marker (Halo 3 leftover)"),
+            DetailedEnumValueInfo::make_map_tag('bloc', ""),
+            DetailedEnumValueInfo::make_description("A leftover from Halo 3's development, available only on Powerhouse. It has no inherent function, and reuses the Flag Stand model.")
          ),
          DetailedEnumValue("ctf_flag_return_area", // Halo 3 leftover from before Forge labels were invented
-            DetailedEnumValueInfo::make_unused_sentinel(),
-            DetailedEnumValueInfo::make_map_tag('bloc', "")
+            DetailedEnumValueInfo::make_friendly_name("Scrapped Flag Return Marker (Halo 3 leftover)"),
+            DetailedEnumValueInfo::make_map_tag('bloc', ""),
+            DetailedEnumValueInfo::make_description("A leftover from Halo 3's development, available only on Powerhouse. It has no inherent function, and reuses the Flag Stand model.")
          ),
          DetailedEnumValue("ctf_flag_spawn_point", // Halo 3 leftover from before Forge labels were invented
-            DetailedEnumValueInfo::make_unused_sentinel(),
-            DetailedEnumValueInfo::make_map_tag('bloc', "")
+            DetailedEnumValueInfo::make_friendly_name("Scrapped Flag Spawn Marker (Halo 3 leftover)"),
+            DetailedEnumValueInfo::make_map_tag('bloc', ""),
+            DetailedEnumValueInfo::make_description("A leftover from Halo 3's development, available only on Powerhouse. It has no inherent function, and reuses the Flag Stand model.")
          ),
          DetailedEnumValue("respawn_zone",
             DetailedEnumValueInfo::make_friendly_name("Respawn Zone"),
@@ -296,9 +299,9 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
          DetailedEnumValue("oddball_ball_spawn_point", // Halo 3 leftover from before Forge labels were invented
-            DetailedEnumValueInfo::make_unused_sentinel(),
-            DetailedEnumValueInfo::make_friendly_name("oddball_ball_spawn_point"),
-            DetailedEnumValueInfo::make_map_tag('bloc', "")
+            DetailedEnumValueInfo::make_friendly_name("Scrapped Oddball Spawn Point (Halo 3 leftover)"),
+            DetailedEnumValueInfo::make_map_tag('bloc', ""),
+            DetailedEnumValueInfo::make_description("A leftover from Halo 3's development, available only on Powerhouse. It has no inherent function, and reuses the Flag Stand model.")
          ),
          DetailedEnumValue("plasma_launcher",
             DetailedEnumValueInfo::make_friendly_name("Plasma Launcher"),
@@ -626,25 +629,27 @@ namespace Megalo {
             DetailedEnumValueInfo::make_description("Analysis of this object's map tag is inconclusive but suggests that it influences spawning when a shape is set on it. It doesn't really matter, though, because only Tempest has the Megalo object tag list specify the tag as of this writing.")
          ),
          DetailedEnumValue("teleporter_sender",
-            DetailedEnumValueInfo::make_friendly_name("teleporter_sender"),
+            DetailedEnumValueInfo::make_friendly_name("Halo 3 Teleporter, Sender"),
             DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/teleporter_sender/teleporter_sender"),
-            DetailedEnumValueInfo::make_description("Testing indicates that this does not correspond to the Sender-Node Teleporters placeable in Forge. Its default shape is a cylinder with dimensions 4, 0, 10, and 2.5. It is only available on Forge World.")
+            DetailedEnumValueInfo::make_description("A Halo 3 teleporter (sender node) available only on Boardwalk. It can be spawned via Megalo, and is interoperable with Halo: Reach teleporters on channel Alpha.")
          ),
          DetailedEnumValue("teleporter_receiver",
-            DetailedEnumValueInfo::make_friendly_name("teleporter_reciever"),
+            DetailedEnumValueInfo::make_friendly_name("Halo 3 Teleporter, Receiver"),
             DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/teleporter_receiver/teleporter_receiver"),
-            DetailedEnumValueInfo::make_description("Testing indicates that this does not correspond to the Receiver-Node Teleporters placeable in Forge. Its default shape is a cylinder with dimensions 4, 0, 10, and 2.5. It is only available on Forge World.")
+            DetailedEnumValueInfo::make_description("A Halo 3 teleporter (receiver node) available only on Boardwalk. It can be spawned via Megalo, and is interoperable with Halo: Reach teleporters on channel Alpha.")
          ),
          DetailedEnumValue("teleporter_2way",
-            DetailedEnumValueInfo::make_friendly_name("teleporter_2way"),
+            DetailedEnumValueInfo::make_unused_sentinel(), // Bungie typo'd the definition
+            DetailedEnumValueInfo::make_friendly_name("Halo 3 Teleporter, Two-Way"),
             DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/teleporter_2way/teleporter_2way"),
-            DetailedEnumValueInfo::make_description("Testing indicates that this does not correspond to the Two-Way-Node Teleporters placeable in Forge. Its default shape is a cylinder with dimensions 4, 0, 10, and 2.5. It is only available on Forge World.")
+            DetailedEnumValueInfo::make_description("A Halo 3 teleporter (two-way node). The object definition exists in the game files, but it isn't available on any map, because Bungie typed in the wrong internal name and path when setting it up.")
          ),
          DetailedEnumValue("data_core_beam",
             DetailedEnumValueInfo::make_friendly_name("data_core_beam"),
             DetailedEnumValueInfo::make_map_tag('mach', "")
          ),
          DetailedEnumValue("phantom_overwatch",
+            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("phantom_overwatch"),
             DetailedEnumValueInfo::make_map_tag('mach', "")
          ),
@@ -674,14 +679,14 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/phantom/phantom_mp")
          ),
          DetailedEnumValue("pelican",
-            DetailedEnumValueInfo::make_unused_sentinel(),
-            DetailedEnumValueInfo::make_friendly_name("Pelican (Vehicle)"),
-            DetailedEnumValueInfo::make_map_tag('mach', "")
+            DetailedEnumValueInfo::make_friendly_name("Pelican (Device)"),
+            DetailedEnumValueInfo::make_map_tag('mach', "The animated device machine used on Spire.")
          ),
          DetailedEnumValue("armory_shelf",
             DetailedEnumValueInfo::make_unused_sentinel(),
-            DetailedEnumValueInfo::make_friendly_name("armory_shelf"),
-            DetailedEnumValueInfo::make_map_tag('scen', "")
+            DetailedEnumValueInfo::make_friendly_name("Armory Shelf"),
+            DetailedEnumValueInfo::make_map_tag('scen', ""),
+            DetailedEnumValueInfo::make_description("A military-style shelving unit defined only on the Campaign level \"The Package.\"")
          ),
          DetailedEnumValue("covenant_resupply_capsule",
             DetailedEnumValueInfo::make_friendly_name("cov_resupply_capsule"),
@@ -693,9 +698,9 @@ namespace Megalo {
             DetailedEnumValueInfo::make_description("An unfinished asset available on Boneyard. It is a small, untextured (i.e. flat grey) cylinder with an upward taper, about the diameter of a player model. It has no collision and no apparent function.")
          ),
          DetailedEnumValue("invisible_marker",
-            DetailedEnumValueInfo::make_unused_sentinel(),
-            DetailedEnumValueInfo::make_friendly_name("invisible_marker"),
-            DetailedEnumValueInfo::make_map_tag('bloc', "")
+            DetailedEnumValueInfo::make_friendly_name("Scrapped Invisible Marker"),
+            DetailedEnumValueInfo::make_map_tag('bloc', ""),
+            DetailedEnumValueInfo::make_description("Defined on Penance, Powerhouse, Reflection, Sword Base, and Zealot. It resembles a flag stand when viewed in the HREK, but is defined to be invisible outside of Forge.")
          ),
          DetailedEnumValue("respawn_zone_weak",
             DetailedEnumValueInfo::make_friendly_name("Respawn Zone (Weak)"),
@@ -708,7 +713,7 @@ namespace Megalo {
             DetailedEnumValueInfo::make_description("A respawn zone with a weak negative influence, of the same variety as those placeable in Forge.")
          ),
          DetailedEnumValue("phantom_device",
-            DetailedEnumValueInfo::make_friendly_name("phantom_device"),
+            DetailedEnumValueInfo::make_friendly_name("Phantom (Device)"),
             DetailedEnumValueInfo::make_map_tag('mach', "objects/vehicles/covenant/phantom/phantom")
          ),
          DetailedEnumValue("resupply_capsule",
@@ -717,6 +722,7 @@ namespace Megalo {
             DetailedEnumValueInfo::make_description("A drop pod for a single weapon, like those seen in Firefight; as of this writing, the object is only available on Anchor 9. Unfortunately, the pod is sealed, and there doesn't seem to be any way to open it. Its tag data suggests that it opens when it reaches 0% health, implying that Firefight opens it by using scripts to \"kill\" it; however, attempting to do the same with Megalo scripts produces no result.")
          ),
          DetailedEnumValue("resupply_capsule_open",
+            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("resupply_capsule_open"),
             DetailedEnumValueInfo::make_map_tag('scen', ""),
             DetailedEnumValueInfo::make_description("This tag is not defined even in Firefight maps, which define the \"closed\" variant. Examination of the \"closed\" variant's tags suggest that an explicit \"open\" variant shouldn't even be necessary.")
@@ -727,10 +733,12 @@ namespace Megalo {
             DetailedEnumValueInfo::make_description("Defined on some Firefight maps, including Courtyard. It is a flat olive drab metal panel with UNSC branding that in Firefight can spawn with power weapons attached to it.")
          ),
          DetailedEnumValue("tech_console_stationary",
+            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("tech_console_stationary"),
             DetailedEnumValueInfo::make_map_tag('mach', "")
          ),
          DetailedEnumValue("tech_console_wall",
+            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("tech_console_wall"),
             DetailedEnumValueInfo::make_map_tag('mach', "")
          ),
@@ -752,6 +760,7 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('weap', "objects/weapons/support_high/flak_cannon/flak_cannon")
          ),
          DetailedEnumValue("dropzone_boundary",
+            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("dropzone_boundary"),
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),

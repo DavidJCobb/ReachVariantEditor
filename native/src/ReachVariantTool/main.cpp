@@ -1,4 +1,5 @@
 #include "ui/main_window.h"
+#include <filesystem>
 #include <QtWidgets/QApplication>
 
 #include "game_variants/base.h"
@@ -19,14 +20,25 @@ int main(int argc, char *argv[]) {
    #if _DEBUG
       qDebug() << a.applicationVersion();
    #endif
-   //
+   
    #if _DEBUG // log all qt resources to the "output" tab in the debugger
       QDirIterator it(":", QDirIterator::Subdirectories);
       while (it.hasNext()) {
          qDebug() << it.next();
       }
    #endif
-   //
+
+   // Load INIs. Has to be done after QApplication instantiation so we can get the 
+   // program folder path.
+   {
+      std::filesystem::path path = QApplication::instance()->applicationDirPath().toStdWString();
+      path /= L"ReachVariantTool.ini";
+
+      auto& ini = ReachINI::get();
+      ini.set_paths(path);
+      ini.load();
+   }
+   
    {  // Themes
       auto* engine = new RVTThemeEngine(&a);
       //

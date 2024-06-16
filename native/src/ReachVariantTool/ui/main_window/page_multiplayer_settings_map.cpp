@@ -74,15 +74,19 @@ void PageMPSettingsMapAndGame::updateEnableStates() {
          disable = false;
       }
    }
-   //
+   
    this->ui.fieldGrenades->setDisabled(disable);
    this->ui.fieldShortcuts->setDisabled(disable);
    this->ui.fieldAbilities->setDisabled(disable);
    this->ui.fieldPowerups->setDisabled(disable);
    this->ui.fieldTurrets->setDisabled(disable);
-   this->ui.fieldIndestructibleVehicles->setDisabled(disable);
    this->ui.fieldWeaponSet->setDisabled(disable);
-   this->ui.fieldVehicleSet->setDisabled(disable);
+
+   // Indestructible Vehicles confirmed to work for pre-placed vehicles (e.g. on Beachhead) 
+   // in current patch.
+   
+   // Vehicle Set options "Mongooses Only" and "All Covenant" confirmed to work for pre-placed 
+   // vehicles (e.g. on Beachhead) in current patch.
 }
 void PageMPSettingsMapAndGame::updateFromVariant(GameVariant* variant) {
    auto data = variant->get_custom_game_options();

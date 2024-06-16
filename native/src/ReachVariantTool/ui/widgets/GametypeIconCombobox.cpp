@@ -4,7 +4,7 @@
 
 namespace {
    const char* _icons[] = {
-      "Capture the Flag",
+      "Capture the Flag", // 0
       "Slayer",
       "Oddball",
       "King of the Hill",
@@ -14,7 +14,7 @@ namespace {
       "Infection",
       "VIP",
       "Invasion",
-      "Invasion Slayer",
+      "Invasion Slayer", // 10
       "Stockpile",
       "Action Sack",
       "Race and Rally",
@@ -24,7 +24,7 @@ namespace {
       "Headhunter",
       "Crosshair",
       "Wheel",
-      "Insane",
+      "Insane", // 20
       "Bunker",
       "Health",
       "Defend Castle",
@@ -35,7 +35,7 @@ namespace {
       "8-Ball",
       "Noble Team Insignia",
       "Covenant Insignia",
-      "Capture Waypoint",
+      "Capture Waypoint", // 30
       /*// Inside of MPVR (not including its header), the engine icon is stored as a 5-bit number and -1 means "none," so these icons aren't usable.
       "Defend Waypoint",
       "Resource Waypoint",

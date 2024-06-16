@@ -93,7 +93,13 @@ namespace Megalo {
             VariableScopeIndicatorValue::index_type::none,
             VariableScopeIndicatorValue::flags::is_readonly // KSoft doesn't list this scope as read-only, but Bungie and 343i need to write to it, and we need it read-only so we can disambiguate from the "score" setter
          );
-         extern VariableScopeIndicatorValue player_money   = VariableScopeIndicatorValue("%w.money",          "%w's Money",  &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none);
+         extern VariableScopeIndicatorValue player_money   = VariableScopeIndicatorValue(
+            "%w.money",
+            "%w's Money",
+            &MegaloVariableScopePlayer,
+            VariableScopeIndicatorValue::index_type::none,
+            VariableScopeIndicatorValue::flags::is_readonly // KSoft doesn't list this scope as read-only, but Bungie and 343i need to write to it, and we need it read-only so we can disambiguate from the "score" setter
+         );
          extern VariableScopeIndicatorValue player_rating  = VariableScopeIndicatorValue("%w.rating",         "%w's Rating", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none);
          extern VariableScopeIndicatorValue player_stat    = VariableScopeIndicatorValue::make_indexed_data_indicator( // player stat
             "%w.script_stat[%i]",

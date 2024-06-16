@@ -16,8 +16,9 @@ namespace cobb {
             protected:
                virtual void _send_change_event(setting*, setting_value_union oldValue, setting_value_union newValue) override;
             public:
-               file(const wchar_t* filepath) : QObject(nullptr), _superclass(filepath) {}
-               file(const wchar_t* filepath, const wchar_t* backup, const wchar_t* working) : QObject(nullptr), _superclass(filepath, backup, working) {}
+               file() : QObject(nullptr), _superclass() {}
+               file(std::filesystem::path filepath) : QObject(nullptr), _superclass(filepath) {}
+               file(std::filesystem::path filepath, std::filesystem::path backup, std::filesystem::path working) : QObject(nullptr), _superclass(filepath, backup, working) {}
          };
       }
    }

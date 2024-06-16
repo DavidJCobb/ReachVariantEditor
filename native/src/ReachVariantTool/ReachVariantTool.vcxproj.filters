@@ -109,9 +109,6 @@
     <ClCompile Include="game_variants\components\teams.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="helpers\ini.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ui\generic\IconOnlyCombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -476,6 +473,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="editor_state\ReachStringCentralModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\ini\file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\ini\setting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1179,6 +1182,21 @@
     <ClInclude Include="helpers\string\strieq_ascii.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="helpers\ini\setting_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\ini\setting_value_union.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\ini\change_callback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\ini\file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\ini\setting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -1245,6 +1263,7 @@
     <Text Include="Resources\localized_string_library\items.txt" />
     <Text Include="Resources\localized_string_library\vehicles.txt" />
     <Text Include="Resources\localized_string_library\vip.txt" />
+    <Text Include="docs\notes.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\gametype_files\blank_forge.bin" />
@@ -1259,6 +1278,7 @@
     <None Include="docs\design flaws\df002 - mapping between script identifiers and compiled references.md" />
     <None Include="docs\design flaws\df003 - handling of variant string IDs.md" />
     <None Include="Directory.build.props" />
+    <None Include="docs\option toggle indices.md" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player.xml" />
