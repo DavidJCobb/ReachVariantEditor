@@ -560,6 +560,7 @@
     <Image Include="Resources\icon_128px.png" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="docs\notes.txt" />
     <Text Include="docs\plans - true else(if) statements.txt" />
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="docs\temporary variables.txt" />
@@ -578,6 +579,7 @@
     <None Include="docs\design flaws\df002 - mapping between script identifiers and compiled references.md" />
     <None Include="docs\design flaws\df003 - handling of variant string IDs.md" />
     <None Include="docs\design flaws\README.md" />
+    <None Include="docs\option toggle indices.md" />
     <None Include="docs\working - help docs\script\api\object\actions\face_toward\calculator.js" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.cpp.bak" />
     <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.h.bak" />

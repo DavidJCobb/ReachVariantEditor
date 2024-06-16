@@ -14,6 +14,7 @@ void OptionToggleModelItem::_destroyDescendants() noexcept {
    this->_children.clear();
 }
 void OptionToggleModelItem::appendChild(OptionToggleModelItem* child) noexcept {
+   assert(child != this);
    auto p = child->parent();
    if (p)
       p->removeChild(child);
@@ -436,12 +437,116 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
 
    static constexpr const char* disambig = "engine option toggles";
    auto model = static_cast<OptionToggleModel*>(this->model());
+
+   constexpr size_t ids_per_player_trait_tree = 35;
+   //
+   auto _populate_player_trait_tree = [](OptionToggleModelItem& traits, size_t base_id, bool skip_in_map_and_game = false) {
+      {
+         auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Defense", disambig));
+         traits.appendChild(parent);
+         //
+         parent->appendChild(new OptionToggleModelItem(base_id + 0, tr("Damage Resistance", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 1, tr("Health Multiplier", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 2, tr("Health Recharge Rate", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 3, tr("Shield Multiplier", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 4, tr("Shield Recharge Rate", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 5, tr("Overshield Recharge Rate", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 6, tr("Headshot Immunity", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 7, tr("Assassination Immunity", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 8, tr("Cannot Die from Damage", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 9, tr("Shield Vampirism", disambig)));
+      }
+      {
+         auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Offense", disambig));
+         traits.appendChild(parent);
+         //
+         parent->appendChild(new OptionToggleModelItem(base_id + 10, tr("Damage Multiplier", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 11, tr("Melee Multiplier", disambig)));
+         if (!skip_in_map_and_game) {
+            //
+            // These two traits are part of Base Player Traits, but they're the only Base Player Traits that 
+            // have working toggles. When we generate the tree for the unused/non-functional B.P.T., we'll 
+            // want to exclude these, since they, ah, aren't unused.
+            //
+            parent->appendChild(new OptionToggleModelItem(base_id + 12, tr("Primary Weapon", disambig)));
+            parent->appendChild(new OptionToggleModelItem(base_id + 13, tr("Secondary Weapon", disambig)));
+         }
+         parent->appendChild(new OptionToggleModelItem(base_id + 14, tr("Armor Ability", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 15, tr("Grenade Count", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 16, tr("Grenade Regeneration", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 19, tr("Weapon Pickup", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 17, tr("Infinite Ammo", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 20, tr("Ability Usage", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 18, tr("Infinite Abilities", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 21, tr("Drop Armor Ability on Death", disambig)));
+      }
+      {
+         auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Movement", disambig));
+         traits.appendChild(parent);
+         //
+         parent->appendChild(new OptionToggleModelItem(base_id + 22, tr("Movement Speed", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 23, tr("Player Gravity", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 24, tr("Vehicle Use", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 25, tr("Jump Height", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 26, tr("Double Jump", disambig)));
+      }
+      {
+         auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Appearance", disambig));
+         traits.appendChild(parent);
+         //
+         parent->appendChild(new OptionToggleModelItem(base_id + 31, tr("Active Camo", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 30, tr("Visible Waypoint", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 34, tr("Visible Name", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 33, tr("Forced Color", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 32, tr("Aura", disambig)));
+      }
+      {
+         auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Sensors", disambig));
+         traits.appendChild(parent);
+         //
+         parent->appendChild(new OptionToggleModelItem(base_id + 27, tr("Motion Tracker Mode",  disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 28, tr("Motion Tracker Range", disambig)));
+         parent->appendChild(new OptionToggleModelItem(base_id + 29, tr("Directional Damage Indicator", disambig)));
+      }
+   };
+
+   constexpr size_t ids_per_ai_wave_trait_tree = 10;
+   //
+   auto _populate_ai_wave_trait_tree = [](OptionToggleModelItem& traits, size_t base_id) {
+      traits.appendChild(new OptionToggleModelItem(base_id + 0, tr("Vision", disambig)));
+      traits.appendChild(new OptionToggleModelItem(base_id + 1, tr("Hearing", disambig)));
+      traits.appendChild(new OptionToggleModelItem(base_id + 2, tr("Luck", disambig)));
+      traits.appendChild(new OptionToggleModelItem(base_id + 3, tr("Shootiness", disambig)));
+      traits.appendChild(new OptionToggleModelItem(base_id + 4, tr("Grenades", disambig)));
+      traits.appendChild(new OptionToggleModelItem(base_id + 5, tr("Drop Equipment on Death", disambig)));
+      traits.appendChild(new OptionToggleModelItem(base_id + 6, tr("Assassination Immunity", disambig)));
+      traits.appendChild(new OptionToggleModelItem(base_id + 7, tr("Headshot Immunity", disambig)));
+      traits.appendChild(new OptionToggleModelItem(base_id + 8, tr("Damage Resistance", disambig)));
+      traits.appendChild(new OptionToggleModelItem(base_id + 9, tr("Damage Modifier", disambig)));
+   };
+
+   auto _populate_respawn_options_tree = [](OptionToggleModelItem& parent, size_t base_id) {
+      parent.appendChild(new OptionToggleModelItem(base_id +  0, tr("Synchronize with Team", disambig)));
+      parent.appendChild(new OptionToggleModelItem(base_id +  1, tr("Respawn with Teammate", disambig)));
+      parent.appendChild(new OptionToggleModelItem(base_id +  2, tr("Respawn at Location", disambig)));
+      parent.appendChild(new OptionToggleModelItem(base_id +  3, tr("Respawn on Kills", disambig)));
+      parent.appendChild(new OptionToggleModelItem(base_id +  4, tr("Lives per Round", disambig)));
+      parent.appendChild(new OptionToggleModelItem(base_id +  5, tr("Team Lives per Round", disambig)));
+      parent.appendChild(new OptionToggleModelItem(base_id +  6, tr("Respawn Time", disambig)));
+      parent.appendChild(new OptionToggleModelItem(base_id +  7, tr("Suicide Penalty", disambig)));
+      parent.appendChild(new OptionToggleModelItem(base_id +  8, tr("Betrayal Penalty", disambig)));
+      parent.appendChild(new OptionToggleModelItem(base_id +  9, tr("Respawn Time Growth", disambig)));
+      parent.appendChild(new OptionToggleModelItem(base_id + 10, tr("Loadout Camera Time", disambig)));
+      parent.appendChild(new OptionToggleModelItem(base_id + 11, tr("Respawn Traits Duration", disambig)));
+   };
+
    {
       auto parent = new OptionToggleModelItem(OptionToggleModelItem::container, tr("General Settings", disambig));
       model->invisibleRootItem()->appendChild(parent);
       //
       parent->appendChild(new OptionToggleModelItem(0, tr("Score to Win",  disambig)));
       parent->appendChild(new OptionToggleModelItem(1, tr("Teams Enabled", disambig)));
+      parent->appendChild(new OptionToggleModelItem(2, tr("Reset Map on New Round", disambig)));
       parent->appendChild(new OptionToggleModelItem(3, tr("Round Time Limit", disambig)));
       parent->appendChild(new OptionToggleModelItem(4, tr("Sudden Death Time", disambig)));
       parent->appendChild(new OptionToggleModelItem(5, tr("Perfection Enabled", disambig)));
@@ -451,22 +556,13 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
    {
       auto parent = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Respawn Settings", disambig));
       model->invisibleRootItem()->appendChild(parent);
-      //
-      parent->appendChild(new OptionToggleModelItem(8, tr("Synchronize with Team", disambig)));
-      // 9, 10, and 11 may be Respawn with Teammate, Respawn at Location, and Respawn on Kills
-      parent->appendChild(new OptionToggleModelItem(12, tr("Lives per Round", disambig)));
-      parent->appendChild(new OptionToggleModelItem(13, tr("Team Lives per Round", disambig)));
-      parent->appendChild(new OptionToggleModelItem(14, tr("Respawn Time", disambig)));
-      parent->appendChild(new OptionToggleModelItem(15, tr("Suicide Penalty", disambig)));
-      parent->appendChild(new OptionToggleModelItem(16, tr("Betrayal Penalty", disambig)));
-      parent->appendChild(new OptionToggleModelItem(17, tr("Respawn Time Growth", disambig)));
-      parent->appendChild(new OptionToggleModelItem(18, tr("Loadout Camera Time", disambig)));
-      parent->appendChild(new OptionToggleModelItem(19, tr("Respawn Traits Duration", disambig)));
+      _populate_respawn_options_tree(*parent, 8);
    }
    {
       auto parent = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Social Settings", disambig));
       model->invisibleRootItem()->appendChild(parent);
       //
+      parent->appendChild(new OptionToggleModelItem(55, tr("Observers", disambig)));
       parent->appendChild(new OptionToggleModelItem(56, tr("Team Changing", disambig)));
       parent->appendChild(new OptionToggleModelItem(57, tr("Friendly Fire", disambig)));
       parent->appendChild(new OptionToggleModelItem(58, tr("Betrayal Booting", disambig)));
@@ -495,16 +591,20 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
    {
       auto base = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Loadouts", disambig));
       model->invisibleRootItem()->appendChild(base);
-      //
+
+      base->appendChild(new OptionToggleModelItem(1091, tr("Spartan Loadouts Enabled", disambig)));
+      base->appendChild(new OptionToggleModelItem(1182, tr("Elite Loadouts Enabled", disambig)));
+
       constexpr uint8_t options_in_loadout = 6;
       constexpr uint8_t loadouts_in_palette = 5;
       constexpr uint8_t palettes_per_species = 3;
       //
+      // 1091 == Spartan Loadouts Enabled
       // 1092 == Spartan Tier 1 Loadout 1 Hide Loadout
       // 1093 == Spartan Tier 1 Loadout 1 Name
       // 1094 == Spartan Tier 1 Loadout 1 Primary Weapon
       // 1181 == Spartan Tier 3 Loadout 5 Grenade Count
-      // 1182 == Unknown
+      // 1182 == Elite Loadouts Enabled
       // 1183 == Elite   Tier 1 Loadout 1 Hide Loadout
       // 1266 == Elite   Tier 3 Loadout 4 Grenade Count
       // 1267 == Elite   Tier 3 Loadout 5 Hide Loadout
@@ -547,86 +647,310 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
             parent->appendChild(new OptionToggleModelItem(oi + 0, tr("Hide Loadout", disambig)));  // 1267
          }
       }
-      /*//
-      {
-         auto tier = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Elite Tier 3", disambig));
-         base->appendChild(tier);
-         //
-         {
-            auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Loadout Epsilon", disambig));
-            tier->appendChild(parent);
-            //
-            parent->appendChild(new OptionToggleModelItem(1268, tr("Name", disambig)));
-            parent->appendChild(new OptionToggleModelItem(1269, tr("Primary Weapon", disambig)));
-            parent->appendChild(new OptionToggleModelItem(1270, tr("Secondary Weapon", disambig)));
-            parent->appendChild(new OptionToggleModelItem(1271, tr("Armor Ability", disambig)));
-            parent->appendChild(new OptionToggleModelItem(1272, tr("Grenade Count", disambig)));
-            parent->appendChild(new OptionToggleModelItem(1267, tr("Hide Loadout", disambig)));
-         }
-      }*/
    }
    {
-      auto traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Player Traits", disambig));
+      auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("All Player Traits", disambig));
       model->invisibleRootItem()->appendChild(traits);
       //
+      _populate_player_trait_tree(*traits, 391);
+   }
+   {
+      auto* forge = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Forge", disambig));
+      model->invisibleRootItem()->appendChild(forge);
+
+      forge->appendChild(new OptionToggleModelItem(213, tr("Enable Open-Channel Voice", disambig)));
+      forge->appendChild(new OptionToggleModelItem(214, tr("Edit Mode Access", disambig)));
+      forge->appendChild(new OptionToggleModelItem(215, tr("Edit Mode Respawn Time", disambig)));
+
       {
-         auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Defense", disambig));
-         traits->appendChild(parent);
-         //
-         parent->appendChild(new OptionToggleModelItem(391, tr("Damage Resistance", disambig)));
-         // 392: Health Multiplier?
-         parent->appendChild(new OptionToggleModelItem(393, tr("Health Recharge Rate", disambig)));
-         parent->appendChild(new OptionToggleModelItem(394, tr("Shield Multiplier", disambig)));
-         parent->appendChild(new OptionToggleModelItem(395, tr("Shield Recharge Rate", disambig)));
-         parent->appendChild(new OptionToggleModelItem(397, tr("Headshot Immunity", disambig)));
-         parent->appendChild(new OptionToggleModelItem(398, tr("Assassination Immunity", disambig)));
-         // are 399 and 400 "shield vampirism" and "deathless?" and if so, which is which?
-      }
-      {
-         auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Offense", disambig));
-         traits->appendChild(parent);
-         //
-         parent->appendChild(new OptionToggleModelItem(401, tr("Damage Multiplier", disambig)));
-         parent->appendChild(new OptionToggleModelItem(402, tr("Melee Multiplier", disambig)));
-         parent->appendChild(new OptionToggleModelItem(403, tr("Primary Weapon", disambig)));
-         parent->appendChild(new OptionToggleModelItem(404, tr("Secondary Weapon", disambig)));
-         parent->appendChild(new OptionToggleModelItem(405, tr("Armor Ability", disambig)));
-         parent->appendChild(new OptionToggleModelItem(406, tr("Grenade Count", disambig)));
-         // is 407 "grenade regeneration?"
-         parent->appendChild(new OptionToggleModelItem(410, tr("Weapon Pickup", disambig)));
-         parent->appendChild(new OptionToggleModelItem(408, tr("Infinite Ammo", disambig)));
-         parent->appendChild(new OptionToggleModelItem(411, tr("Ability Usage", disambig)));
-         // are 409 and 412 "infinite abilities" and "abilities drop on death?" and if so, which is which?
-      }
-      {
-         auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Movement", disambig));
-         traits->appendChild(parent);
-         //
-         parent->appendChild(new OptionToggleModelItem(413, tr("Movement Speed", disambig)));
-         parent->appendChild(new OptionToggleModelItem(414, tr("Player Gravity", disambig)));
-         parent->appendChild(new OptionToggleModelItem(415, tr("Vehicle Use", disambig)));
-         parent->appendChild(new OptionToggleModelItem(416, tr("Jump Height", disambig)));
-         // is 417 "double jump?"
-      }
-      {
-         auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Appearance", disambig));
-         traits->appendChild(parent);
-         //
-         parent->appendChild(new OptionToggleModelItem(422, tr("Active Camo", disambig)));
-         parent->appendChild(new OptionToggleModelItem(421, tr("Visible Waypoint", disambig)));
-         parent->appendChild(new OptionToggleModelItem(425, tr("Visible Name", disambig)));
-         parent->appendChild(new OptionToggleModelItem(424, tr("Forced Color", disambig)));
-         // is 423 "aura?"
-      }
-      {
-         auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Sensors", disambig));
-         traits->appendChild(parent);
-         //
-         parent->appendChild(new OptionToggleModelItem(418, tr("Motion Tracker Mode",  disambig)));
-         parent->appendChild(new OptionToggleModelItem(419, tr("Motion Tracker Range", disambig)));
-         // is 420 "directional damage indicator?"
+         auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Editor Traits", disambig));
+         forge->appendChild(traits);
+         _populate_player_trait_tree(*traits, 216);
       }
    }
+
+   {
+      auto* unused_root = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Unused/Non-Functional Toggles", disambig));
+      model->invisibleRootItem()->appendChild(unused_root);
+
+      {
+         auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Base Player Traits", disambig));
+         unused_root->appendChild(traits);
+         _populate_player_trait_tree(*traits, 68, true);
+      }
+      {
+         auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Respawn Traits", disambig));
+         unused_root->appendChild(traits);
+         _populate_player_trait_tree(*traits, 20);
+      }
+      {
+         auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Red Powerup Traits", disambig));
+         unused_root->appendChild(traits);
+         _populate_player_trait_tree(*traits, 105);
+      }
+      {
+         auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Blue Powerup Traits", disambig));
+         unused_root->appendChild(traits);
+         _populate_player_trait_tree(*traits, 140);
+      }
+      {
+         auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Custom Powerup Traits", disambig));
+         unused_root->appendChild(traits);
+         _populate_player_trait_tree(*traits, 175);
+      }
+      {
+         auto* folder = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Scripted Traits", disambig));
+         unused_root->appendChild(folder);
+
+         for (size_t i = 0; i < 4; ++i) {
+            QString name = tr("Scripted Traits %1", disambig).arg(i);
+
+            auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, name);
+            folder->appendChild(traits);
+            _populate_player_trait_tree(*traits, 251 + ids_per_player_trait_tree * i);
+         }
+      }
+      
+      {
+         auto* mode_root = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Firefight (unused)", disambig));
+         unused_root->appendChild(mode_root);
+         //
+         {
+            auto* folder = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Firefight Settings", disambig));
+            mode_root->appendChild(folder);
+            //
+            folder->appendChild(new OptionToggleModelItem(436, tr("Hazards", disambig)));
+            folder->appendChild(new OptionToggleModelItem(437, tr("Weapon Drops", disambig)));
+            folder->appendChild(new OptionToggleModelItem(438, tr("Ammo Crates", disambig)));
+            folder->appendChild(new OptionToggleModelItem(450, tr("Generator Count", disambig)));
+            folder->appendChild(new OptionToggleModelItem(439, tr("Generator Fail Condition", disambig)));
+            folder->appendChild(new OptionToggleModelItem(440, tr("Generator Spawn Locations", disambig)));
+            folder->appendChild(new OptionToggleModelItem(441, tr("Difficulty", disambig)));
+            folder->appendChild(new OptionToggleModelItem(442, tr("Wave Limit", disambig)));
+            folder->appendChild(new OptionToggleModelItem(443, tr("Bonus Lives (unused?)", disambig)));
+            folder->appendChild(new OptionToggleModelItem(444, tr("Bonus Target Score (unused)", disambig)));
+         }
+         {
+            auto* folder = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Player Lives", disambig));
+            mode_root->appendChild(folder);
+            //
+            folder->appendChild(new OptionToggleModelItem(447, tr("Spartan Starting Lives", disambig)));
+            folder->appendChild(new OptionToggleModelItem(445, tr("Reward for Killing Elite Players", disambig)));
+            folder->appendChild(new OptionToggleModelItem(449, tr("Max Spartan Extra Lives", disambig)));
+            folder->appendChild(new OptionToggleModelItem(448, tr("Elite Starting Lives", disambig)));
+            folder->appendChild(new OptionToggleModelItem(446, tr("Extra Life Score Target (unused)", disambig)));
+         }
+         {
+            auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Base Spartan Traits", disambig));
+            mode_root->appendChild(traits);
+            _populate_player_trait_tree(*traits, 498);
+         }
+         {
+            auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Base Elite Traits", disambig));
+            mode_root->appendChild(traits);
+            _populate_player_trait_tree(*traits, 533);
+         }
+         {
+            auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Base Wave Traits", disambig));
+            mode_root->appendChild(traits);
+            _populate_ai_wave_trait_tree(*traits, 568);
+         }
+         {
+            auto* folder = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Elite Respawn Settings", disambig));
+            mode_root->appendChild(folder);
+            _populate_respawn_options_tree(*folder, 451);
+
+            {
+               auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Elite Respawn Traits", disambig));
+               folder->appendChild(traits);
+               _populate_player_trait_tree(*traits, 463);
+            }
+         }
+         {
+            constexpr size_t base_id = 578;
+
+            constexpr size_t skulls_per = 18;
+            constexpr size_t waves_per  = 3;
+            constexpr size_t squads_per_wave = 12;
+
+            constexpr size_t ids_per_wave  = 2 + squads_per_wave;
+            constexpr size_t ids_per_round = skulls_per + waves_per * ids_per_wave;
+
+            constexpr size_t number_of_rounds = 3;
+
+            auto _append_skulls = [](OptionToggleModelItem& folder, size_t start) {
+               //
+               // Skulls are in the same order as in the game variant file format.
+               //
+               folder.appendChild(new OptionToggleModelItem(start + 0, tr("Skull: Iron", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 1, tr("Skull: Black Eye", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 2, tr("Skull: Catch", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 3, tr("Skull: Fog", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 4, tr("Skull: Famine", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 5, tr("Skull: Thunderstorm", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 6, tr("Skull: Tilt", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 7, tr("Skull: Mythic", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 8, tr("Skull: Assassin", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 9, tr("Skull: Blind", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 10, tr("Skull: Cowbell", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 11, tr("Skull: Grunt Birthday Party", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 12, tr("Skull: IWHBYD", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 13, tr("Skull: Red", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 14, tr("Skull: Yellow", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 15, tr("Skull: Blue", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 16, tr("Skull 17 (unused)", disambig)));
+               folder.appendChild(new OptionToggleModelItem(start + 17, tr("Skull 18 (unused)", disambig)));
+            };
+
+            for (size_t i = 0; i < number_of_rounds; ++i) {
+               auto* round = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Round %1", disambig).arg(i + 1));
+               mode_root->appendChild(round);
+
+               size_t start = base_id + ids_per_round * i;
+               {
+                  auto* folder = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Skulls", disambig));
+                  round->appendChild(folder);
+                  _append_skulls(*folder, start);
+               }
+
+               auto _make_wave = [start](OptionToggleModelItem* folder, size_t nth, size_t vanilla_wave_count) {
+                  size_t wave_start = start + skulls_per + (nth * ids_per_wave);
+
+                  folder->appendChild(new OptionToggleModelItem(wave_start + 0, tr("Uses Dropships", disambig)));
+                  folder->appendChild(new OptionToggleModelItem(wave_start + 1, tr("Squad Order", disambig)));
+                  //
+                  for (size_t j = 0; j < squads_per_wave; ++j) {
+                     QString text;
+                     if (j < vanilla_wave_count) {
+                        text = tr("Squad Type %1", disambig).arg(j + 1);
+                     } else {
+                        text = tr("Squad Type %1 (unused)", disambig).arg(j + 1);
+                     }
+                     folder->appendChild(new OptionToggleModelItem(wave_start + 2 + j, tr("Squad Order", disambig)));
+                  }
+               };
+               //
+               {
+                  auto* folder = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Initial Wave", disambig));
+                  round->appendChild(folder);
+                  //
+                  _make_wave(folder, 0, 3);
+               }
+               {
+                  auto* folder = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Main Wave", disambig));
+                  round->appendChild(folder);
+                  //
+                  _make_wave(folder, 1, 5);
+               }
+               {
+                  auto* folder = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Boss Wave", disambig));
+                  round->appendChild(folder);
+                  //
+                  _make_wave(folder, 2, 3);
+               }
+            }
+            {
+               auto* folder = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Bonus Wave", disambig));
+               mode_root->appendChild(folder);
+
+               constexpr size_t wave_start = 758;
+
+               folder->appendChild(new OptionToggleModelItem(wave_start + 0, tr("Duration", disambig)));
+               _append_skulls(*folder, wave_start + 1);
+               folder->appendChild(new OptionToggleModelItem(wave_start + 1 + skulls_per, tr("Uses Dropships", disambig)));
+               folder->appendChild(new OptionToggleModelItem(wave_start + 1 + skulls_per + 1, tr("Squad Order", disambig)));
+               //
+               for (size_t j = 0; j < squads_per_wave; ++j) {
+                  QString text;
+                  if (j < 3) {
+                     text = tr("Squad Type %1", disambig).arg(j + 1);
+                  } else {
+                     text = tr("Squad Type %1 (unused)", disambig).arg(j + 1);
+                  }
+                  folder->appendChild(new OptionToggleModelItem(wave_start + 1 + skulls_per + 2 + j, text));
+               }
+            }
+         }
+         {
+            size_t ids_per_skull = ids_per_player_trait_tree * 2 + ids_per_ai_wave_trait_tree;
+
+            auto _populate_custom_skull_traits = [&_populate_player_trait_tree, &_populate_ai_wave_trait_tree](OptionToggleModelItem& skull, size_t base_id) {
+               {
+                  auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Spartan Traits", disambig));
+                  skull.appendChild(traits);
+                  _populate_player_trait_tree(*traits, base_id);
+               }
+               {
+                  auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Elite Traits", disambig));
+                  skull.appendChild(traits);
+                  _populate_player_trait_tree(*traits, base_id + ids_per_player_trait_tree);
+               }
+               {
+                  auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Wave Traits", disambig));
+                  skull.appendChild(traits);
+                  _populate_ai_wave_trait_tree(*traits, base_id + ids_per_player_trait_tree * 2);
+               }
+            };
+
+            {
+               auto* skull = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Red Skull", disambig));
+               mode_root->appendChild(skull);
+               _populate_custom_skull_traits(*skull, 791);
+            }
+            {
+               auto* skull = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Blue Skull", disambig));
+               mode_root->appendChild(skull);
+               _populate_custom_skull_traits(*skull, 791 + ids_per_skull * 2);
+            }
+            {
+               auto* skull = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Yellow Skull", disambig));
+               mode_root->appendChild(skull);
+               _populate_custom_skull_traits(*skull, 791 + ids_per_skull);
+            }
+         }
+         // "Round template" menu items
+         {
+            auto* traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("All Firefight Wave Traits", disambig));
+            mode_root->appendChild(traits);
+            _populate_ai_wave_trait_tree(*traits, 426);
+         }
+      }
+   }
+
+   #if _DEBUG
+   {
+      cobb::bitset<1272> seen;
+      const auto* root = model->invisibleRootItem();
+
+      auto find = [](this auto&& recurse, const OptionToggleModelItem& item, size_t desired) -> const OptionToggleModelItem* {
+         auto index = item.index();
+         if (index == desired)
+            return& item;
+         for (size_t i = 0; i < item.childCount(); ++i)
+            if (const auto* child = item.child(i))
+               if (auto* result = recurse(*child, desired))
+                  return result;
+         return nullptr;
+      };
+      
+      auto traverse = [&seen, &find, root](this auto&& recurse, const OptionToggleModelItem& item) -> void {
+         auto index = item.index();
+         if (index >= 0 && index < seen.size()) {
+            if (seen.test(index)) {
+               const auto* the_other_one = find(*root, index);
+               assert(!seen.test(index) && "Multiple options should not have the same ID!");
+            }
+            seen.set(index);
+         }
+         for (size_t i = 0; i < item.childCount(); ++i)
+            if (const auto* child = item.child(i))
+               recurse(*child);
+      };
+      if (auto* root = model->invisibleRootItem())
+         traverse(*root);
+   }
+   #endif
+
    model_type::item_type* unknownRoot = nullptr;
    for (uint16_t i = 0; i < model_type::bitset_type::flag_count; i++) {
       if (model->hasOptionIndex(i))

@@ -1263,6 +1263,7 @@
     <Text Include="Resources\localized_string_library\items.txt" />
     <Text Include="Resources\localized_string_library\vehicles.txt" />
     <Text Include="Resources\localized_string_library\vip.txt" />
+    <Text Include="docs\notes.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\gametype_files\blank_forge.bin" />
@@ -1277,6 +1278,7 @@
     <None Include="docs\design flaws\df002 - mapping between script identifiers and compiled references.md" />
     <None Include="docs\design flaws\df003 - handling of variant string IDs.md" />
     <None Include="Directory.build.props" />
+    <None Include="docs\option toggle indices.md" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player.xml" />
