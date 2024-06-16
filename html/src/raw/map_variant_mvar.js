@@ -149,10 +149,10 @@ function _sub4DC8E0(bitcount, mapBounds, out) {
    }
 }
 
-class LFOUnk30 { // sizeof >= 0x1C
+class ObjectData { // sizeof >= 0x1C
    sub6078F0(stream) {
       let sw = stream.readBits(2);
-      this.unk10 = sw;
+      this.shape = sw;
       let xmm3 = 0.0977517142892;
       let xmm0 = 0;
       let xmm4 = 0.0488758571446;
@@ -162,15 +162,15 @@ class LFOUnk30 { // sizeof >= 0x1C
          case 1: {
             let a = stream.readBits(0xB);
             if (!a) {
-               this.unk00 = 0;
+               this.shapeWidth = 0;
             } else {
                if (a == 0x7FF) {
-                  this.unk00 = 200; // float
+                  this.shapeWidth = 200; // float
                } else {
                   --a;
                   a *= 0.0977517142892;
                   a += 0.0488758571446;
-                  this.unk00 = a;
+                  this.shapeWidth = a;
                }
             }
          }; return;
@@ -184,17 +184,17 @@ class LFOUnk30 { // sizeof >= 0x1C
             } else {
                xmm1 = (eax - 1) * xmm3 + xmm4;
             }
-            this.unk00 = xmm1;
+            this.shapeWidth = xmm1;
             eax = stream.readBits(0xB);
             if (eax == 0) {
                xmm1 = xmm0;
-               this.unk04 = xmm1;
+               this.shapeLength = xmm1;
             } else if (eax == 0x7FF) {
                xmm1 = xmm2;
-               this.unk04 = xmm1;
+               this.shapeLength = xmm1;
             } else {
                xmm1 = (eax - 1) * xmm3 + xmm4;
-               this.unk04 = xmm1;
+               this.shapeLength = xmm1;
             }
          }; break;
          //
@@ -207,7 +207,7 @@ class LFOUnk30 { // sizeof >= 0x1C
             } else {
                xmm1 = (eax - 1) * xmm3 + xmm4;
             }
-            this.unk00 = xmm1;
+            this.shapeWidth = xmm1;
          }; break;
          //
          default:
@@ -221,7 +221,7 @@ class LFOUnk30 { // sizeof >= 0x1C
       } else {
          xmm1 = (eax - 1) * xmm3 + xmm4;
       }
-      this.unk08 = xmm1;
+      this.shapeTop = xmm1;
       eax = stream.readBits(0xB);
       if (!eax) {
          xmm1 = xmm0;
@@ -230,23 +230,32 @@ class LFOUnk30 { // sizeof >= 0x1C
       } else {
          xmm1 = (eax - 1) * xmm3 + xmm4;
       }
-      this.unk0C = xmm1;
+      this.shapeBottom = xmm1;
    }
    constructor(stream) {
-      this.unk00 = 0; // float (shape dimension 0? width or length; radius for cylinder)
-      this.unk04 = 0; // float (shape dimension 1? width or length)
-      this.unk08 = 0; // float (shape dimension 2? top or bottom; top for cylinder)
-      this.unk0C = 0; // float (shape dimension 3? top or bottom; bottom for cylinder)
-      this.unk10 = 0; // byte  (shape type)
+      this.shapeWidth = 0; // float (shape dimension 0? box width; radius for cylinder)
+      this.shapeLength = 0; // float (shape dimension 1? box length)
+      this.shapeTop = 0; // float (shape dimension 2? top)
+      this.shapeBottom = 0; // float (shape dimension 3? bottom)
+      this.shape = 0; // byte  (shape type; 2:cylinder, 3:box)
       this.spawnSequence = 0; // 11 // byte; UI clamps this to [-100, 100]
       this.respawnTime  = 0; // 12 // byte
-      this.unk13 = 0; // byte
-      this.forgeLabelIndex = -1; // 14 // word
-      this.unk16 = 0; // byte // flags? maybe?
-      this.unk17 = 0; // byte
-      this.unk18 = 0; // qword
-      this.team = -1; // 1A // byte
-      this.unk17 = 8; // byte
+      this.cachedType = 0; // byte; cached object type; not always reliable?
+      this.forgeLabelIndex = -1; // 14 // word; gametype label index
+      this.flags = 0; // byte // flags: physics, game specifc, symmetry, hide
+      /*public enum Flags : byte {
+         PhysicsNormal = 0b00000000,
+         PhysicsFixed  = 0b01000000,
+         PhysicsPhased = 0b11000000,
+         GameSpecific  = 0b00100000,
+         Asymmetric    = 0b00001000,
+         Symmetric     = 0b00000100,
+         HideAtStart   = 0b00000010
+      }*/
+      this.team = 0; // byte { 0:Red, 1:Blue, 2:Green, 3:Orange, 4:Purple, 5:Yellow, 6:Brown, 7:Pink, 8:Neutral, TeamColor = -1 or 255 }
+	  //this.otherInfoA = 0; // byte; spareClips, teleporterChannel, locationNameIndex
+	  //this.otherInfoB = 0; // byte; teleporterPassability
+      this.color = -1; // 1A // byte { 0:Red, 1:Blue, 2:Green, 3:Orange, 4:Purple, 5:Yellow, 6:Brown, 7:Pink, 8:Neutral, TeamColor = -1 or 255 }
       if (!stream)
          return;
       this.sub6078F0(stream); // read shape
@@ -257,30 +266,30 @@ class LFOUnk30 { // sizeof >= 0x1C
       this.spawnSequence = eax & 0xFF;
       //
       this.respawnTime = stream.readBits(8);
-      this.unk13 = stream.readBits(5); // teleporter channel? 's got the right number of bits
+      this.cachedType = stream.readBits(5);
       if (stream.readBits(1)) { // absence bit
          this.forgeLabelIndex = -1; // word
       } else {
          this.forgeLabelIndex = stream.readBits(8); // word
       }
-      this.unk16 = stream.readBits(8); // byte
-      this.unk17 = stream.readBits(4) - 1; // object color?
+      this.flags = stream.readBits(8); // byte
+      this.team = stream.readBits(4) - 1;
       if (!stream.readBits(1)) {
-         this.team = stream.readBits(3); // byte
+         this.color = stream.readBits(3); // byte
       } else {
-         this.team = -1; // byte
+         this.color = -1; // byte
       }
       //
-      if (this.unk13 == 1) {
-         this.unk18 = stream.readBits(8); // byte
+      if (this.cachedType == 1) {// weapon
+         this.spareClips = stream.readBits(8); // byte
          return;
-      } else if (this.unk13 <= 0xB) {
+      } else if (this.cachedType <= 0xB) {
          return;
-      } else if (this.unk13 <= 0xE) {
-         this.unk18 = stream.readBits(5); // byte
-         this.unk19 = stream.readBits(5); // byte
-      } else if (this.unk13 == 0x13) {
-         this.unk18 = stream.readBits(8) - 1; // byte
+      } else if (this.cachedType <= 0xE) {// teleporter
+         this.teleporterChannel = stream.readBits(5); // byte
+         this.teleporterPassability = stream.readBits(5); // byte
+      } else if (this.cachedType == 0x13) {
+         this.locationNameIndex = stream.readBits(8) - 1; // byte
       }
    }
 }
@@ -580,11 +589,11 @@ class LoadedForgeObject {
       //
       this.objectSubcat = 0xFFFF; // 02
       //
-      this.unk04 = -1; // dword
+      this.unk04 = -1; // dword, unused/padding?
       this.position = new MVVector(); // 08, 0C, 10
       this.rotation = new MVVector(); // 14, 18, 1C // possibly local-forward unit vector
       this.axisAngleAxis = new MVVector(); // 20, 24, 28 // most likely local-up unit vector
-      this.unk2C = -1; // word
+      this.unk2C = -1; // word, spawnRelativeToMapIndex?
       //
       // objectSubtype
       //    Index of an object within a subcategory.
@@ -594,10 +603,10 @@ class LoadedForgeObject {
       //
       this.objectType = 0; // 2E
       //
-      this.unk2F = 0; // padding?
-      this.unk30 = null; // struct; all remaining fields are its members
+      this.pad1 = 0; // padding
+      this.objectData = null; // struct; all remaining fields are its members
       /*//
-      this.unk30 = 0; // int64?
+      this.objectData = 0; // int64?
       this.unk38 = 0; // int64?
       this.unk40 = 0;
       this.unk41 = 0; // padding?
@@ -638,15 +647,15 @@ class LoadedForgeObject {
       }
       let a = stream.readBits(14, false); // TODO: processing
       this.loadAxisAngleAngle(a);
-      this.unk2C = stream.readBits(10, false) - 1;
-      this.unk30 = new LFOUnk30(stream);
+      this.unk2C = stream.readBits(10, false) - 1;// spawnRelativeToMapIndex?
+      this.objectData = new ObjectData(stream);
    }
    get forgeLabel() {
       if (!this.owner)
          return void 0;
-      if (!this.unk30)
+      if (!this.objectData)
          return null;
-      let index = this.unk30.forgeLabelIndex;
+      let index = this.objectData.forgeLabelIndex;
       if (index < 0)
          return null;
       let entry = this.owner.forgeLabels.strings[index];
