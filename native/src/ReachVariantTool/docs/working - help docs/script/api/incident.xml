@@ -95,7 +95,20 @@
          to access.
       </p>
       
-      <style>
+      <style><![CDATA[
+         main {
+            counter-reset: incident-id 0;
+         }
+         .incidents>dt::before {
+            content: counter(incident-id) ": ";
+            color: #999;
+            font-weight: bold;
+         }
+         .incidents>dt::after {
+            counter-increment: incident-id;
+            content: " ";
+         }
+         
          .incidents dt[data-internal]::after{content:" (internally: " attr(data-internal) ")";margin-left:1em;color:#666}
          
          .incidents.firefight :is(dt, dd) {
@@ -105,7 +118,7 @@
          .incidents.firefight dt.usable-in-customs+dd {
             opacity: 1
          }
-      </style>
+      ]]></style>
       <h2>All multiplayer incidents</h2>
       <dl class="incidents">
          <dt>kill</dt>
@@ -769,6 +782,8 @@
             <dd>No description available.</dd>
          <dt>bone_cv_ph1_intro</dt>
             <dd>No description available.</dd>
+         <dt>bone_cv_ph1_victory</dt>
+            <dd>No description available.</dd>
          <dt>bone_cv_ph2_defeat</dt>
             <dd>No description available.</dd>
          <dt>bone_cv_ph2_victory</dt>
@@ -906,6 +921,9 @@
          <dt><i>[unused]</i></dt>
             <dd>This incident ID is unused.</dd>
          <dt>multikill_comm</dt>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
+         <dt>headshot_comm</dt>
             <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
             system in the game's original Xbox 360 release.</dd>
          <dt>spree_comm</dt>

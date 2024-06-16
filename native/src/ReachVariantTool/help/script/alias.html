@@ -64,6 +64,7 @@
                            <ul>
                               <li><a href="editor/main_window_ff/options-general.html">General Settings</a></li>
                               <li><a href="editor/main_window_ff/options-social.html">Social Settings</a></li>
+                              <li><a href="editor/main_window_ff/options-map.html">Map and Game Settings</a></li>
                               <li data-dont-default-collapse>
                                  <a href="editor/main_window_ff/options-team.html">Team Settings</a>
                                  <ul>
@@ -445,6 +446,66 @@ some_helper_function()
          for the entire rest of the script, preventing any other code from reusing them. One fix for  
          this is to nest your functions in whatever blocks of code actually use them.
       </p>
+      
+      <h2>Rules for alias names</h2>
+      <p>
+         An alias's name can't begin with a numeric digit, and can't contain square brackets or 
+         periods.
+      </p>
+      <p>
+         Broadly speaking, an alias can't shadow anything built-in:
+      </p>
+      <pre>
+<span class="comment">--</span>
+<span class="comment">-- These next few rules apply to both relative and absolute aliases, even though </span>
+<span class="comment">-- relative aliases wouldn't *always* shadow built-ins in these cases.</span>
+<span class="comment">--</span>
+
+<span class="comment">-- ERROR: An alias's name can never be the name of a keyword.</span>
+<span class="keyword">alias</span> <span class="keyword">do</span>       = player.number[0] <span class="comment">-- relative will fail</span>
+<span class="keyword">alias</span> <span class="keyword">if</span>       = global.number[0] <span class="comment">-- absolute will fail</span>
+<span class="keyword">alias</span> <span class="keyword">allocate</span> = <span class="keyword">allocate</span> <span class="subkeyword">temporary</span> number <span class="comment">-- fails</span>
+
+<span class="comment">-- ERROR: An alias's name can never be a namespace name.</span>
+<span class="keyword">alias</span> enums = player.number[0] <span class="comment">-- relative will fail</span>
+<span class="keyword">alias</span> game  = global.number[0] <span class="comment">-- absolute will fail</span>
+
+<span class="comment">-- ERROR: An alias's name can never be the name of a built-in type.</span>
+<span class="keyword">alias</span> player        = global.number[0]
+<span class="keyword">alias</span> timer         = global.number[0]
+<span class="keyword">alias</span> script_traits = global.number[0]
+<span class="keyword">alias</span> script_widget = global.number[0]
+
+<span class="comment">--</span>
+<span class="comment">-- The above rules apply even if the alias is relative. The below rules take into </span>
+<span class="comment">-- account whether the alias is relative or absolute.</span>
+<span class="comment">--</span>
+
+<span class="comment">-- ERROR: Shadows non-namespaced built-in values</span>
+<span class="keyword">alias</span> none            = global.number[0] <span class="comment">-- a value for several different types</span>
+<span class="comment">--</span>
+<span class="keyword">alias</span> announce_slayer = global.number[0] <span class="comment">-- a  Sound value</span>
+<span class="keyword">alias</span> box             = global.number[0] <span class="comment">-- a  Shape value</span>
+<span class="keyword">alias</span> enemies         = global.number[0] <span class="comment">-- a  Player Set value</span>
+<span class="keyword">alias</span> warthog         = global.number[0] <span class="comment">-- an Object Type value</span>
+<span class="comment">--</span>
+<span class="comment">-- Note that `alias none = player.number[0]` would succeed, because `player.none` </span>
+<span class="comment">-- doesn't a shadow built-in value name.</span>
+
+<span class="comment">-- ERROR: Shadows action `rand`</span>
+<span class="keyword">alias</span> rand = global.number[0]
+
+<span class="comment">-- ERROR: Shadows action `object.set_waypoint_visibility`</span>
+<span class="keyword">alias</span> set_waypoint_visibility = object.number[0]
+
+<span class="comment">-- ERROR: Shadows condition `object.shape_contains`</span>
+<span class="keyword">alias</span> shape_contains = object.number[0]
+
+<span class="comment">-- ERROR: Shadows property `player.biped`</span>
+<span class="keyword">alias</span> biped = player.number[0]
+
+<span class="comment">-- ERROR: Shadows access to `player.timer` variables</span>
+<span class="keyword">alias</span> timer = player.number[0]</pre>
    
       </main>
       <script src="resources/sidebar.js"></script>

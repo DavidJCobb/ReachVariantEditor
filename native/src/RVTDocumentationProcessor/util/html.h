@@ -20,6 +20,7 @@ namespace util {
    struct xml_encode_options {
       bool escape_newlines = false;
       bool escape_quotes   = false;
+      bool escape_brackets = true;
    };
    extern QString xml_encode(const QString& text, xml_encode_options options = xml_encode_options());
 }

@@ -64,6 +64,7 @@
                            <ul>
                               <li><a href="editor/main_window_ff/options-general.html">General Settings</a></li>
                               <li><a href="editor/main_window_ff/options-social.html">Social Settings</a></li>
+                              <li><a href="editor/main_window_ff/options-map.html">Map and Game Settings</a></li>
                               <li data-dont-default-collapse>
                                  <a href="editor/main_window_ff/options-team.html">Team Settings</a>
                                  <ul>
@@ -239,21 +240,39 @@
          </p>
          <p>
             (This is all part of the overall design for game variant data: nothing inside of a 
-            game varant is heap-allocated, and there don't appear to be any internal pointers. 
+            game variant is heap-allocated, and there don't appear to be any internal pointers. 
             All lists are stored in fixed-size memory regions. This extends even to the string 
             table: the max uncompressed size is 0x4C00 bytes, and so there's a region that 
             large within the in-memory game variant struct.)
          </p>
+         
+         <h4>A potential optimization</h4>
          <p>
-            It would hypothetically be possible to "overlap" triggers: if two triggers start 
-            with identical opcodes, then they could share those opcodes. This is not an easy 
-            optimization to implement, however, and because of the way opcode interleaving 
-            works, I don't expect that there would even be many opportunities to use it. An 
-            even more challenging optimization would be to overlap triggers whenver it is 
-            possible to do so, such as by having one trigger share the <em>middle</em> of 
-            some other trigger, or having a trigger share identical conditions and actions 
-            with different other triggers. (There are other data values on conditions that 
-            would need to be dealt with as well; see the next section.)
+            It would hypothetically be possible to "overlap" triggers. If trigger <var>A</var>'s 
+            actions (ignoring any interleaved conditions) are exactly identical to a subset of 
+            trigger <var>B</var>'s actions (again ignoring any interleaved conditions), then a 
+            game variant would really only need to store trigger <var>B</var>'s actions, with 
+            trigger <var>A</var> using a slice of those. (Sharing conditions would be harder, 
+            since conditions store additional data values that help to define the structure 
+            of their containing trigger (see next section).)
+         </p>
+         <p>
+            Unfortunately, implementing this optimization within ReachVariantTool, specifically, 
+            would be highly impractical. ReachVariantTool stores triggers in memory without using 
+            the "slices of global lists" approach used by the file format itself. In memory, each 
+            loaded trigger stores a <code>std::vector&lt;Opcode*&gt;</code>, and when saving, we 
+            traverse each trigger to build the "all conditions" and "all actions" arrays and 
+            serialize triggers as slices of each. In other words: for the compiler to apply this 
+            optimization, it'd have to be carefully designed to predict the future, in a way that 
+            feels like a breeding ground for potential bugs.
+         </p>
+         <p>
+            In order for this optimization to be viable within ReachVariantTool, the program would 
+            have to be redesigned to store a Megalo script in memory the same way it's stored in 
+            a game variant file: an array of all conditions; an array of all actions; and triggers 
+            (and action scopes generally) defining slices of each array. Triggers could at least be 
+            given accessors that adapt the data, so it can still be accessed as a flat, sequential, 
+            interleaved list of opcodes per-trigger.
          </p>
          
          <h3>Execution</h3>
@@ -287,7 +306,7 @@ MegaloActionScope::Execute(const MegaloScriptCode&amp; script) const {
       for(; ci &lt; this-&gt;condition_count; ++ci) {
          const auto&amp; condition = script.conditions[this-&gt;condition_start + ci];
 
-         if (condition.exec_before &gt; i)
+         if (condition.exec_before &gt; ai)
             //
             // This condition applies to actions later in the trigger.
             //
@@ -541,8 +560,8 @@ class integer_reference {
             Temporary variables don't need to be declared within the gametype metadata; the game 
             always has room for them; they always exist. When you declare a temporary variable 
             in MegaloEdit, the official editor for Halo: Reach gametypes, it handles this by 
-            just compiling in an assignment to zero-or-none. It automatically allocates temporary 
-            variables based on block scoping, similarly to <a href="script/alias.html">allocation to aliases</a> 
+            just compiling in an assignment to the initial value you specify. It automatically 
+            allocates temporary variables based on block scoping, similarly to <a href="script/alias.html">allocation to aliases</a> 
             in ReachVariantTool. One important difference between the editors is that MegaloEdit 
             is capable of "spilling over" into unused global variables if a script runs out of 
             temporary variables. MegaloEdit can do this because all non-temporary variables must 

@@ -3,7 +3,7 @@
    <head>
       <meta charset="UTF-8" />
       
-      <title>Loadout Tier | ReachVariantTool Documentation</title>
+      <title>Map and Game Settings | ReachVariantTool Documentation</title>
       <base href="../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
@@ -189,38 +189,59 @@
          </ul>
       </nav>
       <main>
-         <h1>Loadout Tier</h1>
+         <h1>Map and Game Settings</h1>
       <p>
-         A <b>loadout tier</b> is a group of loadouts that players may be able to 
-         access depending on the gametype script. Each loadout tier has five loadouts, 
-         which can be enabled and disabled, and configured.
-      </p>
-      <img src="editor/main_window_ff/options-loadout-specific.png">
-      <p>
-         The user interface shows the contents of one loadout at a time. To edit any 
-         given loadout, click its name.
+         The <b>map and game settings</b> page allows you to edit settings related to what 
+         objects can spawn on the map, and how powerups work.
       </p>
       <p>
-         The fields available to edit for each loadout are as follows:
+         The fields available to edit are as follows:
       </p>
       <dl>
-         <dt>Visible In-Game</dt>
-            <dd>Controls whether players can see and select this loadout during a 
-            match.</dd>
-         <dt>Name</dt>
-            <dd>Controls the loadout's name.</dd>
-         <dt>Primary Weapon</dt>
-            <dd>Controls what Primary Weapon players spawn with when they have chosen 
-            this loadout.</dd>
-         <dt>Secondary Weapon</dt>
-            <dd>Controls what Secondary Weapon players spawn with when they have chosen 
-            this loadout.</dd>
-         <dt>Armor Ability</dt>
-            <dd>Controls what Armor Ability players spawn with when they have chosen 
-            this loadout.</dd>
-         <dt>Grenade Count</dt>
-            <dd>Controls what grenades players spawn with when they have chosen this 
-            loadout.</dd>
+         <dt>Indestructible Vehicles</dt>
+            <dd>Controls whether vehicles can be destroyed.</dd>
+         <dt>Vehicle Set</dt>
+            <dd>Controls which types of vehicles can spawn on the map. Spawn points for 
+            ineligible vehicles may be altered to produce an eligible vehicle, or may 
+            produce nothing, depending on the chosen vehicle set.</dd>
+      </dl>
+      
+      <h2>Fields hidden by default</h2>
+      <p>
+         Firefight files contain the same set of Custom Game options as normal Multiplayer 
+         game variants, but not all of these options are functional. By default, 
+         ReachVariantTool will hide or grey out Firefight settings that are known to be 
+         non-functional. Those settings include:
+      </p>
+      <dl>
+         <dt>Grenades on Map</dt>
+            <dd>Controls whether grenades can spawn on the map. This probably would 
+            work if any Firefight maps had pre-placed grenades.</dd>
+         <dt>Shortcuts on Map</dt>
+            <dd>Unknown.</dd>
+         <dt>Armor Abilities on Map</dt>
+            <dd>Controls whether Armor Ability pickups can spawn on the map. This probably 
+            would work if any Firefight maps had pre-placed Armor Ability pickups.</dd>
+         <dt>Powerups on Map</dt>
+            <dd>Controls whether powerups can spawn on the map. This probably would 
+            work if any Firefight maps had pre-placed powerups.</dd>
+         <dt>Turrets on Map</dt>
+            <dd>Controls whether turrets can spawn on the map.</dd>
+         <dt>Weapon Set</dt>
+            <dd>Controls which types of weapons can spawn on the map. This probably would 
+            work if any Firefight maps had pre-placed weapons.</dd>
+         <dt>Red Powerup Duration</dt>
+            <dd>Controls how long the player has Red Powerup Traits after picking up 
+            an Overshield powerup. Since powerups don't appear on Firefight maps, this 
+            setting is unused here.</dd>
+         <dt>Blue Powerup Duration</dt>
+            <dd>Controls how long the player has Blue Powerup Traits after picking up 
+            an Active Camo powerup. Since powerups don't appear on Firefight maps, this 
+            setting is unused here.</dd>
+         <dt>Custom Powerup Duration</dt>
+            <dd>Controls how long the player has Yellow Powerup Traits after picking up 
+            a Custom Powerup. Since powerups don't appear on Firefight maps, this 
+            setting is unused here.</dd>
       </dl>
    
       </main>

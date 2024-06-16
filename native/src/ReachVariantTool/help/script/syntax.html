@@ -64,6 +64,7 @@
                            <ul>
                               <li><a href="editor/main_window_ff/options-general.html">General Settings</a></li>
                               <li><a href="editor/main_window_ff/options-social.html">Social Settings</a></li>
+                              <li><a href="editor/main_window_ff/options-map.html">Map and Game Settings</a></li>
                               <li data-dont-default-collapse>
                                  <a href="editor/main_window_ff/options-team.html">Team Settings</a>
                                  <ul>
@@ -190,14 +191,17 @@
       <main>
          <h1>Basic syntax</h1>
       <p>
-         Only Bungie and 343 Industries know what Megalo "truly" looks like. However, community 
-         reverse-engineers have figured out Megalo's bytecode. This makes it possible for members 
-         of the public to design their own script languages which compile to the same bytecode... 
-         and this is what has been done for ReachVariantTool.
+         Back when ReachVariantTool was made, only Bungie and 343 Industries knew what Megalo 
+         truly looked like. However, community reverse-engineers figured out Megalo's bytecode, 
+         and this made it possible for members of the public to design their own script languages 
+         that compile to the same bytecode. That is what was done for ReachVariantTool. Since 
+         then, 343 Industries released MegaloEdit, an official editor for Megalo which uses the 
+         same language that Bungie used internally.
       </p>
       <p>
-         The RVT dialect of Megalo, then, is loosely inspired by Lua syntax, though there are 
-         quite a few differences such as the use of zero-indexed collections.
+         The RVT dialect of Megalo is loosely inspired by Lua syntax, though there are quite a 
+         few differences such as the use of zero-indexed collections. It is not compatible with 
+         the "true" Megalo language used in MegaloEdit.
       </p>
 
       <h2>Literals</h2>
