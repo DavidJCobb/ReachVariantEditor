@@ -27,6 +27,9 @@ namespace {
 }
 
 ReachEditorState::ReachEditorState() {
+
+   bool is_headless = qobject_cast<QGuiApplication*>(QApplication::instance()) == nullptr;
+
    QObject::connect(this, &ReachEditorState::stringModified, [this](uint32_t index) {
       auto mp = this->multiplayerData();
       if (!mp)
@@ -60,7 +63,7 @@ ReachEditorState::ReachEditorState() {
          }
       }
    }
-   {
+   if (!is_headless) {
       std::wstring dir;
       if (cobb::steam::get_game_directory(1695793, dir)) {
          QString hrek = QString::fromWCharArray(dir.c_str());

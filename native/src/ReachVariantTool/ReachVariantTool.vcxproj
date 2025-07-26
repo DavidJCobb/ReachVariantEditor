@@ -74,7 +74,7 @@
       <BuildStlModules>false</BuildStlModules>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <QtUic>
@@ -94,7 +94,7 @@
       <EnableModules>false</EnableModules>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
     <QtUic>
@@ -102,6 +102,7 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cli.cpp" />
     <ClCompile Include="editor_state\ReachStringCentralModel.cpp" />
     <ClCompile Include="formats\block.cpp" />
     <ClCompile Include="formats\content_author.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="game_variants\io_process.cpp" />
     <ClCompile Include="game_variants\types\firefight.cpp" />
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
+    <ClCompile Include="headless.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
     <ClCompile Include="helpers\bytewriter.cpp" />
     <ClCompile Include="helpers\endianness.cpp" />
@@ -308,6 +310,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="editor_state\ReachStringCentralModel.h" />
+    <ClInclude Include="cli.h" />
     <ClInclude Include="formats\indexed_lists.h" />
     <ClInclude Include="formats\ugc_header.h" />
     <ClInclude Include="game_variants\components\custom_game_options.h" />
@@ -352,6 +355,7 @@
     <ClInclude Include="game_variants\io_process.h" />
     <ClInclude Include="game_variants\types\firefight.h" />
     <ClInclude Include="game_variants\warnings.h" />
+    <ClInclude Include="headless.h" />
     <ClInclude Include="helpers\bitarray.h" />
     <ClInclude Include="helpers\ini\change_callback.h" />
     <ClInclude Include="helpers\ini\file.h" />

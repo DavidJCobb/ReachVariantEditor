@@ -12,10 +12,116 @@
    #include <QDebug>
    #include <QDirIterator>
 #endif
+#include <QDir>
+#include <QStandardPaths>
+
+#include <cstdio>
+#include <print>
+#include "./cli.h"
+#include "./editor_state.h"
+#include "./headless.h"
+
+static void load_inis() {
+   auto legacy_path_str = QApplication::instance()->applicationDirPath();;
+   auto modern_path_str = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppLocalDataLocation);
+   if (modern_path_str.isEmpty()) {
+      modern_path_str = legacy_path_str;
+   } else {
+      QDir{}.mkpath(modern_path_str);
+   }
+
+   auto legacy_path = std::filesystem::path(legacy_path_str.toStdWString()) / L"ReachVariantTool.ini";
+   auto modern_path = std::filesystem::path(modern_path_str.toStdWString()) / L"ReachVariantTool.ini";
+
+   auto& ini = ReachINI::get();
+   ini.set_paths(modern_path);
+
+   bool load_from_modern = !std::filesystem::exists(modern_path);
+   if (!std::filesystem::exists(modern_path) && std::filesystem::exists(legacy_path)) {
+      //
+      // This is, technically, vulnerable to a race condition: files can be created or 
+      // deleted between us running the checks, and us trying to load. For a quick and 
+      // dirty INI update procedure, though, I don't consider that a serious risk.
+      //
+      ini.load(legacy_path);
+      //
+      // Force an immediate save, so that the file gets moved.
+      //
+      if (ini.save()) {
+         //
+         // Try and delete the old file. Doesn't matter too much if we can't.
+         //
+         std::error_code ec;
+         std::filesystem::remove(legacy_path, ec);
+      }
+   } else {
+      ini.load();
+   }
+}
 
 int main(int argc, char *argv[]) {
-   ReachINI::get().load();
-   //
+   if (argc > 1) {
+      rvt::command_line_params params(argc, argv);
+      if (params.has_error) {
+         return 1;
+      }
+      if (params.help) {
+         rvt::print_cli_help();
+         return 0;
+      }
+      if (params.headless) {
+         if (params.operation == rvt::headless_operation::none) {
+            std::println(stderr, "You didn't specify an operation to perform.");
+            return 1;
+         }
+         if (params.game_variant.input.empty()) {
+            std::println(stderr, "You didn't specify a game variant to operate on.");
+            return 1;
+         }
+
+         QCoreApplication a(argc, argv);
+         load_inis();
+         
+         auto& editor  = ReachEditorState::get();
+         if (!rvt::headless::load_game_variant(params.game_variant.input)) {
+            return 1;
+         }
+
+         switch (params.operation) {
+            case rvt::headless_operation::recompile:
+               if (!rvt::headless::recompile(params))
+                  return 1;
+               {
+                  auto path = params.game_variant.output;
+                  if (path.empty())
+                     path = params.game_variant.input;
+               }
+               break;
+         }
+         if (!rvt::headless::save_game_variant(params))
+            return 1;
+         return 0;
+      }
+   }
+   #if defined( Q_OS_WIN )
+      //
+      // Windows applications must be defined to use a given "subsystem," roughly corresponding 
+      // to the kind of application you're making (e.g. GUI versus console). Windows does not 
+      // define a "GUI by default but headless if asked for" application type, however:
+      // 
+      //    https://learn.microsoft.com/en-us/cpp/build/reference/subsystem-specify-subsystem?view=msvc-170
+      //    https://devblogs.microsoft.com/oldnewthing/20090101-00/?p=19643
+      // 
+      // The only way to make a Qt program that behaves in the manner desired is to compile it 
+      // for the "console" subsystem, and just manually hide your console window when you decide 
+      // to fire up a GUI. (Apparently, and fortunately, this call is a no-op if we don't own 
+      // the console window we're running in.) Per:
+      // 
+      //    https://stackoverflow.com/a/49098065
+      //
+      ::ShowWindow(::GetConsoleWindow(), SW_HIDE); //hide console window
+   #endif
+
    QApplication a(argc, argv);
    #if _DEBUG
       qDebug() << a.applicationVersion();
@@ -30,14 +136,7 @@ int main(int argc, char *argv[]) {
 
    // Load INIs. Has to be done after QApplication instantiation so we can get the 
    // program folder path.
-   {
-      std::filesystem::path path = QApplication::instance()->applicationDirPath().toStdWString();
-      path /= L"ReachVariantTool.ini";
-
-      auto& ini = ReachINI::get();
-      ini.set_paths(path);
-      ini.load();
-   }
+   load_inis();
    
    {  // Themes
       auto* engine = new RVTThemeEngine(&a);
