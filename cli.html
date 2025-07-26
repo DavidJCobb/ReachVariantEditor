@@ -3,8 +3,8 @@
    <head>
       <meta charset="UTF-8" />
       
-      <title>Forge Settings | ReachVariantTool Documentation</title>
-      <base href="../../" />
+      <title>Command line interface | ReachVariantTool Documentation</title>
+      <base />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
          <link rel="stylesheet" href="resources/noscript.css" />
@@ -190,26 +190,26 @@
          </ul>
       </nav>
       <main>
-         <h1>Forge Settings</h1>
+         <h1>Command line interface</h1>
       <p>
-         The <b>Forge settings</b> page allows you to edit options related to Forge. 
-         It only appears when opening a Forge variant file.
+         ReachVariantTool can be run from the command line, with commands like these:
       </p>
-      <img src="editor/main_window/forge.png">
+      <pre>
+ReachVariantTool /?
+ReachVariantTool <span class="comment">--help</span>
+ReachVariantTool <span class="comment">--headless path/to/variant --recompile path/to/megalo</span>
+ReachVariantTool <span class="comment">--headless path/to/variant --recompile path/to/megalo --dst path/to/output</span></pre>
+      <hr></hr>
       <p>
-         The fields available to edit are as follows:
+         The <code>--help</code> or <code>/?</code> command displays a list of available commands.
       </p>
-      <dl>
-         <dt>Enable Open-Channel Voice</dt>
-            <dd>Unknown.</dd>
-         <dt>Unknown Flag 1</dt>
-            <dd>Unknown.</dd>
-         <dt>Editor Respawn Time</dt>
-            <dd>Presumably controls how long it takes for players to respawn if they 
-            die while in Edit Mode; however, testing suggests it may not be used.</dd>
-         <dt>Edit Mode Access</dt>
-            <dd>Unknown.</dd>
-      </dl>
+      <p>
+         The <code>--headless</code> runs RVT without its GUI, loading a game variant as input. The 
+         <code>--recompile</code> operation allows you to load script source code from a file, try 
+         to compile it into the target variant, and then re-save it. If you specify <code>--dst</code>, 
+         then the recompiled variant will be saved to that destination (if compilation succeeds); 
+         otherwise, the original file is replaced.
+      </p>
    
       </main>
       <script src="resources/sidebar.js"></script>

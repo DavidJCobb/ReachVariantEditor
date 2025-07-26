@@ -119,8 +119,9 @@
       <dd><p>A type of object that can exist in the game world.</p></dd>
    <dt><a href="script/api/number.html">radius</a></dt>
       <dd><p>
-                  Unknown. A value of 10 is equal to 1 Forge unit. Testing has not revealed any
-                  obvious effect. A value of 0 seems safe.
+                  The created object will have a cylinder shape, and this controls the radius. 
+                  A value of 10 represents one Forge unit. If the radius is zero or negative, 
+                  then the game will use 10 instead. Radii are clamped to the range [0, 200].
                </p></dd>
 </dl>
 <h2>Example</h2>
@@ -131,7 +132,10 @@ global.object[0] = global.object[1].place_between_me_and(global.object[2], skull
    <li><p>
                Unlike <a href="script/api/object/actions/place_at_me.html">object.place_at_me</a>,
                this function appears to spawn objects exactly in place, provided they aren't
-               solid or obstructed.
+               solid or obstructed. It also automatically gives the object a 
+               <a href="script/api/object/actions/set_shape.html">shape</a> — specifically, a 
+               cylinder, whose top and bottom lengths are set to reach from one basis object to 
+               the other basis object.
             </p></li>
    <li><p>
                If the same object is used as both basis objects — that is, if the object
