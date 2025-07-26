@@ -5,10 +5,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>--headless D:\UserContent\Cobb\Documents\temp\rvt\src-variant.bin --recompile D:\UserContent\Cobb\Documents\temp\rvt\scr.lua --dst D:\UserContent\Cobb\Documents\temp\rvt\dst-variant.bin</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>--headless D:\UserContent\Cobb\Documents\temp\rvt\src-variant.bin --recompile D:\UserContent\Cobb\Documents\temp\rvt\scr.lua --dst D:\UserContent\Cobb\Documents\temp\rvt\dst-variant.bin</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

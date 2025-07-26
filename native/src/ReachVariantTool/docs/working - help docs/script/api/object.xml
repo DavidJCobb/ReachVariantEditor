@@ -1374,8 +1374,9 @@
                </arg>
                <arg name="type"  type="object-type" />
                <arg name="radius" type="number">
-                  Unknown. A value of 10 is equal to 1 Forge unit. Testing has not revealed any
-                  obvious effect. A value of 0 seems safe.
+                  The created object will have a cylinder shape, and this controls the radius. 
+                  A value of 10 represents one Forge unit. If the radius is zero or negative, 
+                  then the game will use 10 instead. Radii are clamped to the range [0, 200].
                </arg>
             </args>
             <blurb>Spawn a new object between this object and another.</blurb>
@@ -1385,7 +1386,10 @@
             <note>
                Unlike <a href="script/api/object/actions/place_at_me">object.place_at_me</a>,
                this function appears to spawn objects exactly in place, provided they aren't
-               solid or obstructed.
+               solid or obstructed. It also automatically gives the object a 
+               <a href="script/api/object/actions/set_shape">shape</a> &mdash; specifically, a 
+               cylinder, whose top and bottom lengths are set to reach from one basis object to 
+               the other basis object.
             </note>
             <note>
                If the same object is used as both basis objects &mdash; that is, if the object
