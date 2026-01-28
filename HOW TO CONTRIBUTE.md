@@ -1,7 +1,7 @@
 
 In order to contribute to ReachVariantTool, you'll need to set up your build environment:
 
-* Microsoft Visual Studio 2019 Community
+* Microsoft Visual Studio 2022 Community
 * [Qt Visual Studio Tools](https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools2019) plug-in
 * Qt version 5.15.2, 64-bit, for MSVC 2019 x64.
 
