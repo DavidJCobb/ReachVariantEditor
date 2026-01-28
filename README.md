@@ -8,7 +8,7 @@ The repo has a few top-level folders. The "html" folder was for some prototyping
 
 ## Contributing
 
-This program was built using Microsoft Visual Studio Community 2019 with the [Qt Visual Studio Tools](https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools2019) plug-in and with Qt Designer. The [version of Qt used](https://doc.qt.io/qtvstools/qtvstools-managing-projects.html#managing-qt-versions) was 5.15.2, 64-bit, for MSVC 2019.
+This program was built using Microsoft Visual Studio Community 2022 with the [Qt Visual Studio Tools](https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools2019) plug-in and with Qt Designer. The [version of Qt used](https://doc.qt.io/qtvstools/qtvstools-managing-projects.html#managing-qt-versions) was 5.15.2, 64-bit, for MSVC 2019.
 
 For detailed information on contributing to the main project, please refer to `HOW TO CONTRIBUTE.md`.
 
