@@ -1,9 +1,9 @@
 #include "./code_block.h"
 #include <cassert>
-#include "../../../helpers/bitnumber.h"
-#include "../../../helpers/bitwriter.h"
-#include "../../../helpers/bitwise.h"
-#include "../../../helpers/stream.h"
+#include "helpers/bitnumber.h"
+#include "helpers/bitwriter.h"
+#include "helpers/bitwise.h"
+#include "helpers/stream.h"
 #include "../../types/multiplayer.h"
 #include "./opcode_arg_types/all_indices.h"
 #include "./opcode_arg_types/megalo_scope.h"

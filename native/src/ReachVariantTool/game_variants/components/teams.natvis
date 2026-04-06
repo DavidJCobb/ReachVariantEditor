@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="ReachTeamData">
+      <Expand>
+         <Synthetic Name="[flags]">
+            <DisplayString>{flags.value}</DisplayString>
+            <Expand>
+               <Item Name="[enabled]">!!(flags.value &amp; 1)</Item>
+               <Item Name="[has primary color]">!!(flags.value &amp; 2)</Item>
+               <Item Name="[has secondary color]">!!(flags.value &amp; 4)</Item>
+               <Item Name="[has text color]">!!(flags.value &amp; 8)</Item>
+               <Item Name="[raw flags]">flags.value,x</Item>
+            </Expand>
+         </Synthetic>
+         <Item Name="[name]">name</Item>
+         <Synthetic Name="[initial designator]">
+            <DisplayString>{(int)initialDesignator.value,d}</DisplayString>
+            <Expand>
+               <Item Name="value">initialDesignator.value</Item>
+            </Expand>
+         </Synthetic>
+         <Synthetic Name="[species]">
+            <DisplayString Condition="!spartanOrElite.value">Spartan</DisplayString>
+            <DisplayString Condition="spartanOrElite.value">Elite</DisplayString>
+            <Expand>
+               <Item Name="[raw]">spartanOrElite.value</Item>
+            </Expand>
+         </Synthetic>
+         <Synthetic Name="[colors]">
+            <Expand>
+               <Item Name="[primary]">colorPrimary,view(hex)</Item>
+               <Item Name="[secondary]">colorSecondary,view(hex)</Item>
+               <Item Name="[text]">colorText,view(hex)</Item>
+            </Expand>
+         </Synthetic>
+         <Synthetic Name="[fireteam count]">
+            <DisplayString>{(int)fireteamCount.value,d}</DisplayString>
+            <Expand>
+               <Item Name="value">fireteamCount.value</Item>
+            </Expand>
+         </Synthetic>
+      </Expand>
+   </Type>
+</AutoVisualizer>

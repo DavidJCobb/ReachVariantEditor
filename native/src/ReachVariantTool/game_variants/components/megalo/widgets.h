@@ -1,9 +1,9 @@
 #pragma once
 #include <cstdint>
-#include "../../../helpers/bitnumber.h"
-#include "../../../helpers/bitwriter.h"
-#include "../../../helpers/refcounting.h"
-#include "../../../helpers/stream.h"
+#include "helpers/bitnumber.h"
+#include "helpers/bitwriter.h"
+#include "helpers/refcounting.h"
+#include "helpers/stream.h"
 #include "../../../formats/indexed_lists.h"
 
 namespace Megalo {

@@ -1,6 +1,6 @@
 #pragma once
 #include "../opcode_arg.h"
-#include "../../../formats/detailed_enum.h"
+#include "formats/detailed_enum.h"
 #include "../limits.h"
 
 namespace Megalo {

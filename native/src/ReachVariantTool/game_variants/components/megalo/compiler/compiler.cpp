@@ -4,7 +4,7 @@
 #include <cassert>
 #include "enums.h"
 #include "namespaces.h"
-#include "../../../helpers/qt/string.h"
+#include "helpers/qt/string.h"
 #include "../opcode_arg_types/all_indices.h" // OpcodeArgValueTrigger
 #include "../opcode_arg_types/forge_label.h"
 #include "../opcode_arg_types/megalo_scope.h"
@@ -13,9 +13,9 @@
 #include "../opcode_arg_types/variables/base.h"
 #include "../opcode_arg_types/variables/player_or_group.h"
 #include "../helpers/format_strings.h"
-#include "../../../../editor_state.h"
+#include "editor_state.h"
 
-#include "../../../../services/ini.h"
+#include "services/ini.h"
 
 namespace {
    constexpr const bool else_inverts_operator_rather_than_using_not = true;

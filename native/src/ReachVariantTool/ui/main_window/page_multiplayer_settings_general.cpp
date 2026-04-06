@@ -25,6 +25,7 @@ PageMPSettingsGeneral::PageMPSettingsGeneral(QWidget* parent) : QWidget(parent) 
    reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldNewRoundResetsPlayers, general.flags, ReachCGGeneralOptions::flags_t::new_round_resets_players);
    reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldNewRoundResetsMap,     general.flags, ReachCGGeneralOptions::flags_t::new_round_resets_map);
    reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldTeamsEnabled,          general.flags, ReachCGGeneralOptions::flags_t::teams_enabled);
+   reach_main_window_setup_bool_checkbox(multiplayerData, this->ui.fieldFireteamsEnabled, fireteamsEnabled);
    reach_main_window_setup_combobox(customGameOptions, this->ui.fieldPlayerSpecies,  team.species);
    reach_main_window_setup_spinbox(customGameOptions, this->ui.fieldRoundTimeLimit,  general.timeLimit);
    reach_main_window_setup_spinbox(customGameOptions, this->ui.fieldRoundLimit,      general.roundLimit);
@@ -33,6 +34,8 @@ PageMPSettingsGeneral::PageMPSettingsGeneral(QWidget* parent) : QWidget(parent) 
    reach_main_window_setup_spinbox(customGameOptions, this->ui.fieldGracePeriod,     general.gracePeriod);
    reach_main_window_setup_spinbox(multiplayerData,   this->ui.fieldScoreToWin,      scoreToWin); // MP-specific
    #include "widget_macros_setup_end.h"
+
+   this->ui.fieldFireteamsEnabled->setVisible(!!ReachEditorState::get().multiplayerData());
 }
 void PageMPSettingsGeneral::updateEnableStates() {
    bool disable = ReachINI::Editing::bHideFirefightNoOps.current.b;
@@ -47,6 +50,7 @@ void PageMPSettingsGeneral::updateEnableStates() {
    this->ui.fieldNewRoundResetsPlayers->setDisabled(disable); // cleared by default in Firefight, yet players are obviously reset
    this->ui.fieldNewRoundResetsMap->setDisabled(disable); // cleared by default in Firefight, yet the map is obviously reset
    this->ui.fieldRoundsToWin->setDisabled(disable);
+   this->ui.fieldFireteamsEnabled->setVisible(!!ReachEditorState::get().multiplayerData());
    //
    bool visible = !disable;
    this->ui.fieldPerfectionEnabled->setVisible(visible);
@@ -68,6 +72,12 @@ void PageMPSettingsGeneral::updateFromVariant(GameVariant* variant) {
    reach_main_window_update_flag_checkbox(this->ui.fieldNewRoundResetsPlayers, general.flags, ReachCGGeneralOptions::flags_t::new_round_resets_players);
    reach_main_window_update_flag_checkbox(this->ui.fieldNewRoundResetsMap,     general.flags, ReachCGGeneralOptions::flags_t::new_round_resets_map);
    reach_main_window_update_flag_checkbox(this->ui.fieldTeamsEnabled,          general.flags, ReachCGGeneralOptions::flags_t::teams_enabled);
+   {
+      auto* widget = this->ui.fieldFireteamsEnabled;
+      const auto blocker = QSignalBlocker(widget);
+      if (auto* md = variant->get_multiplayer_data())
+         widget->setChecked(md->fireteamsEnabled);
+   }
    reach_main_window_update_combobox(this->ui.fieldPlayerSpecies,  team.species);
    reach_main_window_update_spinbox(this->ui.fieldRoundTimeLimit,  general.timeLimit);
    reach_main_window_update_spinbox(this->ui.fieldRoundLimit,      general.roundLimit);

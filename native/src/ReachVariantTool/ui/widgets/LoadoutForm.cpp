@@ -24,29 +24,29 @@ LoadoutForm::LoadoutForm(QWidget* parent) : QWidget(parent) {
    }
    {
       auto widget = this->ui.loadoutWeaponPrimary;
-      QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, widget](int value) {
+      QObject::connect(widget, &RVTExtensibleEnumPicker::valueChanged, [this, widget]() {
          auto loadout = this->_getLoadout();
          if (!loadout)
             return;
-         loadout->weaponPrimary = (reach::weapon)widget->currentData().toInt();
+         loadout->weaponPrimary = widget->enumValue();
       });
    }
    {
       auto widget = this->ui.loadoutWeaponSecondary;
-      QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, widget](int value) {
+      QObject::connect(widget, &RVTExtensibleEnumPicker::valueChanged, [this, widget]() {
          auto loadout = this->_getLoadout();
          if (!loadout)
             return;
-         loadout->weaponSecondary = (reach::weapon)widget->currentData().toInt();
+         loadout->weaponSecondary = widget->enumValue();
       });
    }
    {
       auto widget = this->ui.loadoutAbility;
-      QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, widget](int value) {
+      QObject::connect(widget, &RVTExtensibleEnumPicker::valueChanged, [this, widget]() {
          auto loadout = this->_getLoadout();
          if (!loadout)
             return;
-         loadout->ability = (reach::ability)widget->currentData().toInt();
+         loadout->ability = widget->enumValue();
       });
    }
    {
@@ -86,9 +86,9 @@ void LoadoutForm::pullFromGameVariant() {
    const QSignalBlocker blocker6(this->ui.loadoutGrenadeCount);
    this->ui.loadoutFlagVisible->setChecked(loadout.visible);
    this->ui.loadoutName->setCurrentIndex((int)loadout.nameIndex + 1);
-   this->ui.loadoutWeaponPrimary->setByData((int)loadout.weaponPrimary);
-   this->ui.loadoutWeaponSecondary->setByData((int)loadout.weaponSecondary);
-   this->ui.loadoutAbility->setByData((int)loadout.ability);
+   this->ui.loadoutWeaponPrimary->setEnumValue(loadout.weaponPrimary);
+   this->ui.loadoutWeaponSecondary->setEnumValue(loadout.weaponSecondary);
+   this->ui.loadoutAbility->setEnumValue(loadout.ability);
    this->ui.loadoutGrenadeCount->setCurrentIndex((int)loadout.grenadeCount);
 
 }

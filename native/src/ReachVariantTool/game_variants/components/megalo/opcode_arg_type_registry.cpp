@@ -1,7 +1,7 @@
 #include "opcode_arg_type_registry.h"
 #include "opcode_arg.h"
 #include "opcode_arg_types/all.h"
-#include "../../../helpers/qt/string.h"
+#include "helpers/qt/string.h"
 //
 #include "actions.h"
 #include "conditions.h"

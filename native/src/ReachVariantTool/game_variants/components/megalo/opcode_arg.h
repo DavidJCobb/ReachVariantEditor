@@ -3,11 +3,11 @@
 #include <functional>
 #include <string>
 #include <vector>
-#include "../../../helpers/bitwriter.h"
-#include "../../../helpers/refcounting.h"
-#include "../../../helpers/stream.h"
-#include "../../../helpers/string_scanner.h"
-#include "../../../helpers/strings.h"
+#include "helpers/bitwriter.h"
+#include "helpers/refcounting.h"
+#include "helpers/stream.h"
+#include "helpers/string_scanner.h"
+#include "helpers/strings.h"
 #include "variables_and_scopes.h"
 #include "decompiler/decompiler.h"
 #include "compiler/types.h"

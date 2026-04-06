@@ -25,6 +25,10 @@
             round, but testing suggests that it doesn't work in <i>Halo: Reach</i>.</dd>
          <dt>Teams Enabled</dt>
             <dd>Controls whether teams are enabled.</dd>
+         <dt>Fireteams Enabled</dt>
+            <dd>Controls whether teams are divided into fireteams. When fireteams are 
+            enabled, Bro Spawning will only allow players to spawn on top of a fireteam 
+            member; otherwise, Bro Spawning will allow players to spawn on any teammate.</dd>
          <dt>Player Species</dt>
             <dd>
                <p>Determines whether players play as Spartans or Elites. The available 

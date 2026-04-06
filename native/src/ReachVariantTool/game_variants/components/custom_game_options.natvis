@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="ReachCGGeneralOptions">
+      <Expand>
+         <Synthetic Name="[flags]">
+            <DisplayString>{flags.value}</DisplayString>
+            <Expand>
+               <Item Name="[award Perfection medal]">!!(flags.value &amp; 1)</Item>
+               <Item Name="[rounds reset players]">!!(flags.value &amp; 2)</Item>
+               <Item Name="[rounds reset map]">!!(flags.value &amp; 4)</Item>
+               <Item Name="[teams enabled]">!!(flags.value &amp; 8)</Item>
+               <Item Name="[raw flags]">flags.value,x</Item>
+            </Expand>
+         </Synthetic>
+         <Item Name="[time limit (seconds)]">timeLimit</Item>
+         <Item Name="[round limit]">roundLimit</Item>
+         <Item Name="[rounds to win]">roundsToWin</Item>
+         <Item Name="[sudden death time (seconds)]">suddenDeathTime</Item>
+         <Item Name="[grace period (seconds)]">gracePeriod</Item>
+      </Expand>
+   </Type>
+   <Type Name="ReachCGMapOptions">
+      <Expand>
+         <Synthetic Name="[flags]">
+            <DisplayString>{flags.value}</DisplayString>
+            <Expand>
+               <Item Name="[grenades on map]">!!(flags.value &amp; 1)</Item>
+               <Item Name="[shortcuts on map]">!!(flags.value &amp; 2)</Item>
+               <Item Name="[abilities on map]">!!(flags.value &amp; 4)</Item>
+               <Item Name="[powerups on map]">!!(flags.value &amp; 8)</Item>
+               <Item Name="[turrets on map]">!!(flags.value &amp; 16)</Item>
+               <Item Name="[indestructible vehicles]">!!(flags.value &amp; 32)</Item>
+               <Item Name="[raw flags]">flags.value,x</Item>
+            </Expand>
+         </Synthetic>
+         <Item Name="[base player traits]">baseTraits</Item>
+         <Item Name="[weapon set]">weaponSet</Item>
+         <Item Name="[vehicle set]">vehicleSet</Item>
+         <Synthetic Name="[powerups]">
+            <Expand>
+               <Item Name="[red]">powerups.red</Item>
+               <Item Name="[blue]">powerups.blue</Item>
+               <Item Name="[yellow]">powerups.yellow</Item>
+            </Expand>
+         </Synthetic>
+      </Expand>
+   </Type>
+   <Type Name="ReachCGSocialOptions">
+      <Expand>
+         <Synthetic Name="[flags]">
+            <DisplayString>{flags.value}</DisplayString>
+            <Expand>
+               <Item Name="[dead player voice]">!!(flags.value &amp; 1)</Item>
+               <Item Name="[global voice]">!!(flags.value &amp; 2)</Item>
+               <Item Name="[proximity voice]">!!(flags.value &amp; 4)</Item>
+               <Item Name="[betrayal booting]">!!(flags.value &amp; 8)</Item>
+               <Item Name="[friendly fire]">!!(flags.value &amp; 16)</Item>
+               <Item Name="[raw flags]">flags.value,x</Item>
+            </Expand>
+         </Synthetic>
+         <Item Name="[observers]">observers</Item>
+         <Item Name="[team changing]">teamChanges</Item>
+      </Expand>
+   </Type>
+</AutoVisualizer>

@@ -2,8 +2,8 @@
 #include "variables_and_scopes.h"
 #include "opcode_arg_types/variables/all_core.h"
 #include "../../errors.h"
-#include "../../../helpers/qt/string.h"
-#include "../../../formats/detailed_enum.h"
+#include "helpers/qt/string.h"
+#include "formats/detailed_enum.h"
 #include "../../../formats/detailed_flags.h"
 
 namespace Megalo {

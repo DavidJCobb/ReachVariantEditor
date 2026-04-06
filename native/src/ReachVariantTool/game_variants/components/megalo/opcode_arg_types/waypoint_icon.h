@@ -1,6 +1,6 @@
 #pragma once
 #include "variables/number.h"
-#include "../../../formats/detailed_enum.h"
+#include "formats/detailed_enum.h"
 
 namespace Megalo {
    class OpcodeArgValueWaypointIcon : public OpcodeArgValue {

@@ -9,20 +9,20 @@
 
 namespace reach {
    enum class ability : int8_t {
-      // -4: Icon is two concentric circles. Acts as Sprint.
-      unchanged        = -3,
-      // -2: Acts as None.
-      none             = -1,
-      sprint           =  0,
-      jetpack          =  1,
-      armor_lock       =  2,
-      //  3: KSoft.Tool identifies this as "power fist." Armor Lock icon in loadout selection; acts as None.
-      active_camo      =  4,
-      //  5: KSoft.Tool identifies this as "ammo pack." Armor Lock icon in loadout selection; acts as None.
-      //  6: KSoft.Tool identifies this as "sensor pack." Armor Lock icon in loadout selection; acts as None.
-      hologram         =  7,
-      evade            =  8,
-      drop_shield      =  9
+      random             = -4, // unconfirmed
+      unchanged          = -3,
+      map_default        = -2, // unconfirmed. acts as None
+      none               = -1,
+      sprint             =  0,
+      jetpack            =  1,
+      armor_lock         =  2,
+      unused_power_fist  =  3, // per KSoft.Tool
+      active_camo        =  4,
+      unused_ammo_pack   =  5, // per KSoft.Tool
+      unused_sensor_pack =  6, // per KSoft.Tool
+      hologram           =  7,
+      evade              =  8,
+      drop_shield        =  9
    };
    enum class ability_usage : uint8_t {
       unchanged           = 0,

@@ -61,6 +61,10 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>fieldFlag0</tabstop>
+  <tabstop>fieldFlag1</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

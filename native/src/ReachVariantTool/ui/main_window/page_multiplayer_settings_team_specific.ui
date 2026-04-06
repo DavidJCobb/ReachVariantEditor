@@ -197,7 +197,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
      <property name="minimum">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="maximum">
       <number>31</number>
@@ -278,6 +278,19 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>buttonName</tabstop>
+  <tabstop>fieldEnabled</tabstop>
+  <tabstop>fieldEnableColorPrimary</tabstop>
+  <tabstop>fieldButtonColorPrimary</tabstop>
+  <tabstop>fieldEnableColorSecondary</tabstop>
+  <tabstop>fieldButtonColorSecondary</tabstop>
+  <tabstop>fieldEnableColorText</tabstop>
+  <tabstop>fieldButtonColorText</tabstop>
+  <tabstop>fieldSpecies</tabstop>
+  <tabstop>fieldFireteamCount</tabstop>
+  <tabstop>fieldInitialDesignator</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

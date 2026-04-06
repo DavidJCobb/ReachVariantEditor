@@ -27,29 +27,29 @@ PagePlayerTraits::PagePlayerTraits(QWidget* parent) : QWidget(parent) {
       reach_main_window_setup_combobox(playerTraits, this->ui.fieldMeleeMult,  offense.meleeMult);
       {
          auto widget = this->ui.fieldWeaponPrimary;
-         QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
+         QObject::connect(widget, &RVTExtensibleEnumPicker::valueChanged, [widget]() {
             auto traits = ReachEditorState::get().playerTraits();
             if (!traits)
                return;
-            traits->offense.weaponPrimary = (reach::weapon)widget->currentData().toInt();
+            traits->offense.weaponPrimary = widget->enumValue();
          });
       }
       {
          auto widget = this->ui.fieldWeaponSecondary;
-         QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
+         QObject::connect(widget, &RVTExtensibleEnumPicker::valueChanged, [widget]() {
             auto traits = ReachEditorState::get().playerTraits();
             if (!traits)
                return;
-            traits->offense.weaponSecondary = (reach::weapon)widget->currentData().toInt();
+            traits->offense.weaponSecondary = widget->enumValue();
          });
       }
       {
          auto widget = this->ui.fieldArmorAbility;
-         QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
+         QObject::connect(widget, &RVTExtensibleEnumPicker::valueChanged, [widget]() {
             auto traits = ReachEditorState::get().playerTraits();
             if (!traits)
                return;
-            traits->offense.ability = (reach::ability)widget->currentData().toInt();
+            traits->offense.ability = widget->enumValue();
          });
       }
       reach_main_window_setup_combobox(playerTraits, this->ui.fieldGrenadeCount, offense.grenadeCount);
@@ -103,17 +103,17 @@ void PagePlayerTraits::updateFromVariant(ReachPlayerTraits* data) {
       {
          auto widget = this->ui.fieldWeaponPrimary;
          const QSignalBlocker blocker(widget);
-         widget->setByData((int)data->offense.weaponPrimary);
+         widget->setEnumValue(data->offense.weaponPrimary);
       }
       {
          auto widget = this->ui.fieldWeaponSecondary;
          const QSignalBlocker blocker(widget);
-         widget->setByData((int)data->offense.weaponSecondary);
+         widget->setEnumValue(data->offense.weaponSecondary);
       }
       {
          auto widget = this->ui.fieldArmorAbility;
          const QSignalBlocker blocker(widget);
-         widget->setByData((int)data->offense.ability);
+         widget->setEnumValue(data->offense.ability);
       }
       reach_main_window_update_combobox(this->ui.fieldGrenadeCount,    offense.grenadeCount);
       reach_main_window_update_combobox(this->ui.fieldGrenadeRegen,    offense.grenadeRegen);

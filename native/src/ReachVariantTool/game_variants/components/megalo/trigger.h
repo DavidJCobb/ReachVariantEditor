@@ -8,10 +8,10 @@
 #include "limits.h"
 #include "limits_bitnumbers.h"
 #include "forge_label.h"
-#include "../../../helpers/bitnumber.h"
-#include "../../../helpers/bitwriter.h"
-#include "../../../helpers/bitwise.h"
-#include "../../../helpers/stream.h"
+#include "helpers/bitnumber.h"
+#include "helpers/bitwriter.h"
+#include "helpers/bitwise.h"
+#include "helpers/stream.h"
 #include "decompiler/decompiler.h"
 
 class GameVariantDataMultiplayer;

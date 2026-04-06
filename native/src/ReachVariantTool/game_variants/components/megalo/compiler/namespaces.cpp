@@ -3,7 +3,7 @@
 #include "../opcode_arg_types/variables/all_core.h"
 #include "../opcode_arg_types/variables/player_or_group.h"
 #include "../opcode_arg_types/widget_related.h"
-#include "../../../helpers/qt/string.h"
+#include "helpers/qt/string.h"
 
 namespace Megalo {
    namespace Script {

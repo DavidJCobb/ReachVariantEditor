@@ -1,6 +1,6 @@
 #pragma once
 #include "../opcode_arg.h"
-#include "../../../formats/detailed_flags.h"
+#include "formats/detailed_flags.h"
 
 namespace Megalo {
    class OpcodeArgValueFlagsSuperclass : public OpcodeArgValue {

@@ -2,7 +2,7 @@
 #include <cassert>
 #include <string>
 #include <vector>
-#include "../../../formats/detailed_enum.h"
+#include "formats/detailed_enum.h"
 
 namespace Megalo {
    enum class variable_scope {

@@ -144,7 +144,7 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
    if (!block_type_is_gvar) {
       auto     hasher   = cobb::sha1();
       uint32_t size     = offset_after_hashable - offset_before_hashable;
-      printf("Checking SHA-1 hash... Data size is %08X (%08X - %08X).\n", size, offset_before_hashable, offset_after_hashable);
+      //printf("Checking SHA-1 hash... Data size is %08X (%08X - %08X).\n", size, offset_before_hashable, offset_after_hashable);
       uint32_t bufsize  = size + sizeof(reachSHA1Salt) + 4;
       auto     buffer   = (const uint8_t*)stream.data();
       auto     buffer32 = (const uint32_t*)buffer;
@@ -153,6 +153,7 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
       free(working);
       working = nullptr;
       //
+      /*//
       printf("File's existing hash:\n");
       for (int i = 0; i < 5; i++)
          printf("   %08X\n", buffer32[0xC / 4 + i]);
@@ -160,6 +161,7 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
       for (int i = 0; i < 5; i++)
          printf("   %08X\n", hasher.hash[i]);
       printf("Check done.\n");
+      //*/
    }
    //
    return true;

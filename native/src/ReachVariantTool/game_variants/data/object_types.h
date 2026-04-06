@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../formats/detailed_enum.h"
+#include "formats/detailed_enum.h"
 
 namespace Megalo {
    namespace enums {

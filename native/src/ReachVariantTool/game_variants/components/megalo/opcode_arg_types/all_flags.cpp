@@ -1,5 +1,5 @@
 #include "all_flags.h"
-#include "../../../helpers/qt/string.h"
+#include "helpers/qt/string.h"
 
 namespace Megalo {
    namespace flags_masks {

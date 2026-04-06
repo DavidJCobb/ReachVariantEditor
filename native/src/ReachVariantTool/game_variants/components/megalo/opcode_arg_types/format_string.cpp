@@ -110,7 +110,7 @@ namespace Megalo {
       //
       this->tokenCount.read(stream);
       if (this->tokenCount > max_token_count) {
-         printf("Tokens value claimed to have %d tokens; max is %d.\n", this->tokenCount.to_int(), max_token_count);
+         printf("Tokens value claimed to have %d tokens; max is %d.\n", this->tokenCount.to_int(), (int)max_token_count);
          return false;
       }
       for (uint8_t i = 0; i < this->tokenCount; i++)

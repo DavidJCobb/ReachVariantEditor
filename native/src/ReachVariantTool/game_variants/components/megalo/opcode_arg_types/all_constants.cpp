@@ -1,6 +1,6 @@
 #include "all_constants.h"
 #include "../compiler/compiler.h"
-#include "../../../helpers/numeric.h"
+#include "helpers/numeric.h"
 
 namespace Megalo {
    #pragma region bool

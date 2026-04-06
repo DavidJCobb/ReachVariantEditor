@@ -19,11 +19,11 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
@@ -72,6 +72,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <DisableSpecificWarnings>26812;</DisableSpecificWarnings>
       <BuildStlModules>false</BuildStlModules>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -92,6 +93,7 @@
       <DisableSpecificWarnings>26812;</DisableSpecificWarnings>
       <BuildStlModules>false</BuildStlModules>
       <EnableModules>false</EnableModules>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -256,6 +258,9 @@
     <ClCompile Include="ui\widgets\option_toggles.cpp" />
     <ClCompile Include="ui\widgets\RoundCardTextPreview.cpp" />
     <ClCompile Include="ui\widgets\string_picker.cpp" />
+    <ClCompile Include="widgets\RVTArmorAbilityPicker.cpp" />
+    <ClCompile Include="widgets\RVTExtensibleEnumPicker.cpp" />
+    <ClCompile Include="widgets\RVTWeaponPicker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\main_window.h" />
@@ -309,6 +314,9 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="widgets\RVTWeaponPicker.h" />
+    <QtMoc Include="widgets\RVTExtensibleEnumPicker.h" />
+    <QtMoc Include="widgets\RVTArmorAbilityPicker.h" />
     <QtMoc Include="editor_state\ReachStringCentralModel.h" />
     <ClInclude Include="cli.h" />
     <ClInclude Include="formats\indexed_lists.h" />
@@ -593,6 +601,7 @@
     <None Include="Resources\gametype_files\blank_ff.bin" />
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="docs\working - help docs\cli.xml" />
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player.xml" />
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player_team.xml" />
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_target_player_team.xml" />
@@ -604,6 +613,11 @@
     <Xml Include="docs\working - help docs\script\api\player\actions\try_get_vehicle.xml" />
     <Xml Include="docs\working - help docs\script\api\player\actions\try_get_weapon.xml" />
     <Xml Include="docs\working - help docs\script\api\player\properties\unknown_09.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="game_variants\components\custom_game_options.natvis" />
+    <Natvis Include="game_variants\components\teams.natvis" />
+    <Natvis Include="helpers\bitnumber.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QGridLayout" name="gridLayout" columnstretch="1,1">
    <item row="4" column="0">
     <widget class="QLabel" name="label_4">
      <property name="text">
@@ -36,12 +36,9 @@
       <string>Primary Weapon</string>
      </property>
      <property name="buddy">
-      <cstring>loadoutWeaponPrimary</cstring>
+      <cstring>loadoutWeaponSecondary</cstring>
      </property>
     </widget>
-   </item>
-   <item row="4" column="1">
-    <widget class="PlayerTraitArmorAbilityCombobox" name="loadoutAbility"/>
    </item>
    <item row="3" column="0">
     <widget class="QLabel" name="label_3">
@@ -49,7 +46,7 @@
       <string>Secondary Weapon</string>
      </property>
      <property name="buddy">
-      <cstring>loadoutWeaponSecondary</cstring>
+      <cstring>loadoutWeaponPrimary</cstring>
      </property>
     </widget>
    </item>
@@ -59,9 +56,6 @@
       <string>Visible In-Game</string>
      </property>
     </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="PlayerTraitWeaponCombobox" name="loadoutWeaponSecondary"/>
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="label">
@@ -487,9 +481,6 @@
      </item>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="PlayerTraitWeaponCombobox" name="loadoutWeaponPrimary"/>
-   </item>
    <item row="5" column="0">
     <widget class="QLabel" name="label_5">
      <property name="text">
@@ -579,25 +570,34 @@
      </item>
     </widget>
    </item>
+   <item row="4" column="1">
+    <widget class="RVTArmorAbilityPicker" name="loadoutAbility"/>
+   </item>
+   <item row="3" column="1">
+    <widget class="RVTWeaponPicker" name="loadoutWeaponPrimary"/>
+   </item>
+   <item row="2" column="1">
+    <widget class="RVTWeaponPicker" name="loadoutWeaponSecondary"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlayerTraitWeaponCombobox</class>
-   <extends>QComboBox</extends>
-   <header>../generic/PlayerTraitWidgets.h</header>
+   <class>RVTArmorAbilityPicker</class>
+   <extends>QWidget</extends>
+   <header>widgets/RVTArmorAbilityPicker.h</header>
   </customwidget>
   <customwidget>
-   <class>PlayerTraitArmorAbilityCombobox</class>
-   <extends>QComboBox</extends>
-   <header>../generic/PlayerTraitWidgets.h</header>
+   <class>RVTWeaponPicker</class>
+   <extends>QWidget</extends>
+   <header>widgets/RVTWeaponPicker.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>loadoutFlagVisible</tabstop>
   <tabstop>loadoutName</tabstop>
-  <tabstop>loadoutWeaponPrimary</tabstop>
   <tabstop>loadoutWeaponSecondary</tabstop>
+  <tabstop>loadoutWeaponPrimary</tabstop>
   <tabstop>loadoutAbility</tabstop>
   <tabstop>loadoutGrenadeCount</tabstop>
  </tabstops>
