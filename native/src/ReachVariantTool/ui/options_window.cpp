@@ -129,6 +129,10 @@ ProgramOptionsDialog::ProgramOptionsDialog(QWidget* parent) : QDialog(parent) {
       #pragma endregion
       #pragma region Syntax highlighting
       {  // syn
+         QObject::connect(this->ui.synHigh, &QGroupBox::toggled, [](bool checked) {
+            ReachINI::CodeEditor::bEnableSyntaxHighlighting.pending.b = checked;
+         });
+
          QComboBox* widget = this->ui.synHighType;
          widget->clear();
          QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this]() {
@@ -318,6 +322,13 @@ void ProgramOptionsDialog::refreshWidgetsFromINI() {
       this->ui.optionFullFilePathsInWindowTitle->setChecked(ReachINI::UIWindowTitle::bShowFullPath.current.b);
       this->ui.optionVariantNameInWindowTitle->setChecked(ReachINI::UIWindowTitle::bShowVariantTitle.current.b);
       this->ui.optionTheme->setText(ReachINI::UIWindowTitle::sTheme.currentStr.c_str());
+   }
+   //
+   // Script Code Editor
+   //
+   {
+      const QSignalBlocker blocker(this->ui.synHigh);
+      this->ui.synHigh->setChecked(ReachINI::CodeEditor::bEnableSyntaxHighlighting.current.b);
    }
 }
 void ProgramOptionsDialog::saveAndClose() {

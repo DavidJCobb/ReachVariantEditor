@@ -3,6 +3,7 @@
 #include "../../editor_state.h"
 #include "../../game_variants/components/megalo/compiler/compiler.h"
 #include "../../game_variants/components/megalo/decompiler/decompiler.h"
+#include "../generic/MegaloSyntaxHighlighter.h"
 
 class ScriptEditorPageScriptCode : public QWidget {
    Q_OBJECT
@@ -16,6 +17,7 @@ class ScriptEditorPageScriptCode : public QWidget {
       //
    protected:
       Ui::ScriptEditorPageScriptCode ui;
+      MegaloSyntaxHighlighter highlighter;
       //
       log_t _lastNotices;
       log_t _lastWarnings;
@@ -28,4 +30,5 @@ class ScriptEditorPageScriptCode : public QWidget {
       void jumpToLogItem(QListWidgetItem&);
 
       void updateCodeEditorStyle();
+      void updateSyntaxHighlightingEnabled();
 };

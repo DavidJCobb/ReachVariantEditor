@@ -42,9 +42,13 @@ namespace {
 ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
    {
-      new MegaloSyntaxHighlighter(this->ui.textEditor->document());
       this->updateCodeEditorStyle();
+      this->updateSyntaxHighlightingEnabled();
       QObject::connect(&ReachINI::getForQt(), &cobb::qt::ini::file::settingChanged, this, [this](cobb::ini::setting* setting, cobb::ini::setting_value_union oldValue, cobb::ini::setting_value_union newValue) {
+         if (setting == &ReachINI::CodeEditor::bEnableSyntaxHighlighting) {
+            this->updateSyntaxHighlightingEnabled();
+            return;
+         }
          for (auto* ptr : ini_settings) {
             if (setting == ptr) {
                this->updateCodeEditorStyle();
@@ -280,4 +284,12 @@ void ScriptEditorPageScriptCode::updateCodeEditorStyle() {
    }
    qss = QString("QTextEdit { %1 }").arg(qss); // needed to prevent settings from bleeding into e.g. the scrollbar
    widget->setStyleSheet(qss);
+}
+void ScriptEditorPageScriptCode::updateSyntaxHighlightingEnabled() {
+   auto* widget = this->ui.textEditor;
+   if (ReachINI::CodeEditor::bEnableSyntaxHighlighting.current.b) {
+      this->highlighter.setDocument(widget->document());
+   } else {
+      this->highlighter.setDocument(nullptr);
+   }
 }
