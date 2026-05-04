@@ -20,6 +20,9 @@
 #include "./cli.h"
 #include "./editor_state.h"
 #include "./headless.h"
+#if defined(Q_OS_WIN)
+   #include "./attach_to_parent_console.h"
+#endif
 
 static void load_inis() {
    auto legacy_path_str = QApplication::instance()->applicationDirPath();;
@@ -59,12 +62,71 @@ static void load_inis() {
    }
 }
 
+static constexpr const bool is_console_application =
+   //
+   // In MSBuild, the Linker "Subsystem" option controls whether you're compiling 
+   // a console application or a GUI application.
+   // 
+   // This option cannot be directly tested from source code. When you create a 
+   // project in Visual Studio, you have to select the subsystem, and based on the 
+   // choice you make at that time, VS will configure the project to define the 
+   // appropriate macro (_CONSOLE or _WINDOWS). However, these macros may not be 
+   // updated when you manually change the subsystem option. (Worse, it seems like 
+   // `_WINDOWS` may be defined implicitly somewhere in Visual Studio or Qt VS 
+   // Tools' supplied defaults, even if your project isn't set to define it.)
+   // 
+   // If neither macro is present, then we assume that the project is a console 
+   // application and the macros just aren't set up.
+   //
+   #if defined(RVT_FORCE_CONSOLENESS_TO)
+      (bool)(RVT_FORCE_CONSOLENESS_TO)
+   #else
+      #if _CONSOLE
+         true
+      #else
+         #if _WINDOWS
+            false
+         #else
+            true
+         #endif
+      #endif
+   #endif
+;
+
+static constexpr const bool headless_creates_console_if_none_to_attach_to = false;
+
 int main(int argc, char *argv[]) {
    if (argc > 1) {
       rvt::command_line_params params(argc, argv);
       if (params.has_error) {
          return 1;
       }
+
+      if constexpr (!is_console_application) {
+         #if defined(Q_OS_WIN)
+            //
+            // If we were compiled as a Windows Application rather than a Console Application, 
+            // then we won't have a console to print to by default. We can try to attach to a 
+            // parent process's console; if we were started from the console, then that will 
+            // work and allow us to print to that console, though `std::cin` and friends will 
+            // not work. (When a console starts a non-console application, it won't wait for 
+            // the application to exit before continuing.)
+            // 
+            switch (attach_to_parent_console()) {
+               case attach_to_console_result::success:
+                  break;
+               case attach_to_console_result::already_have_a_console:
+                  break;
+               default:
+                  #if _DEBUG
+                     if (attach_to_new_console())
+                        break;
+                  #endif
+                  return 1;
+            }
+         #endif
+      }
+
       if (params.help) {
          rvt::print_cli_help();
          return 0;
@@ -103,26 +165,28 @@ int main(int argc, char *argv[]) {
          return 0;
       }
    }
-   #if defined( Q_OS_WIN )
-      //
-      // Windows applications must be defined to use a given "subsystem," roughly corresponding 
-      // to the kind of application you're making (e.g. GUI versus console). Windows does not 
-      // define a "GUI by default but headless if asked for" application type, however:
-      // 
-      //    https://learn.microsoft.com/en-us/cpp/build/reference/subsystem-specify-subsystem?view=msvc-170
-      //    https://devblogs.microsoft.com/oldnewthing/20090101-00/?p=19643
-      // 
-      // The only way to make a Qt program that behaves in the manner desired is to compile it 
-      // for the "console" subsystem, and then have it detach from its parent console if it 
-      // decides it wants to run with a GUI. If the console was created specifically for us 
-      // (i.e. if we were double-clicked), then the console will de-spawn (since nothing else 
-      // will be attached to it).
-      // 
-      // This does have the potential drawback of the console window briefly being visible, if 
-      // the program takes too long to get to this point (e.g. system bogged down by something).
-      //
-      ::FreeConsole();
-   #endif
+   if constexpr (is_console_application) {
+      #if defined(Q_OS_WIN)
+         //
+         // Windows applications must be defined to use a given "subsystem," roughly corresponding 
+         // to the kind of application you're making (e.g. GUI versus console). Windows does not 
+         // define a "GUI by default but headless if asked for" application type, however:
+         // 
+         //    https://learn.microsoft.com/en-us/cpp/build/reference/subsystem-specify-subsystem?view=msvc-170
+         //    https://devblogs.microsoft.com/oldnewthing/20090101-00/?p=19643
+         // 
+         // We have to pick one. We can compile a console application that detaches its console 
+         // if run standaline and not headlessly, or a GUI application that attaches itself to a 
+         // console if it's run from one and headlessly. This codepath handles the former method, 
+         // detaching ourselves from a console if we decide to spawn a GUI. (Detaching the console 
+         // window will de-spawn it automatically, if nothing else is using it.)
+         // 
+         // This does have the potential drawback of the console window briefly being visible, if 
+         // the program takes too long to get to this point (e.g. system bogged down by something).
+         //
+         ::FreeConsole();
+      #endif
+   }
 
    QApplication a(argc, argv);
    #if _DEBUG

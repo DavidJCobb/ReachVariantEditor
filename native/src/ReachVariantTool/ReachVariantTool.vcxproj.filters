@@ -496,6 +496,9 @@
     <ClCompile Include="ui\megalo_syntax_highlighting\highlighter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="attach_to_parent_console.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -1239,6 +1242,9 @@
     <ClInclude Include="ui\megalo_syntax_highlighting\block_state_none_param.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="attach_to_parent_console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -1321,6 +1327,7 @@
     <None Include="docs\design flaws\df003 - handling of variant string IDs.md" />
     <None Include="Directory.build.props" />
     <None Include="docs\option toggle indices.md" />
+    <None Include="docs\headless.md" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player.xml" />
