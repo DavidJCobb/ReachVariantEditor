@@ -113,13 +113,15 @@ int main(int argc, char *argv[]) {
       //    https://devblogs.microsoft.com/oldnewthing/20090101-00/?p=19643
       // 
       // The only way to make a Qt program that behaves in the manner desired is to compile it 
-      // for the "console" subsystem, and just manually hide your console window when you decide 
-      // to fire up a GUI. (Apparently, and fortunately, this call is a no-op if we don't own 
-      // the console window we're running in.) Per:
+      // for the "console" subsystem, and then have it detach from its parent console if it 
+      // decides it wants to run with a GUI. If the console was created specifically for us 
+      // (i.e. if we were double-clicked), then the console will de-spawn (since nothing else 
+      // will be attached to it).
       // 
-      //    https://stackoverflow.com/a/49098065
+      // This does have the potential drawback of the console window briefly being visible, if 
+      // the program takes too long to get to this point (e.g. system bogged down by something).
       //
-      ::ShowWindow(::GetConsoleWindow(), SW_HIDE); //hide console window
+      ::FreeConsole();
    #endif
 
    QApplication a(argc, argv);
