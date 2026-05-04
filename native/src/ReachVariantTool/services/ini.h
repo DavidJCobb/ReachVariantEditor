@@ -21,6 +21,7 @@ namespace ReachINI {
    //
    #define REACHTOOL_MAKE_INI_SETTING(name, category, value) extern cobb::ini::setting name;
    namespace CodeEditor {
+      REACHTOOL_MAKE_INI_SETTING(bEnableSyntaxHighlighting, "CodeEditor", true);
       REACHTOOL_MAKE_INI_SETTING(bOverrideBackColor,  "CodeEditor", false);
       REACHTOOL_MAKE_INI_SETTING(bOverrideTextColor,  "CodeEditor", false);
       REACHTOOL_MAKE_INI_SETTING(sBackColor,          "CodeEditor", "rgb(255, 255, 255)");

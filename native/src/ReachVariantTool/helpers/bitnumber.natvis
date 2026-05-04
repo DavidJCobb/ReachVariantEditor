@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="cobb::bitnumber&lt;*,*,*,*,*&gt;">
+      <DisplayString IncludeView="hex">{value,X}</DisplayString>
+      <DisplayString>{value,d}</DisplayString>
+   </Type>
+   <Type Name="cobb::bitnumber&lt;*,signed char,*,*,*&gt;" Priority="High">
+      <DisplayString IncludeView="hex">{value,X}</DisplayString>
+      <DisplayString>{(int)value,d}</DisplayString>
+   </Type>
+   <Type Name="cobb::bitnumber&lt;*,unsigned char,*,*,*&gt;" Priority="High">
+      <DisplayString IncludeView="hex">{value,X}</DisplayString>
+      <DisplayString>{(int)value,d}</DisplayString>
+   </Type>
+   <Type Name="cobb::bitbool">
+      <DisplayString>{value}</DisplayString>
+   </Type>
+</AutoVisualizer>

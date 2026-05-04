@@ -1,10 +1,16 @@
 #include "script_editor.h"
+#include "ui_script_editor.h" // generated
 #include <QMenuBar>
 #include <QResource>
 #include "../game_variants/data/object_types.h"
 #include "localized_string_editor.h"
 
-MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(parent) {
+MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent)
+:
+   QDialog(parent),
+   _ui_ptr(new Ui::MegaloScriptEditorWindow),
+   ui(*_ui_ptr)
+{
    ui.setupUi(this);
    //
    this->setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
@@ -97,6 +103,9 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
    QObject::connect(&editor, &ReachEditorState::variantAbandoned,       this, &MegaloScriptEditorWindow::updateSaveMenuItems);
    QObject::connect(&editor, &ReachEditorState::variantAcquired,        this, &MegaloScriptEditorWindow::updateSaveMenuItems);
    this->updateSaveMenuItems();
+}
+MegaloScriptEditorWindow::~MegaloScriptEditorWindow() {
+   delete this->_ui_ptr;
 }
 
 void MegaloScriptEditorWindow::keyPressEvent(QKeyEvent* event) {

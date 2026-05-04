@@ -43,9 +43,10 @@ namespace cobb::ini {
          setting_list settings;
          setting_map  byCategory;
          std::vector<change_callback> changeCallbacks;
-         std::wstring filePath;
-         std::wstring backupFilePath;
+         std::wstring filePath;        // canonical file path
+         std::wstring backupFilePath;  // variation of canonical file path
          std::wstring workingFilePath;
+         std::wstring loadedFromFilePath; // path we were last loaded from
          
          struct _pending_category { // state object used when saving INI settings
             //
@@ -77,7 +78,8 @@ namespace cobb::ini {
 
          void insert_setting(setting* setting);
          void load(); // if the file doesn't exist, calls (save) to generate a new file and then returns (does not redundantly load the new file)
-         void save(); // preserves the existing file's whitespace, comments, setting order, etc.; writes all setting values including those not changed from the defaults
+         void load(std::filesystem::path);
+         bool save(); // preserves the existing file's whitespace, comments, setting order, etc.; writes all setting values including those not changed from the defaults
          void abandon_pending_changes();
          
          setting* get_setting(std::string& category, std::string& name) const;

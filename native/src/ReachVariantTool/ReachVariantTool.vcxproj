@@ -206,7 +206,6 @@
     <ClCompile Include="ui\generic\ColorPickerButton.cpp" />
     <ClCompile Include="ui\generic\FlowLayout.cpp" />
     <ClCompile Include="ui\generic\ImageStackWidget.cpp" />
-    <ClCompile Include="ui\generic\MegaloSyntaxHighlighter.cpp" />
     <ClCompile Include="ui\generic\QListWidgetEx.cpp" />
     <ClCompile Include="ui\localized_string_editor.cpp" />
     <ClCompile Include="ui\localized_string_library.cpp" />
@@ -219,6 +218,7 @@
     <ClCompile Include="ui\main_window\page_firefight_round.cpp" />
     <ClCompile Include="ui\main_window\page_firefight_scenario.cpp" />
     <ClCompile Include="ui\main_window\page_firefight_wave_traits.cpp" />
+    <ClCompile Include="ui\megalo_syntax_highlighting\highlighter.cpp" />
     <ClCompile Include="ui\options_window\syntax_highlight_option_widget.cpp" />
     <ClCompile Include="ui\script_editor\bottom_bar.cpp" />
     <ClCompile Include="ui\script_editor\compiler_unresolved_strings.cpp" />
@@ -379,6 +379,11 @@
     <ClInclude Include="helpers\string\strieq_ascii.h" />
     <ClInclude Include="rvt_version_macros.h" />
     <ClInclude Include="ui\generic\FlowLayout.h" />
+    <ClInclude Include="ui\megalo_syntax_highlighting\block_state.h" />
+    <QtMoc Include="ui\megalo_syntax_highlighting\highlighter.h" />
+    <ClInclude Include="ui\megalo_syntax_highlighting\block_state_none_param.h" />
+    <ClInclude Include="ui\megalo_syntax_highlighting\keywords.h" />
+    <ClInclude Include="ui\megalo_syntax_highlighting\block_type.h" />
     <ClInclude Include="ui\widgets\RoundCardTextPreview.h" />
     <QtMoc Include="ui\script_editor\page_script_code.h" />
     <QtMoc Include="ui\script_editor\page_map_perms.h" />
@@ -424,7 +429,6 @@
     <QtMoc Include="ui\generic\QListWidgetEx.h" />
     <ClInclude Include="services\localization_library.h" />
     <QtMoc Include="ui\localized_string_library.h" />
-    <QtMoc Include="ui\generic\MegaloSyntaxHighlighter.h" />
     <QtMoc Include="ui\generic\ColorPickerButton.h" />
     <QtMoc Include="services\RVTThemeEngine.h" />
     <ClInclude Include="services\syntax_highlight_option.h" />

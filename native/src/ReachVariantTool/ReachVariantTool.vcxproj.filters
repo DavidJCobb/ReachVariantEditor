@@ -436,9 +436,6 @@
     <ClCompile Include="helpers\qt\ini.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ui\generic\MegaloSyntaxHighlighter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ui\generic\ColorPickerButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -494,6 +491,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="widgets\RVTWeaponPicker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\megalo_syntax_highlighting\highlighter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -654,9 +654,6 @@
     <QtMoc Include="helpers\qt\ini.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="ui\generic\MegaloSyntaxHighlighter.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="ui\options_window\syntax_highlight_option_widget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -676,6 +673,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="widgets\RVTWeaponPicker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\megalo_syntax_highlighting\highlighter.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -1225,6 +1225,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headless.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\megalo_syntax_highlighting\keywords.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\megalo_syntax_highlighting\block_state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\megalo_syntax_highlighting\block_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\megalo_syntax_highlighting\block_state_none_param.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

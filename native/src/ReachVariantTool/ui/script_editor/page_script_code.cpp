@@ -5,7 +5,9 @@
 #include <QListWidget>
 #include <QTextBlock>
 #include "../../helpers/qt/color.h"
-#include "../generic/MegaloSyntaxHighlighter.h"
+#include "../../editor_state.h"
+#include "../../game_variants/components/megalo/decompiler/decompiler.h"
+#include "../megalo_syntax_highlighting/highlighter.h"
 #include "../../services/ini.h"
 
 namespace {
@@ -41,6 +43,9 @@ namespace {
 
 ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
+   
+   this->highlighter = new highlighter_type(this);
+
    {
       this->updateCodeEditorStyle();
       this->updateSyntaxHighlightingEnabled();
@@ -288,8 +293,8 @@ void ScriptEditorPageScriptCode::updateCodeEditorStyle() {
 void ScriptEditorPageScriptCode::updateSyntaxHighlightingEnabled() {
    auto* widget = this->ui.textEditor;
    if (ReachINI::CodeEditor::bEnableSyntaxHighlighting.current.b) {
-      this->highlighter.setDocument(widget->document());
+      this->highlighter->setDocument(widget->document());
    } else {
-      this->highlighter.setDocument(nullptr);
+      this->highlighter->setDocument(nullptr);
    }
 }

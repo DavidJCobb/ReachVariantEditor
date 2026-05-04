@@ -114,8 +114,13 @@ namespace cobb::ini {
    }
    //
    __declspec(noinline) void file::load() {
+      this->load(this->filePath);
+   };
+   __declspec(noinline) void file::load(std::filesystem::path from) {
+      this->loadedFromFilePath = from.wstring();
+      
       std::ifstream file;
-      file.open(this->filePath);
+      file.open(this->loadedFromFilePath);
       if (!file) {
          printf("Unable to load our INI file for reading. Calling cobb::ini::file::save to generate a default one.\n");
          this->save(); // generate a new INI file.
@@ -240,8 +245,8 @@ namespace cobb::ini {
       }
       file.close();
       this->abandon_pending_changes();
-   };
-   __declspec(noinline) void file::save() {
+   }
+   __declspec(noinline) bool file::save() {
       for (auto& setting : this->settings) {
          setting->commit_pending_changes();
       }
@@ -251,13 +256,16 @@ namespace cobb::ini {
       oFile.open(this->workingFilePath, std::ios_base::out | std::ios_base::trunc);
       if (!oFile) {
          printf("Unable to open working INI file for writing.\n");
-         return;
+         return false;
       }
       //
       _pending_category current;
       std::vector<std::string> missingCategories;
       this->get_categories(missingCategories);
       iFile.open(this->filePath, std::ios_base::in);
+      if (!iFile) {
+         iFile.open(this->loadedFromFilePath, std::ios_base::in);
+      }
       if (iFile) {
          //
          // If the INI file already exists, read its contents: we want to preserve whitespace, comments, 
@@ -361,6 +369,7 @@ namespace cobb::ini {
             success = MoveFileExW(this->workingFilePath.c_str(), this->filePath.c_str(), MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH);
          //}
       }
+      return success;
    }
    //
    void file::abandon_pending_changes() {
