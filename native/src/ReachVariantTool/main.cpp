@@ -26,8 +26,6 @@
 #endif
 #include "./is_console_application.h"
 #include "./services/crash_dumper/core.h"
-#include "./services/crash_dumper/monitor_process_state.h"
-#include "./services/crash_dumper/main_process_state.h"
 
 static void load_inis() {
    auto legacy_path_str = QApplication::instance()->applicationDirPath();;
@@ -70,11 +68,7 @@ static void load_inis() {
 static constexpr const bool headless_creates_console_if_none_to_attach_to = false;
 
 int main(int argc, char *argv[]) {
-   if (argc >= 2 && std::string_view(argv[1]) == "--crash-handler") {
-      rvt::subsystems::crash_dumper::monitor_process_state::get_or_create();
-      return 0;
-   }
-   rvt::subsystems::crash_dumper::main_process_state::get_or_create();
+   rvt::subsystems::crash_dumper::core::get_or_create().on_application_start(argc, argv);
 
    if (argc > 1) {
       rvt::command_line_params params(argc, argv);

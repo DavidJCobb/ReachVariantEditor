@@ -8,6 +8,10 @@ namespace rvt::subsystems::crash_dumper {
          ~core();
 
       public:
+         // Call this from `main`.
+         // If we're running in the monitor process, this function will not return.
+         void on_application_start(int argc, char* argv[]);
+
          void register_new_thread();
    };
 }

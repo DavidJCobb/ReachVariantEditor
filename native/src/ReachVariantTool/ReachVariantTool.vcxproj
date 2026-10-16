@@ -612,6 +612,7 @@
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="docs\temporary variables.txt" />
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
+    <Text Include="MISC NOTES.txt" />
     <Text Include="README.txt" />
     <Text Include="Resources\localized_string_library\campaign.txt" />
     <Text Include="Resources\localized_string_library\generic.txt" />

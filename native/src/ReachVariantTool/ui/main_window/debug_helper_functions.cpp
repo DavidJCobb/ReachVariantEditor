@@ -12,11 +12,18 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QLabel>
+#include "helpers/win32/suspend_all_other_threads.h"
 
 namespace DebugHelperFunctions {
    void break_on_variant() {
       auto variant = ReachEditorState::get().variant();
       __debugbreak();
+   }
+   bool crash() {
+      auto _dereference = [](char* foo) {
+         return *foo;
+      };
+      return _dereference(nullptr);
    }
    void export_variant_triggers_english(QWidget* parentWindow) {
       auto variant = ReachEditorState::get().variant();
@@ -121,6 +128,9 @@ namespace DebugHelperFunctions {
          }
          out << "\r\n";
       }
+   }
+   void suspend_other_threads() {
+      cobb::win32::suspend_all_other_threads();
    }
    void test_loading_hrek_fonts(QWidget* parentWindow) {
       QString eurostile = QFileDialog::getOpenFileName(

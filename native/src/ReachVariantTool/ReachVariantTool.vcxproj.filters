@@ -1393,6 +1393,7 @@
     <Text Include="Resources\localized_string_library\vehicles.txt" />
     <Text Include="Resources\localized_string_library\vip.txt" />
     <Text Include="docs\notes.txt" />
+    <Text Include="MISC NOTES.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\gametype_files\blank_forge.bin" />

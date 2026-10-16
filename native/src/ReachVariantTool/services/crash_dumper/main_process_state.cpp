@@ -3,20 +3,33 @@
 #include "helpers/win32/suspend_all_other_threads.h"
 #include "./crash_info.h"
 #include "./ipc.h"
-#include "../../is_console_application.h"
+
+constexpr const SECURITY_ATTRIBUTES heritable_handle_attributes = {
+   .nLength              = sizeof(SECURITY_ATTRIBUTES),
+   .lpSecurityDescriptor = nullptr,
+   .bInheritHandle       = TRUE,
+};
+constexpr const SECURITY_ATTRIBUTES non_heritable_handle_attributes = {
+   .nLength              = sizeof(SECURITY_ATTRIBUTES),
+   .lpSecurityDescriptor = nullptr,
+   .bInheritHandle       = FALSE,
+};
 
 namespace rvt::subsystems::crash_dumper {
    main_process_state::main_process_state() {
-      this->_spawn_child_process();
-
       SetUnhandledExceptionFilter(&_unhandled_exception_filter);
-
       std::set_terminate(&_terminate_handler);
    }
    main_process_state::~main_process_state() {
    }
 
-   void main_process_state::_spawn_child_process() {
+   void main_process_state::setup(bool headless) {
+      if (this->child_process != NULL)
+         return;
+      this->_spawn_child_process(headless);
+   }
+
+   void main_process_state::_spawn_child_process(bool headless) {
       struct {
          struct {
             HANDLE read  = NULL; // handle the child process uses to read from stdin
@@ -28,39 +41,26 @@ namespace rvt::subsystems::crash_dumper {
          } std_out;
       } child_handles;
 
-      SECURITY_ATTRIBUTES security_attr = {
-         .nLength              = sizeof(security_attr),
-         .lpSecurityDescriptor = NULL,
-         .bInheritHandle       = TRUE,
-      };
+      auto security_attr = heritable_handle_attributes;
 
       if (!CreatePipe(&child_handles.std_out.read, &child_handles.std_out.write, &security_attr, 0)) {
-         // TODO: failed
-         #if _DEBUG
-            __debugbreak();
-         #endif
          return;
       }
-      if (!SetHandleInformation(child_handles.std_out.read, HANDLE_FLAG_INHERIT, 0)) { // suppress inheritance of the handle we use to receive data
-         // TODO: failed
-      }
+      SetHandleInformation(child_handles.std_out.read, HANDLE_FLAG_INHERIT, 0); // suppress inheritance of the handle we use to receive data
 
       if (!CreatePipe(&child_handles.std_in.read, &child_handles.std_in.write, &security_attr, 0)) {
-         // TODO: failed
-         #if _DEBUG
-            __debugbreak();
-         #endif
          return;
       }
-      if (!SetHandleInformation(child_handles.std_in.write, HANDLE_FLAG_INHERIT, 0)) { // suppress inheritance of the handle we use to send data
-         // TODO: failed
-      }
+      SetHandleInformation(child_handles.std_in.write, HANDLE_FLAG_INHERIT, 0); // suppress inheritance of the handle we use to send data
 
       //
       // Create the child process.
       //
 
-      wchar_t command_line[] = L"ReachVariantTool.exe --crash-handler"; // cannot be const; CreateProcessW may modify it
+      std::wstring command_line = L"ReachVariantTool.exe --crash-handler"; // cannot be const; CreateProcessW may modify it
+      if (headless) {
+         command_line += L" --headless";
+      }
 
       PROCESS_INFORMATION process_info;
       STARTUPINFOW        startup_info;
@@ -73,16 +73,16 @@ namespace rvt::subsystems::crash_dumper {
       startup_info.dwFlags   |= STARTF_USESTDHANDLES;
 
       bool success = CreateProcessW(
-         NULL,          // application name
-         command_line,  // command line
-         NULL,          // process security attributes
-         NULL,          // primary thread security attributes
-         TRUE,          // inherit handles
-         0,             // creation flags
-         NULL,          // environment variables to use (NULL = same as parent)
-         NULL,          // current working directory (NULL = same as parent)
-         &startup_info, // STARTUPINFO pointer
-         &process_info  // out: result (child process ID and its main thread ID)
+         NULL,                // application name
+         command_line.data(), // command line
+         NULL,                // process security attributes
+         NULL,                // primary thread security attributes
+         TRUE,                // inherit handles
+         0,                   // creation flags
+         NULL,                // environment variables to use (NULL = same as parent)
+         NULL,                // current working directory (NULL = same as parent)
+         &startup_info,       // STARTUPINFO pointer
+         &process_info        // out: result (child process ID and its main thread ID)
       );
 
       // Close the handles that are only used by the child process, so that that 
@@ -94,22 +94,10 @@ namespace rvt::subsystems::crash_dumper {
          this->child_process = process_info.hProcess;
          this->pipe.send     = child_handles.std_in.write;
          this->pipe.receive  = child_handles.std_out.read;
-
-         if constexpr (is_console_application) {
-            HANDLE this_process = NULL;
-            DuplicateHandle(
-               GetCurrentProcess(), // sender process
-               GetCurrentProcess(), // handle to duplicate
-               this->child_process, // recipient process
-               &this_process,       // out: duplicated handle
-               0,
-               TRUE,
-               DUPLICATE_SAME_ACCESS
-            );
-            DWORD this_proc_id = GetCurrentProcessId();
-            ipc::send_value(this->pipe.send, this_process);
-            ipc::send_value(this->pipe.send, this_proc_id);
-         }
+         //
+         // Send our output console handle, for use if we're running headlessly.
+         //
+         ipc::send_value(this->pipe.send, GetStdHandle(STD_OUTPUT_HANDLE));
       } else {
          #if _DEBUG
             __debugbreak();

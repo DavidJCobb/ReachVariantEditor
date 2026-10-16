@@ -223,8 +223,14 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    #endif
    #if _DEBUG
       QObject::connect(this->ui.actionDebugbreak, &QAction::triggered, DebugHelperFunctions::break_on_variant);
+      QObject::connect(this->ui.actionDebugCrash, &QAction::triggered, DebugHelperFunctions::crash);
       QObject::connect(this->ui.actionDebugExportTriggersText, &QAction::triggered, [this]() { DebugHelperFunctions::export_variant_triggers_english(this); });
       QObject::connect(this->ui.actionDebugExportStringsText, &QAction::triggered, [this]() { DebugHelperFunctions::export_variant_strings(this); });
+      {
+         auto* action = new QAction("Debug: suspend all other threads", this);
+         QObject::connect(action, &QAction::triggered, [this]() { DebugHelperFunctions::suspend_other_threads(); });
+         this->ui.menuTools->addAction(action);
+      }
       {
          auto* action = new QAction("Debug: test fonts", this);
          QObject::connect(action, &QAction::triggered, [this]() { DebugHelperFunctions::test_loading_hrek_fonts(this); });
@@ -233,6 +239,8 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    #else
       this->ui.actionDebugbreak->setEnabled(false);
       this->ui.actionDebugbreak->setVisible(false);
+      this->ui.actionDebugCrash->setEnabled(false);
+      this->ui.actionDebugCrash->setVisible(false);
       this->ui.actionDebugExportTriggersText->setEnabled(false);
       this->ui.actionDebugExportTriggersText->setVisible(false);
       this->ui.actionDebugExportStringsText->setEnabled(false);

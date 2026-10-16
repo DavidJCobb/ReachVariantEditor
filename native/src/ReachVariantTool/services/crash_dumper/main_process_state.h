@@ -23,6 +23,8 @@ namespace rvt::subsystems::crash_dumper {
             return &_terminate_handler;
          }
 
+         void setup(bool headless);
+
       protected:
          main_process_state();
          ~main_process_state();
@@ -39,7 +41,7 @@ namespace rvt::subsystems::crash_dumper {
          } pipe;
 
       private:
-         void _spawn_child_process();
+         void _spawn_child_process(bool headless);
 
          static main_process_state& _get_and_lock();
 
