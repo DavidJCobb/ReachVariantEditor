@@ -1,5 +1,6 @@
 #include "ui/main_window.h"
 #include <filesystem>
+#include <string_view>
 #include <QtWidgets/QApplication>
 
 #include "game_variants/base.h"
@@ -23,6 +24,10 @@
 #if defined(Q_OS_WIN)
    #include "./attach_to_parent_console.h"
 #endif
+#include "./is_console_application.h"
+#include "./services/crash_dumper/core.h"
+#include "./services/crash_dumper/monitor_process_state.h"
+#include "./services/crash_dumper/main_process_state.h"
 
 static void load_inis() {
    auto legacy_path_str = QApplication::instance()->applicationDirPath();;
@@ -62,40 +67,15 @@ static void load_inis() {
    }
 }
 
-static constexpr const bool is_console_application =
-   //
-   // In MSBuild, the Linker "Subsystem" option controls whether you're compiling 
-   // a console application or a GUI application.
-   // 
-   // This option cannot be directly tested from source code. When you create a 
-   // project in Visual Studio, you have to select the subsystem, and based on the 
-   // choice you make at that time, VS will configure the project to define the 
-   // appropriate macro (_CONSOLE or _WINDOWS). However, these macros may not be 
-   // updated when you manually change the subsystem option. (Worse, it seems like 
-   // `_WINDOWS` may be defined implicitly somewhere in Visual Studio or Qt VS 
-   // Tools' supplied defaults, even if your project isn't set to define it.)
-   // 
-   // If neither macro is present, then we assume that the project is a console 
-   // application and the macros just aren't set up.
-   //
-   #if defined(RVT_FORCE_CONSOLENESS_TO)
-      (bool)(RVT_FORCE_CONSOLENESS_TO)
-   #else
-      #if _CONSOLE
-         true
-      #else
-         #if _WINDOWS
-            false
-         #else
-            true
-         #endif
-      #endif
-   #endif
-;
-
 static constexpr const bool headless_creates_console_if_none_to_attach_to = false;
 
 int main(int argc, char *argv[]) {
+   if (argc >= 2 && std::string_view(argv[1]) == "--crash-handler") {
+      rvt::subsystems::crash_dumper::monitor_process_state::get_or_create();
+      return 0;
+   }
+   rvt::subsystems::crash_dumper::main_process_state::get_or_create();
+
    if (argc > 1) {
       rvt::command_line_params params(argc, argv);
       if (params.has_error) {

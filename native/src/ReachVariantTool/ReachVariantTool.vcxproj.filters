@@ -499,6 +499,36 @@
     <ClCompile Include="attach_to_parent_console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="services\crash_dumper\core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="services\crash_dumper\crash_info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="services\crash_dumper\ipc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="services\crash_dumper\crash_types\cpp_exception.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="services\crash_dumper\crash_types\structured_exception.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\win32\get_parent_process_id.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\win32\suspend_all_other_threads.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="services\crash_dumper\register_new_thread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="services\crash_dumper\main_process_state.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="services\crash_dumper\monitor_process_state.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -1245,6 +1275,57 @@
     <ClInclude Include="attach_to_parent_console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="helpers\singleton_ex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\crash_dumper\core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\crash_dumper\crash_info.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\crash_dumper\ipc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\crash_dumper\crash_types\cpp_exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\crash_dumper\crash_types\cpp_generic_terminate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\crash_dumper\crash_types\cpp_generic_throw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\crash_dumper\crash_types\structured_exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\win32\forward_declare_handles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\win32\get_parent_process_id.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\win32\suspend_all_other_threads.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\win32\WINAPI.define.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\crash_dumper\register_new_thread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\crash_dumper\main_process_state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\crash_dumper\monitor_process_state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\variants\index_of_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="is_console_application.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -1328,6 +1409,13 @@
     <None Include="Directory.build.props" />
     <None Include="docs\option toggle indices.md" />
     <None Include="docs\headless.md" />
+    <None Include="services\crash_dumper\crash_info.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="services\crash_dumper\_docs\how to intercept a crash.md" />
+    <None Include="services\crash_dumper\_docs\how to save a minidump.md" />
+    <None Include="services\crash_dumper\_docs\interprocess communication.md" />
+    <None Include="services\crash_dumper\_docs\README.md" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="docs\working - help docs\script\api\ns_unnamed\hud_player.xml" />

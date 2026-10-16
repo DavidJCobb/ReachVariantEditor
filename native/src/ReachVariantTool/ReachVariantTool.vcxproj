@@ -201,7 +201,17 @@
     <ClCompile Include="helpers\stream.cpp" />
     <ClCompile Include="helpers\strings.cpp" />
     <ClCompile Include="helpers\string_scanner.cpp" />
+    <ClCompile Include="helpers\win32\get_parent_process_id.cpp" />
+    <ClCompile Include="helpers\win32\suspend_all_other_threads.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="services\crash_dumper\core.cpp" />
+    <ClCompile Include="services\crash_dumper\crash_info.cpp" />
+    <ClCompile Include="services\crash_dumper\crash_types\cpp_exception.cpp" />
+    <ClCompile Include="services\crash_dumper\crash_types\structured_exception.cpp" />
+    <ClCompile Include="services\crash_dumper\ipc.cpp" />
+    <ClCompile Include="services\crash_dumper\main_process_state.cpp" />
+    <ClCompile Include="services\crash_dumper\monitor_process_state.cpp" />
+    <ClCompile Include="services\crash_dumper\register_new_thread.cpp" />
     <ClCompile Include="services\localization_library.cpp" />
     <ClCompile Include="services\RVTThemeEngine.cpp" />
     <ClCompile Include="services\syntax_highlight_option.cpp" />
@@ -380,8 +390,25 @@
     <ClInclude Include="helpers\miscellaneous.h" />
     <ClInclude Include="helpers\numeric.h" />
     <ClInclude Include="helpers\pointer_list.h" />
+    <ClInclude Include="helpers\singleton_ex.h" />
     <ClInclude Include="helpers\string\strieq_ascii.h" />
+    <ClInclude Include="helpers\variants\index_of_type.h" />
+    <ClInclude Include="helpers\win32\forward_declare_handles.h" />
+    <ClInclude Include="helpers\win32\get_parent_process_id.h" />
+    <ClInclude Include="helpers\win32\suspend_all_other_threads.h" />
+    <ClInclude Include="helpers\win32\WINAPI.define.h" />
+    <ClInclude Include="is_console_application.h" />
     <ClInclude Include="rvt_version_macros.h" />
+    <ClInclude Include="services\crash_dumper\core.h" />
+    <ClInclude Include="services\crash_dumper\crash_info.h" />
+    <ClInclude Include="services\crash_dumper\crash_types\cpp_exception.h" />
+    <ClInclude Include="services\crash_dumper\crash_types\cpp_generic_terminate.h" />
+    <ClInclude Include="services\crash_dumper\crash_types\cpp_generic_throw.h" />
+    <ClInclude Include="services\crash_dumper\crash_types\structured_exception.h" />
+    <ClInclude Include="services\crash_dumper\ipc.h" />
+    <ClInclude Include="services\crash_dumper\main_process_state.h" />
+    <ClInclude Include="services\crash_dumper\monitor_process_state.h" />
+    <ClInclude Include="services\crash_dumper\register_new_thread.h" />
     <ClInclude Include="ui\generic\FlowLayout.h" />
     <ClInclude Include="ui\megalo_syntax_highlighting\block_state.h" />
     <QtMoc Include="ui\megalo_syntax_highlighting\highlighter.h" />
@@ -611,6 +638,11 @@
     <None Include="Resources\gametype_files\blank_forge.bin" />
     <None Include="Resources\gametype_files\blank_mp.bin" />
     <None Include="Resources\gametype_files\blank_ff.bin" />
+    <None Include="services\crash_dumper\crash_info.inl" />
+    <None Include="services\crash_dumper\_docs\how to intercept a crash.md" />
+    <None Include="services\crash_dumper\_docs\how to save a minidump.md" />
+    <None Include="services\crash_dumper\_docs\interprocess communication.md" />
+    <None Include="services\crash_dumper\_docs\README.md" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="docs\working - help docs\cli.xml" />
