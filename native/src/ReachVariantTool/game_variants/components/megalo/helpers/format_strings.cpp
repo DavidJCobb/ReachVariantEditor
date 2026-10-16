@@ -21,7 +21,7 @@ namespace Megalo {
          //
          // Validate the format code:
          //
-         auto match = pattern.match(text.midRef(i));
+         auto match = pattern.match(QStringView(text).mid(i));
          if (!match.hasMatch()) {
             QChar c = text[i + 1];
             if (c != ' ') {

@@ -70,7 +70,7 @@ namespace {
    // 
    // The first character in the QStringRef should be the first `[`.
    //
-   static void extract_long_bracket(const QStringRef& view, int& level, int& token_length) {
+   static void extract_long_bracket(const QStringView view, int& level, int& token_length) {
       level        = -1;
       token_length =  0;
       if (view[0] != '[')
@@ -93,7 +93,7 @@ namespace {
       }
    }
 
-   static bool extract_long_bracket_close(const QStringRef& view, int level, int& token_length) {
+   static bool extract_long_bracket_close(const QStringView view, int level, int& token_length) {
       token_length = 0;
       if (view[0] != ']')
          return false;
@@ -118,7 +118,7 @@ namespace {
       return false;
    }
 
-   static const keyword* match_keyword(const QStringRef& view, const keyword* last) {
+   static const keyword* match_keyword(const QStringView view, const keyword* last) {
       const keyword* match = nullptr;
       if (last) {
          for (const auto k_idx : last->branches_to) {
@@ -139,7 +139,7 @@ namespace {
       //
       return lookup_keyword_by_name(view);
    }
-   static QStringRef extract_word(const QStringRef& view) {
+   static QStringView extract_word(const QStringView view) {
       int size  = view.size();
       int i     = 0;
       int brace = 0;
@@ -151,10 +151,10 @@ namespace {
             continue;
          break;
       }
-      return QStringRef(view.string(), view.position(), i);
+      return view.left(i);
    }
 
-   static const QString* extract_operator(const QStringRef& view) {
+   static const QString* extract_operator(const QStringView view) {
       for (const auto& op : operators)
          if (view.startsWith(op))
             return &op;
@@ -162,7 +162,7 @@ namespace {
    }
 
    // returns length of the number, if there was a valid one at the start of the string
-   static int skip_number(const QStringRef& view) {
+   static int skip_number(const QStringView view) {
       auto size = view.size();
       bool hex  = false;
       int  i    = 0;
@@ -276,7 +276,7 @@ namespace ui::megalo_syntax_highlighting {
                if (c == '[') {
                   int length =  0;
                   int level  = -1;
-                  extract_long_bracket(QStringRef(&text, i, size - i), level, length);
+                  extract_long_bracket(QStringView(text).mid(i), level, length);
                   if (level > block_state::max_supported_param)
                      level = -1;
                   if (level >= 0) {
@@ -295,7 +295,7 @@ namespace ui::megalo_syntax_highlighting {
                if (this->features.block_comments) {
                   QChar e = (i + 2) < size ? text[i + 2] : '\0';
                   if (e == '[') {
-                     extract_long_bracket(QStringRef(&text, i + 2, size - i - 2), level, length);
+                     extract_long_bracket(QStringView(text).mid(i + 2), level, length);
                      if (level > block_state::max_supported_param)
                         level = -1;
                   }
@@ -310,7 +310,7 @@ namespace ui::megalo_syntax_highlighting {
                continue;
             }
             
-            auto next = QStringRef(&text, i, size - i);
+            auto next = QStringView(text).mid(i);
             if (!is_keyword_boundary(c)) { // handle keywords
                //
                // `c` is a character that is valid in keywords. But is it the *start* 
@@ -367,7 +367,7 @@ namespace ui::megalo_syntax_highlighting {
          // We're in a comment or string. Search for its end; if we find it, exit that 
          // state.
          //
-         auto next   = QStringRef(&text, i, size - i);
+         auto next   = QStringView(text).mid(i);
          int  length = 0;
          switch (state.type()) {
             case block_type::string_simple:

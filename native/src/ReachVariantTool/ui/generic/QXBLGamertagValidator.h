@@ -11,10 +11,10 @@ class QXBLGamertagValidator : public QValidator {
       QXBLGamertagValidator(bool l = true, QObject* parent = nullptr) : QValidator(parent), lax(l) {}
       bool lax = true;
       //
-      virtual QValidator::State validate(QString& input, int& pos) const {
+      virtual QValidator::State validate(QString& input, int& pos) const override {
          if (lax) {
             for (auto c : input) {
-               if (c > 255)
+               if (c.unicode() > 255)
                   return QValidator::Invalid;
             }
             return QValidator::Acceptable;

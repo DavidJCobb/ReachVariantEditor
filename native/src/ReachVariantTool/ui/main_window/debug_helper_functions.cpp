@@ -3,7 +3,6 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QTextCodec>
 #include <QTextStream>
 #include "../../game_variants/types/multiplayer.h"
 
@@ -110,7 +109,6 @@ namespace DebugHelperFunctions {
          return;
       }
       QTextStream out(&file);
-      out.setCodec(QTextCodec::codecForName("UTF-8"));
       out << QString::fromUtf16(mp->variantHeader.title);
       out << "\r\n\r\n";
       auto& table = mp->scriptData.strings;

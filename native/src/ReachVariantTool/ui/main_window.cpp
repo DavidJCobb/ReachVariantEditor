@@ -11,7 +11,6 @@
 #include <QResource>
 #include <QSaveFile>
 #include <QString>
-#include <QTextCodec>
 #include <QTextStream>
 #include <QTreeWidget>
 #include <QWidget>
@@ -117,8 +116,8 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          // Got the version info. If it's "A.B.C.0", let's strip that trailing ".0" build number.
          //
          auto m = QRegularExpression(R"(^(\d+)\.(\d+)\.(\d+)\.(\d+)$)").match(v); // R"(abc)" creates a string literal in which "abc" needs no escape sequences
-         if (m.hasMatch() && m.capturedRef(4) == "0") {
-            v = QString("%1.%2.%3").arg(m.capturedRef(1)).arg(m.capturedRef(2)).arg(m.capturedRef(3));
+         if (m.hasMatch() && m.capturedView(4) == "0") {
+            v = QString("%1.%2.%3").arg(m.capturedView(1)).arg(m.capturedView(2)).arg(m.capturedView(3));
          }
          //
          // Display the version info:

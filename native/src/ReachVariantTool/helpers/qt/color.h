@@ -21,7 +21,7 @@ namespace cobb::qt {
       unrecognized_color_name,
    };
    extern QColor parse_css_color(const QString&, css_color_parse_error&);
-   extern QColor parse_css_color(QStringRef, css_color_parse_error&);
+   extern QColor parse_css_color(QStringView, css_color_parse_error&);
 
    enum class css_color_format {
       hex,

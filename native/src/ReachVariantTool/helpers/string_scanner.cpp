@@ -44,7 +44,7 @@ namespace cobb {
          QChar seq;
          QChar out;
          //
-         _escape_map_entry(QChar a, QChar b) : seq(a), out(b) {}
+         _escape_map_entry(char a, char b) : seq(a), out(b) {}
       };
       _escape_map_entry _escapes[] = {
          _escape_map_entry('\'', '\''),

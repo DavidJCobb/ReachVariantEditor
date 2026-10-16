@@ -29,7 +29,7 @@
    <item row="0" column="0">
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
      <property name="childrenCollapsible">
       <bool>false</bool>
@@ -76,8 +76,11 @@
            <pointsize>10</pointsize>
           </font>
          </property>
-         <property name="tabStopWidth">
-          <number>24</number>
+         <property name="tabStopDistance">
+          <double>24.000000000000000</double>
+         </property>
+         <property name="tabStopWidth" stdset="0">
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -147,7 +150,7 @@
           <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -177,7 +180,7 @@
        <item>
         <widget class="QListWidgetEx" name="compileLog">
          <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
+          <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
          </property>
          <property name="showDropIndicator" stdset="0">
           <bool>false</bool>
@@ -186,7 +189,7 @@
           <bool>true</bool>
          </property>
          <property name="selectionMode">
-          <enum>QAbstractItemView::ContiguousSelection</enum>
+          <enum>QAbstractItemView::SelectionMode::ContiguousSelection</enum>
          </property>
          <property name="wordWrap">
           <bool>true</bool>

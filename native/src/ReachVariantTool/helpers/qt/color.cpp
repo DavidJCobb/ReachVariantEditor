@@ -5,16 +5,16 @@
 
 namespace cobb::qt {
    extern QColor parse_css_color(const QString& text, css_color_parse_error& error) {
-      return parse_css_color(QStringRef(&text), error);
+      return parse_css_color(QStringView(text), error);
    }
-   extern QColor parse_css_color(QStringRef view, css_color_parse_error& error) {
+   extern QColor parse_css_color(QStringView view, css_color_parse_error& error) {
       error = css_color_parse_error::none;
       view  = view.trimmed();
       //
       auto values = std::array<int, 4>{ 0, 0, 0, 255 };
-      if (view.startsWith("#")) {
+      if (view.startsWith('#')) {
          int len = view.size() - 1;
-         if (view.indexOf(" ") > 0) {
+         if (view.indexOf(' ') > 0) {
             error = css_color_parse_error::unexpected_trailing_content;
             return QColor();
          }
@@ -55,8 +55,8 @@ namespace cobb::qt {
       //
       // Try CSS function syntax:
       //
-      bool is_rgb = view.startsWith("rgb", Qt::CaseInsensitive);
-      bool is_hsl = view.startsWith("hsl", Qt::CaseInsensitive);
+      bool is_rgb = view.startsWith(QLatin1StringView("rgb"), Qt::CaseInsensitive);
+      bool is_hsl = view.startsWith(QLatin1StringView("hsl"), Qt::CaseInsensitive);
       if (is_rgb || is_hsl) {
          bool alpha   = view[4] == 'a' || view[4] == 'A';
          bool comma   = false;

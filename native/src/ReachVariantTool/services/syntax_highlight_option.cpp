@@ -2,7 +2,7 @@
 #include "../helpers/qt/color.h"
 
 namespace {
-   static QStringRef _extractFontRule(const QStringRef& text, bool& error) {
+   static QStringView _extractFontRule(const QStringView text, bool& error) {
       int size  = text.size();
       int i;
       int paren = 0;
@@ -17,7 +17,7 @@ namespace {
             --paren;
             if (paren < 0) { // more closing parentheses than opening ones
                error = true;
-               return QStringRef();
+               return {};
             }
             continue;
          }
@@ -26,9 +26,9 @@ namespace {
       }
       if (paren) { // unterminated parenthetical
          error = true;
-         return QStringRef();
+         return {};
       }
-      return QStringRef(text.string(), text.position(), i);
+      return text.left(i);
    }
 }
 
@@ -39,7 +39,7 @@ namespace ReachINI {
       //
       int size = text.size();
       for (int i = 0; i < size; ++i) {
-         auto  forward = QStringRef(&text, i, size - i);
+         auto  forward = QStringView(text).mid(i);
          QChar c = text[i];
          if (c.isSpace())
             continue;
@@ -48,19 +48,19 @@ namespace ReachINI {
             if (error)
                return out;
             i += rule.size() - 1; // subtract 1 because our loop will increment it
-            if (rule.compare(QLatin1Literal("bold"), Qt::CaseInsensitive) == 0) {
+            if (rule.compare(QLatin1StringView("bold"), Qt::CaseInsensitive) == 0) {
                out.bold = true;
                continue;
             }
-            if (rule.compare(QLatin1Literal("italic"), Qt::CaseInsensitive) == 0) {
+            if (rule.compare(QLatin1StringView("italic"), Qt::CaseInsensitive) == 0) {
                out.italic = true;
                continue;
             }
-            if (rule.compare(QLatin1Literal("underline"), Qt::CaseInsensitive) == 0) {
+            if (rule.compare(QLatin1StringView("underline"), Qt::CaseInsensitive) == 0) {
                out.underline = true;
                continue;
             }
-            if (rule.startsWith('#') || rule.startsWith(QLatin1Literal("rgb"), Qt::CaseInsensitive) || rule.startsWith(QLatin1Literal("hsl"), Qt::CaseInsensitive)) {
+            if (rule.startsWith('#') || rule.startsWith(QLatin1StringView("rgb"), Qt::CaseInsensitive) || rule.startsWith(QLatin1StringView("hsl"), Qt::CaseInsensitive)) {
                cobb::qt::css_color_parse_error pe;
                auto color = cobb::qt::parse_css_color(rule, pe);
                if (pe != cobb::qt::css_color_parse_error::none) {

@@ -32,7 +32,7 @@ namespace {
       }
       return reach::language::not_a_language;
    }
-   reach::language _code_to_language(const QStringRef& c) {
+   reach::language _code_to_language(const QStringView c) {
       for (int i = 0; i < std::extent<decltype(_languages)>::value; ++i) {
          if (_languages[i].code.compare(c, Qt::CaseInsensitive) == 0)
             return _languages[i].value;
@@ -157,7 +157,6 @@ LocalizedStringLibrary::LocalizedStringLibrary() {
       //
       auto   stream  = QTextStream(&file);
       Entry* current = nullptr;
-      stream.setCodec("UTF-8");
       while (!stream.atEnd()) {
          QString line = stream.readLine().trimmed();
          if (line[0] == '#') // comment
@@ -165,7 +164,7 @@ LocalizedStringLibrary::LocalizedStringLibrary() {
          if (line[0] == '[') { // header
             if (!line.endsWith(']'))
                continue;
-            auto name = line.midRef(1, line.size() - 2);
+            auto name = QStringView(line).mid(1, line.size() - 2);
             if (name.isEmpty())
                continue;
             current = new Entry;
@@ -177,8 +176,8 @@ LocalizedStringLibrary::LocalizedStringLibrary() {
          auto index = line.indexOf('=');
          if (index <= 0)
             continue;
-         auto key   = line.midRef(0, index).trimmed();
-         auto value = line.midRef(index + 1).trimmed();
+         auto key   = QStringView(line).mid(0, index).trimmed();
+         auto value = QStringView(line).mid(index + 1).trimmed();
          if (key.compare(QString("name"), Qt::CaseInsensitive) == 0) {
             current->friendly_name = value.toString();
             continue;

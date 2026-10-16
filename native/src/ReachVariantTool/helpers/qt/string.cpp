@@ -36,7 +36,7 @@ namespace cobb {
          int size_text = text.size();
          int size_set  = strlen(charset);
          for (int i = 0; i < size_text; i++) {
-            auto c = text[i];
+            auto c = text[i].unicode();
             if (c > 255) // character isn't representable in Latin-1 and so cannot appear in a (const char*)-type charset
                continue;
             for (int j = 0; j < size_set; j++) {
