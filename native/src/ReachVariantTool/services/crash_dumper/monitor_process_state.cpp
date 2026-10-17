@@ -298,12 +298,16 @@ namespace rvt::subsystems::crash_dumper {
          message = strings::minidump_success;
          message += L"\n\n";
          message += minidump_path;
-         message += L"\n\n";
-         message += strings::minidump_how_to_copy_one_path;
+         if (!this->headless) {
+            message += L"\n\n";
+            message += strings::minidump_how_to_copy_one_path;
+         }
       } else {
          message += strings::minidump_failed;
-         message += L"\n\n";
-         message += strings::copy_and_paste_without_minidump;
+         if (!this->headless) {
+            message += L"\n\n";
+            message += strings::copy_and_paste_without_minidump;
+         }
       }
       message += L" ";
       message += strings::please_save_copies_of_your_files;
